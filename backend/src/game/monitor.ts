@@ -1,18 +1,43 @@
-import type { G15Player, Lobby, Player } from "$types/lobby";
+import type { G15Player, KillfeedEntry, Lobby, Player } from "$types/lobby";
 import { GameMessages } from "$types/messages";
+import { join } from "path";
+import Config from "../config";
 import Socket from "../socket";
 import Rcon from "./rcon";
+import fs from "fs";
 
 export default class GameMonitor {
-    static lobby: Lobby = { players: [] };
+    static logPath: string;
+    static lobby: Lobby = { players: [], killfeed: [] };
     static playerMap = new Map<string, Player>();
     static pollInterval = 1000;
+    static logFile: Bun.BunFile;
+    static readStart = 0;
 
     static init() {
+        this.logPath = join(Config.get("tf2Path"), "tf", "console.log");
+
         setInterval(() => this.poll(), this.pollInterval);
 
-        Socket.onConnect("game", (ws) => {
-            ws.send(GameMessages.Initial + JSON.stringify(this.lobby.players));
+        Socket.onConnect("game", (respond) => {
+            respond(GameMessages.Initial, this.lobby);
+        });
+
+        let logExists = false;
+        this.logFile = Bun.file(this.logPath);
+        this.logFile.exists().then((exists) => logExists = exists);
+        this.logFile.stat().then(s => this.readStart = s.size);
+
+        // fs.watch can't be relied on for log updates, somehow the log
+        // doesn't trigger whatever listeners this uses
+        fs.watch(this.logPath, (type) => {
+            if(type === "rename") {
+                logExists = !logExists;
+                if(!logExists) return;
+
+                this.logFile.stat().then(s => this.readStart = s.size);
+                return;
+            }
         });
     }
 
@@ -24,6 +49,44 @@ export default class GameMonitor {
                 if(typeof text !== "string") return;
                 this.parseG15(text);
             });
+
+        this.logFile.stat().then(stat => {
+            if(stat.size > this.readStart) this.readLog();
+        });
+    }
+
+    static readLog() {
+        const stream = fs.createReadStream(this.logPath, {
+            start: this.readStart
+        });
+
+        let added = "";
+        stream.once("data", (buffer) => added += buffer);
+        stream.once("close", () => {
+            this.readStart += added.length;
+            this.parseLog(added)
+        });
+    }
+
+    // Doesn't handle suicides
+    static killfeedRegex = /(?:\n|^)(.+) killed (.+) with (.+)\.( \(crit\))?(?:\r?\n|$)/g;
+    static parseLog(text: string) {
+        let match: RegExpExecArray;
+        while(match = this.killfeedRegex.exec(text)) {
+            let killer = this.lobby.players.find(p => p.name === match[1]);
+            if(!killer) continue;
+
+            let entry: KillfeedEntry = {
+                killer: match[1],
+                victim: match[2],
+                weapon: match[3],
+                crit: match[4] !== undefined,
+                killerTeam: killer.team
+            }
+
+            this.lobby.killfeed.push(entry);
+            Socket.send("game", GameMessages.KillfeedAdded, entry);
+        }
     }
 
     static g15Regex = /m_(.+)\[(\d+)\] .+ \((.+)\)(?:\n|$)/g;

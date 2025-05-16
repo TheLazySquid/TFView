@@ -11,9 +11,7 @@ export default class Config {
         if(await this.file.exists()) {
             this.config = await this.file.json();
         } else {
-            this.config = {
-                rconPort: 27015
-            };
+            throw new Error("Config file not found");
         }
     }
 

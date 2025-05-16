@@ -1,32 +1,25 @@
-import type { Player } from "$types/lobby";
+import type { KillfeedEntry, Player } from "$types/lobby";
 import { GameMessages, type GameMessageTypes } from "$types/messages";
 import WSClient from "./wsclient";
 
 export default new class Game extends WSClient<GameMessageTypes> {
-    players: Player[] = $state([
-        {
-            name: "Swag Messiah",
-            team: 2,
-            ping: 50,
-            health: 125,
-            alive: true,
-            userId: "15",
-            accountId: "9349"
-        }
-    ]);
+    players: Player[] = $state([]);
     playersMap = new Map<string, Player>();
+    killfeed: KillfeedEntry[] = $state([]);
 
     constructor() {
         super("game");
     }
 
     init() {
-        this.on(GameMessages.Initial, (players) => {
-            this.players = players;
+        this.on(GameMessages.Initial, (data) => {
+            this.players = data.players;
             this.playersMap.clear();
             for(let player of this.players) {
                 this.playersMap.set(player.userId, player);
             }
+
+            this.killfeed = data.killfeed;
         })
 
         this.on(GameMessages.PlayerJoin, (player) => {
@@ -50,6 +43,10 @@ export default new class Game extends WSClient<GameMessageTypes> {
                 // @ts-ignore Oughta fix this, even "any" doesn't work
                 player[key] = data[key];
             }
+        });
+
+        this.on(GameMessages.KillfeedAdded, (entry) => {
+            this.killfeed.push(entry);
         });
     }
 }

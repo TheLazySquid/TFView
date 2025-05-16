@@ -30,6 +30,15 @@ export interface Player {
     // TODO: Killfeed related things
 }
 
+export interface KillfeedEntry {
+    killer: string;
+    victim: string;
+    weapon: string;
+    crit: boolean;
+    killerTeam: number;
+}
+
 export interface Lobby {
     players: Player[];
+    killfeed: KillfeedEntry[];
 }

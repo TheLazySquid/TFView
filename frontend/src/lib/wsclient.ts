@@ -7,7 +7,7 @@ export default class WSClient<T> {
     constructor(route: string) {
         this.route = route;
 
-        // this.connectSocket();
+        this.connectSocket();
     }
 
     connectSocket() {

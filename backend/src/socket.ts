@@ -7,7 +7,7 @@ export default class Socket {
     static port = 7523;
     static types: Type[] = ["game"];
     static sockets = new Map<Type, WS[]>();
-    static connectListeners = new Map<Type, (ws: WS) => void>();
+    static connectListeners = new Map<Type, (callback: (channel: any, data: any) => void) => void>();
 
     static init() {
         for(let type of this.types) this.sockets.set(type, []);
@@ -29,7 +29,12 @@ export default class Socket {
                 message: () => {},
                 open: (ws: WS) => {
                     this.sockets.get(ws.data.type).push(ws);
-                    this.connectListeners.get(ws.data.type)(ws);
+                    const listener = this.connectListeners.get(ws.data.type);
+                    if(!listener) return;
+
+                    listener((channel, data) => {
+                        ws.send(channel.toString() + JSON.stringify(data));
+                    });
                 },
                 close: (ws: WS) => {
                     const sockets = this.sockets.get(ws.data.type);
@@ -43,7 +48,8 @@ export default class Socket {
         });
     }
 
-    static onConnect<T extends Type>(type: T, callback: (ws: WS) => void) {
+    static onConnect<T extends Type, C extends keyof MessageTypes[T]>
+        (type: T, callback: (send: (channel: C, data: MessageTypes[T][C]) => void) => void) {
         this.connectListeners.set(type, callback);
     }
 
