@@ -7,6 +7,8 @@ export default class Rcon {
     static connected = false;
 
     static init() {
+        if(Bun.env.FAKE_DATA === "true") return;
+        
         this.server = new RconServer({
             host: "127.0.0.1",
             port: Config.get("rconPort")

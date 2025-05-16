@@ -5,6 +5,7 @@ import Config from "../config";
 import Socket from "../socket";
 import Rcon from "./rcon";
 import fs from "fs";
+import { fakeLobby } from "src/fakedata/game";
 
 export default class GameMonitor {
     static logPath: string;
@@ -15,15 +16,18 @@ export default class GameMonitor {
     static readStart = 0;
 
     static init() {
-        this.logPath = join(Config.get("tf2Path"), "tf", "console.log");
-
-        setInterval(() => this.poll(), this.pollInterval);
-
         Socket.onConnect("game", (respond) => {
             respond(GameMessages.Initial, this.lobby);
         });
 
+        if(Bun.env.FAKE_DATA === "true") {
+            this.lobby = fakeLobby;
+            return;
+        }
+        
+        // watch the log for updates
         let logExists = false;
+        this.logPath = join(Config.get("tf2Path"), "tf", "console.log");
         this.logFile = Bun.file(this.logPath);
         this.logFile.exists().then((exists) => logExists = exists);
         this.logFile.stat().then(s => this.readStart = s.size);
@@ -39,6 +43,8 @@ export default class GameMonitor {
                 return;
             }
         });
+
+        setInterval(() => this.poll(), this.pollInterval);
     }
 
     static poll() {
