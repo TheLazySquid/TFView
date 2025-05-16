@@ -3,7 +3,17 @@ import { GameMessages, type GameMessageTypes } from "$types/messages";
 import WSClient from "./wsclient";
 
 export default new class Game extends WSClient<GameMessageTypes> {
-    players: Player[] = $state([]);
+    players: Player[] = $state([
+        {
+            name: "Swag Messiah",
+            team: 2,
+            ping: 50,
+            health: 125,
+            alive: true,
+            userId: "15",
+            accountId: "9349"
+        }
+    ]);
     playersMap = new Map<string, Player>();
 
     constructor() {

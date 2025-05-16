@@ -19,6 +19,7 @@ export interface Player {
     
     // From g15_dumpplayer command
     name: string;
+    /** 1 spectator, 2 = red, 3 = blue */
     team: number;
     ping: number;
     health: number;
