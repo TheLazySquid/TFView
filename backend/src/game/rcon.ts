@@ -1,6 +1,5 @@
 import RconServer from "rcon-srcds";
 import Config from "../config";
-import LobbyMonitor from "./monitor";
 
 export default class Rcon {
     static server: RconServer;
@@ -30,8 +29,11 @@ export default class Rcon {
         this.server.authenticate(password)
             .then(() => {
                 this.connected = true;
+                console.log("RCON Connected");
+                
                 this.server.connection.once("close", () => {
                     this.connected = false;
+                    console.log("RCON Disconnected");
                     pollReconnect();
                 });
             })

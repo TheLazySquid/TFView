@@ -1,0 +1,8 @@
+{
+    "name": "tfview",
+    "private": true,
+    "workspaces": [
+        "backend",
+        "frontend"
+    ]
+}

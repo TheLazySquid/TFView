@@ -1,3 +1,18 @@
+export interface G15Player {
+    iAmmo: string;
+    szName: string;
+    iPing: string;
+    iScore: string;
+    iDeaths: string;
+    bConnected: string;
+    iTeam: string;
+    bAlive: string;
+    iHealth: string;
+    iAccountID: string;
+    bValid: string;
+    iUserID: string;
+}
+
 export interface Player {    
     // From status command
     connectTime?: number;

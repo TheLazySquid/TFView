@@ -1,7 +1,9 @@
 import Config from "./config";
-import LobbyMonitor from "./lobby/monitor";
-import Rcon from "./lobby/rcon";
+import GameMonitor from "./game/monitor";
+import Rcon from "./game/rcon";
+import Socket from "./socket";
 
 await Config.init();
 Rcon.init();
-LobbyMonitor.init();
+GameMonitor.init();
+Socket.init();
