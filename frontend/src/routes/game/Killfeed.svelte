@@ -3,14 +3,30 @@
     import { getWeaponImage } from "$lib/killfeed";
     import VirtualList from "svelte-tiny-virtual-list";
     import { resize } from "svelte-resize-observer-action";
-
-    let containerHeight = $state(window.innerHeight);
+    import { onMount, tick } from "svelte";
 
     const red = '#b55c4c'
     const blue = '#687d9c';
+    
+    let container: HTMLElement;
+    let containerHeight = $state(window.innerHeight);
+    let list: HTMLElement;
+
+    onMount(() => {
+        let el = container.querySelector<HTMLElement>(".virtual-list-wrapper");
+        if(el) list = el;
+    });
+
+    $effect(() => {
+        Game.killfeed.length;
+        if(!list) return;
+        tick().then(() => {
+            if(list.scrollTop > 41) list.scrollTop += 40;
+        });
+    });
 </script>
 
-<div use:resize={(e) => containerHeight = e.contentRect.height}>
+<div use:resize={(e) => containerHeight = e.contentRect.height} bind:this={container}>
     <VirtualList height={containerHeight} itemCount={Game.killfeed.length} itemSize={40}>
         <div slot="item" let:index let:style {style}>
             {@const kill = Game.killfeed[Game.killfeed.length - index - 1]}
