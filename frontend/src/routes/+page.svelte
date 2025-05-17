@@ -10,7 +10,8 @@
     <div class="bg-border w-1"></div>
 {/snippet}
 
-<div class="w-screen h-screen grid" style="grid-template-columns: 1fr auto 1fr auto 1fr;">
+<div class="w-screen h-screen grid overflow-hidden"
+    style="grid-template-columns: 1fr auto 1fr auto 1fr;">
     <TeamView name="Red" id={2} />
     {@render seperator()}
     <TeamView name="Blue" id={3} />

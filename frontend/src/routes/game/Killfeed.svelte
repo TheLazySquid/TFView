@@ -1,15 +1,21 @@
 <script lang="ts">
     import Game from "$lib/game.svelte";
     import { getWeaponImage } from "$lib/killfeed";
+    import VirtualList from "svelte-tiny-virtual-list";
+    import { resize } from "svelte-resize-observer-action";
+
+    let containerHeight = $state(window.innerHeight);
 
     const red = '#b55c4c'
     const blue = '#687d9c';
 </script>
 
-<div class="overflow-y-auto w-full">
-    <div class="flex flex-col items-start gap-2">
-        {#each Game.killfeed as kill}
-            <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill" class:crit={kill.crit}>
+<div use:resize={(e) => containerHeight = e.contentRect.height}>
+    <VirtualList height={containerHeight} itemCount={Game.killfeed.length} itemSize={40}>
+        <div slot="item" let:index let:style {style}>
+            {@const kill = Game.killfeed[Game.killfeed.length - index - 1]}
+            <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill mb-2 w-fit"
+                class:crit={kill.crit}>
                 <div class="whitespace-nowrap"
                 style="color: {kill.killerTeam === 2 ? red : blue}">
                     {kill.killer}
@@ -21,8 +27,8 @@
                     {kill.victim}
                 </div>
             </div>
-        {/each}
-    </div>
+        </div>
+    </VirtualList>
 </div>
 
 <style>

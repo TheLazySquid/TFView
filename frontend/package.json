@@ -25,5 +25,9 @@
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"svelte-resize-observer-action": "^0.0.4",
+		"svelte-tiny-virtual-list": "^2.1.2"
+	}
 }
