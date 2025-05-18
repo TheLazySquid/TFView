@@ -21,3 +21,17 @@ export interface GameMessageTypes {
 export interface MessageTypes {
     game: GameMessageTypes;
 }
+
+export enum GameRecieves {
+    Chat = "0",
+    ChatTeam = "1"
+}
+
+export interface GameRecievesTypes {
+    [GameRecieves.Chat]: string;
+    [GameRecieves.ChatTeam]: string;
+}
+
+export interface RecievesTypes {
+    game: GameRecievesTypes;
+}

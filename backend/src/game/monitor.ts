@@ -1,11 +1,12 @@
 import type { ChatMessage, G15Player, KillfeedEntry, Lobby, Player } from "$types/lobby";
-import { GameMessages } from "$types/messages";
+import { GameMessages, GameRecieves } from "$types/messages";
 import { join } from "path";
 import Config from "../config";
 import Socket from "../socket";
 import Rcon from "./rcon";
 import fs from "fs";
 import { fakeLobby } from "src/fakedata/game";
+import { fakeData } from "src/consts";
 
 export default class GameMonitor {
     static logPath: string;
@@ -20,7 +21,17 @@ export default class GameMonitor {
             respond(GameMessages.Initial, this.lobby);
         });
 
-        if(Bun.env.FAKE_DATA === "true") {
+        Socket.on("game", GameRecieves.Chat, (msg) => {
+            if(fakeData) this.addFakeMessage(msg, false);
+            else Rcon.server.execute(`say ${msg}`);
+        });
+
+        Socket.on("game", GameRecieves.ChatTeam, (msg) => {
+            if(fakeData) this.addFakeMessage(msg, true);
+            else Rcon.server.execute(`say_team ${msg}`);
+        });
+
+        if(fakeData) {
             this.lobby = fakeLobby;
             return;
         }
@@ -76,7 +87,7 @@ export default class GameMonitor {
 
     // Doesn't handle suicides
     static killfeedRegex = /(?:\n|^)(.+) killed (.+) with (.+)\.( \(crit\))?/g;
-    static chatRegex = /(?:\n|^)(\*DEAD\* ?)?(\(TEAM\) )?(.+) :  (.+)/g;
+    static chatRegex = /(?:\n|^)(?:\*SPEC\* )?(\*DEAD\* ?)?(\(TEAM\) |\(Spectator\) )?(.+) :  (.+)/g;
     static parseLog(text: string) {
         let match: RegExpExecArray;
 
@@ -186,5 +197,18 @@ export default class GameMonitor {
 
         if(!changed) return null;
         return diff;
+    }
+
+    
+    static addFakeMessage(msg: string, team: boolean) {   
+        let message: ChatMessage = {
+            name: "You",
+            senderTeam: 2,
+            dead: false,
+            team,
+            text: msg
+        }
+        this.lobby.chat.push(message);
+        Socket.send("game", GameMessages.ChatAdded, message);
     }
 }

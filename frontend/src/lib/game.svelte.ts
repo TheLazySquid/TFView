@@ -1,8 +1,8 @@
 import type { ChatMessage, KillfeedEntry, Player } from "$types/lobby";
-import { GameMessages, type GameMessageTypes } from "$types/messages";
+import { GameMessages } from "$types/messages";
 import WSClient from "./wsclient";
 
-export default new class Game extends WSClient<GameMessageTypes> {
+export default new class Game extends WSClient<"game"> {
     players: Player[] = $state([]);
     playersMap = new Map<string, Player>();
     killfeed: KillfeedEntry[] = $state([]);

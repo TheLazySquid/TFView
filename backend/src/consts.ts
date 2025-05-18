@@ -1,0 +1,1 @@
+export const fakeData = Bun.argv.includes("--fakeData");

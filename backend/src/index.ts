@@ -1,9 +1,10 @@
 import Config from "./config";
+import { fakeData } from "./consts";
 import GameMonitor from "./game/monitor";
 import Rcon from "./game/rcon";
 import Socket from "./socket";
 
-if(Bun.env.FAKE_DATA === "true") {
+if(fakeData) {
     console.log("Using fake data for backend");
 }
 

@@ -1,4 +1,5 @@
-import type { MessageTypes } from "$types/messages";
+import type { MessageTypes, RecievesTypes } from "$types/messages";
+import EventEmitter from "node:events";
 
 type Type = keyof MessageTypes;
 type WS = Bun.ServerWebSocket<{ type: Type }>;
@@ -7,7 +8,7 @@ export default class Socket {
     static port = 7523;
     static types: Type[] = ["game"];
     static sockets = new Map<Type, WS[]>();
-    static connectListeners = new Map<Type, (callback: (channel: any, data: any) => void) => void>();
+    static events = new EventEmitter();
 
     static init() {
         for(let type of this.types) this.sockets.set(type, []);
@@ -26,13 +27,16 @@ export default class Socket {
                 return new Response("Upgrade failed", { status: 500 });
             },
             websocket: {
-                message: () => {},
+                message: (ws: WS, message: string) => {
+                    let type = message[0];
+                    let data = JSON.parse(message.slice(1));
+
+                    this.events.emit(`${ws.data.type}-${type}`, data);
+                },
                 open: (ws: WS) => {
                     this.sockets.get(ws.data.type).push(ws);
-                    const listener = this.connectListeners.get(ws.data.type);
-                    if(!listener) return;
 
-                    listener((channel, data) => {
+                    this.events.emit(`${ws.data.type}-connect`, (channel: string, data: any) => {
                         ws.send(channel.toString() + JSON.stringify(data));
                     });
                 },
@@ -50,7 +54,12 @@ export default class Socket {
 
     static onConnect<T extends Type, C extends keyof MessageTypes[T]>
         (type: T, callback: (send: (channel: C, data: MessageTypes[T][C]) => void) => void) {
-        this.connectListeners.set(type, callback);
+        this.events.on(`${type}-connect`, callback);
+    }
+
+    static on<T extends Type, C extends keyof RecievesTypes[T]>
+        (type: T, channel: C, callback: (data: RecievesTypes[T][C]) => void) {
+        this.events.on(`${type}-${channel.toString()}`, callback);
     }
 
     static send<T extends Type, C extends keyof MessageTypes[T]>

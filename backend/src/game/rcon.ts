@@ -1,5 +1,6 @@
 import RconServer from "rcon-srcds";
 import Config from "../config";
+import { fakeData } from "src/consts";
 
 export default class Rcon {
     static server: RconServer;
@@ -7,7 +8,7 @@ export default class Rcon {
     static connected = false;
 
     static init() {
-        if(Bun.env.FAKE_DATA === "true") return;
+        if(fakeData) return;
         
         this.server = new RconServer({
             host: "127.0.0.1",
