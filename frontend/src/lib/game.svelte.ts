@@ -1,4 +1,4 @@
-import type { KillfeedEntry, Player } from "$types/lobby";
+import type { ChatMessage, KillfeedEntry, Player } from "$types/lobby";
 import { GameMessages, type GameMessageTypes } from "$types/messages";
 import WSClient from "./wsclient";
 
@@ -6,6 +6,8 @@ export default new class Game extends WSClient<GameMessageTypes> {
     players: Player[] = $state([]);
     playersMap = new Map<string, Player>();
     killfeed: KillfeedEntry[] = $state([]);
+    // stored in reverse order for performance
+    chat: ChatMessage[] = $state([]);
 
     constructor() {
         super("game");
@@ -20,6 +22,7 @@ export default new class Game extends WSClient<GameMessageTypes> {
             }
 
             this.killfeed = data.killfeed;
+            this.chat = data.chat.toReversed();
         })
 
         this.on(GameMessages.PlayerJoin, (player) => {
@@ -47,6 +50,10 @@ export default new class Game extends WSClient<GameMessageTypes> {
 
         this.on(GameMessages.KillfeedAdded, (entry) => {
             this.killfeed.push(entry);
+        });
+
+        this.on(GameMessages.ChatAdded, (message) => {
+            this.chat.unshift(message);
         });
     }
 }

@@ -4,9 +4,7 @@
     import VirtualList from "svelte-tiny-virtual-list";
     import { resize } from "svelte-resize-observer-action";
     import { onMount, tick } from "svelte";
-
-    const red = '#b55c4c'
-    const blue = '#687d9c';
+    import { killfeedBlue, killfeedRed } from "$lib/consts";
     
     let container: HTMLElement;
     let containerHeight = $state(window.innerHeight);
@@ -33,13 +31,13 @@
             <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill mb-2 w-fit"
                 class:crit={kill.crit}>
                 <div class="whitespace-nowrap"
-                style="color: {kill.killerTeam === 2 ? red : blue}">
+                style="color: {kill.killerTeam === 2 ? killfeedRed : killfeedBlue}">
                     {kill.killer}
                 </div>
                 <img class="px-4"
                 src={getWeaponImage(kill.weapon, kill.crit)} alt={kill.weapon} />
                 <div class="whitespace-nowrap"
-                style="color: {kill.killerTeam === 2 ? blue : red}">
+                style="color: {kill.killerTeam === 2 ? killfeedBlue : killfeedRed}">
                     {kill.victim}
                 </div>
             </div>

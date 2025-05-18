@@ -54,5 +54,28 @@ export const fakeLobby: Lobby = {
             weapon: "scattergun",
             crit: false
         }
+    ],
+    chat: [
+        {
+            name: "Still Alive",
+            text: "I'm not even angry",
+            senderTeam: 3,
+            dead: true,
+            team: false
+        },
+        {
+            name: "Screamin' Eagles",
+            text: "You are all weak. You are all bleeders!",
+            senderTeam: 2,
+            dead: false,
+            team: true
+        },
+        {
+            name: "Mentlegen",
+            text: "Go to hell, and take your cheap suit with you!",
+            senderTeam: 1,
+            dead: false,
+            team: false
+        },
     ]
 }

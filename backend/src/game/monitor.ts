@@ -1,4 +1,4 @@
-import type { G15Player, KillfeedEntry, Lobby, Player } from "$types/lobby";
+import type { ChatMessage, G15Player, KillfeedEntry, Lobby, Player } from "$types/lobby";
 import { GameMessages } from "$types/messages";
 import { join } from "path";
 import Config from "../config";
@@ -9,7 +9,7 @@ import { fakeLobby } from "src/fakedata/game";
 
 export default class GameMonitor {
     static logPath: string;
-    static lobby: Lobby = { players: [], killfeed: [] };
+    static lobby: Lobby = { players: [], killfeed: [], chat: [] };
     static playerMap = new Map<string, Player>();
     static pollInterval = 1000;
     static logFile: Bun.BunFile;
@@ -75,9 +75,12 @@ export default class GameMonitor {
     }
 
     // Doesn't handle suicides
-    static killfeedRegex = /(?:\n|^)(.+) killed (.+) with (.+)\.( \(crit\))?(?:\r?\n|$)/g;
+    static killfeedRegex = /(?:\n|^)(.+) killed (.+) with (.+)\.( \(crit\))?/g;
+    static chatRegex = /(?:\n|^)(\*DEAD\* ?)?(\(TEAM\) )?(.+) :  (.+)/g;
     static parseLog(text: string) {
         let match: RegExpExecArray;
+
+        // parse the killfeed
         while(match = this.killfeedRegex.exec(text)) {
             let killer = this.lobby.players.find(p => p.name === match[1]);
             if(!killer) continue;
@@ -92,6 +95,23 @@ export default class GameMonitor {
 
             this.lobby.killfeed.push(entry);
             Socket.send("game", GameMessages.KillfeedAdded, entry);
+        }
+
+        // parse the chat
+        while(match = this.chatRegex.exec(text)) {
+            let player = this.lobby.players.find(p => p.name === match[3]);
+            if(!player) continue;
+
+            let message: ChatMessage = {
+                dead: match[1] !== undefined,
+                team: match[2] !== undefined,
+                name: match[3],
+                text: match[4],
+                senderTeam: player.team
+            }
+
+            this.lobby.chat.push(message);
+            Socket.send("game", GameMessages.ChatAdded, message);
         }
     }
 

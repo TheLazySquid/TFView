@@ -19,7 +19,7 @@ export interface Player {
     
     // From g15_dumpplayer command
     name: string;
-    /** 1 spectator, 2 = red, 3 = blue */
+    /** 1 = spectator, 2 = red, 3 = blue */
     team: number;
     ping: number;
     health: number;
@@ -38,7 +38,16 @@ export interface KillfeedEntry {
     killerTeam: number;
 }
 
+export interface ChatMessage {
+    name: string;
+    text: string;
+    senderTeam: number;
+    team: boolean;
+    dead: boolean;
+}
+
 export interface Lobby {
     players: Player[];
     killfeed: KillfeedEntry[];
+    chat: ChatMessage[];
 }
