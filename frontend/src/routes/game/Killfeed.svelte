@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Game from "$lib/game.svelte";
+    import Game from "$lib/ws/game.svelte";
     import { getWeaponImage } from "$lib/killfeed";
     import VirtualList from "svelte-tiny-virtual-list";
     import { resize } from "svelte-resize-observer-action";

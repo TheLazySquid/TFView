@@ -1,6 +1,6 @@
 <script lang="ts">
     import { chatBlue, chatRed, chatSpectator } from "$lib/consts";
-    import Game from "$lib/game.svelte";
+    import Game from "$lib/ws/game.svelte";
     import { GameRecieves } from "$types/messages";
     import Send from "@lucide/svelte/icons/send";
 

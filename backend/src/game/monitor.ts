@@ -1,19 +1,17 @@
 import type { ChatMessage, G15Player, KillfeedEntry, Lobby, Player } from "$types/lobby";
 import { GameMessages, GameRecieves } from "$types/messages";
-import { join } from "path";
-import Config from "../config";
 import Socket from "../socket";
 import Rcon from "./rcon";
-import fs from "fs";
 import { fakeLobby } from "src/fakedata/game";
 import { fakeData } from "src/consts";
+import LogParser from "src/logParser";
+import History from "src/history/history";
 
 export default class GameMonitor {
     static logPath: string;
     static lobby: Lobby = { players: [], killfeed: [], chat: [] };
     static playerMap = new Map<string, Player>();
     static pollInterval = 1000;
-    static logFile: Bun.BunFile;
     static readStart = 0;
 
     static init() {
@@ -35,66 +33,41 @@ export default class GameMonitor {
             this.lobby = fakeLobby;
             return;
         }
-        
-        // watch the log for updates
-        let logExists = false;
-        this.logPath = join(Config.get("tf2Path"), "tf", "console.log");
-        this.logFile = Bun.file(this.logPath);
-        this.logFile.exists().then((exists) => logExists = exists);
-        this.logFile.stat().then(s => this.readStart = s.size);
 
-        // fs.watch can't be relied on for log updates, somehow the log
-        // doesn't trigger whatever listeners this uses
-        fs.watch(this.logPath, (type) => {
-            if(type === "rename") {
-                logExists = !logExists;
-                if(!logExists) return;
-
-                this.logFile.stat().then(s => this.readStart = s.size);
-                return;
-            }
-        });
-
+        this.listenToLog();
         setInterval(() => this.poll(), this.pollInterval);
     }
 
+    static gotResponse = false;
     static poll() {
         if(!Rcon.connected) return;
 
         Rcon.server.execute("g15_dumpplayer")
             .then((text) => {
-                if(typeof text !== "string") return;
+                // check if the game ended
+                if(typeof text !== "string" || text === "") {
+                    // Wait 10 seconds before calling that the game ended- for some reason during load screens
+                    // whether or not dumpplayer returns something is pretty random
+                    if(!History.currentGame || Date.now() - History.currentGame.start < 10e3) return;
+
+                    if(this.gotResponse) History.onGameEnd();
+                    this.gotResponse = false;
+                    return;
+                }
+
+                this.gotResponse = true;
                 this.parseG15(text);
             });
-
-        this.logFile.stat().then(stat => {
-            if(stat.size > this.readStart) this.readLog();
-        });
-    }
-
-    static readLog() {
-        const stream = fs.createReadStream(this.logPath, {
-            start: this.readStart
-        });
-
-        let added = "";
-        stream.once("data", (buffer) => added += buffer);
-        stream.once("close", () => {
-            this.readStart += added.length;
-            this.parseLog(added)
-        });
     }
 
     // Doesn't handle suicides
     static killfeedRegex = /(?:\n|^)(.+) killed (.+) with (.+)\.( \(crit\))?/g;
     static chatRegex = /(?:\n|^)(?:\*SPEC\* )?(\*DEAD\* ?)?(\(TEAM\) |\(Spectator\) )?(.+) :  (.+)/g;
-    static parseLog(text: string) {
-        let match: RegExpExecArray;
-
+    static listenToLog() {
         // parse the killfeed
-        while(match = this.killfeedRegex.exec(text)) {
+        LogParser.on(this.killfeedRegex, (match) => {
             let killer = this.lobby.players.find(p => p.name === match[1]);
-            if(!killer) continue;
+            if(!killer) return;
 
             let entry: KillfeedEntry = {
                 killer: match[1],
@@ -106,12 +79,12 @@ export default class GameMonitor {
 
             this.lobby.killfeed.push(entry);
             Socket.send("game", GameMessages.KillfeedAdded, entry);
-        }
+        });
 
         // parse the chat
-        while(match = this.chatRegex.exec(text)) {
+        LogParser.on(this.chatRegex, (match) => {
             let player = this.lobby.players.find(p => p.name === match[3]);
-            if(!player) continue;
+            if(!player) return;
 
             let message: ChatMessage = {
                 dead: match[1] !== undefined,
@@ -123,7 +96,7 @@ export default class GameMonitor {
 
             this.lobby.chat.push(message);
             Socket.send("game", GameMessages.ChatAdded, message);
-        }
+        });
     }
 
     static g15Regex = /m_(.+)\[(\d+)\] .+ \((.+)\)(?:\n|$)/g;

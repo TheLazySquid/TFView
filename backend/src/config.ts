@@ -1,12 +1,13 @@
 import { join } from "node:path";
-import type { ConfigType } from "$types/config";
+import type { ConfigType } from "$types/data";
+import { dataPath } from "./consts";
 
 export default class Config {
     static file: Bun.BunFile;
     static config: ConfigType;
 
     static async init() {
-        this.file = Bun.file(join(Bun.main, "..", "..", "config.json"));
+        this.file = Bun.file(join(dataPath, "config.json"));
 
         if(await this.file.exists()) {
             this.config = await this.file.json();

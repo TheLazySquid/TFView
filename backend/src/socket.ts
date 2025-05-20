@@ -1,4 +1,4 @@
-import type { MessageTypes, RecievesTypes } from "$types/messages";
+import type { MessageTypes, RecievesKey, RecievesTypes } from "$types/messages";
 import EventEmitter from "node:events";
 
 type Type = keyof MessageTypes;
@@ -6,7 +6,7 @@ type WS = Bun.ServerWebSocket<{ type: Type }>;
 
 export default class Socket {
     static port = 7523;
-    static types: Type[] = ["game"];
+    static types: Type[] = ["game", "history"];
     static sockets = new Map<Type, WS[]>();
     static events = new EventEmitter();
 
@@ -31,7 +31,9 @@ export default class Socket {
                     let type = message[0];
                     let data = JSON.parse(message.slice(1));
 
-                    this.events.emit(`${ws.data.type}-${type}`, data);
+                    this.events.emit(`${ws.data.type}-${type}`, data, (response: any) => {
+                        ws.send("r" + type + JSON.stringify(response));
+                    });
                 },
                 open: (ws: WS) => {
                     this.sockets.get(ws.data.type).push(ws);
@@ -58,7 +60,8 @@ export default class Socket {
     }
 
     static on<T extends Type, C extends keyof RecievesTypes[T]>
-        (type: T, channel: C, callback: (data: RecievesTypes[T][C]) => void) {
+        (type: T, channel: C, callback: (data: RecievesKey<T, C, "send">,
+        reply: (response: RecievesKey<T, C, "reply">) => void) => void) {
         this.events.on(`${type}-${channel.toString()}`, callback);
     }
 

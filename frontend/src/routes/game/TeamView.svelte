@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Game from "$lib/game.svelte";
+    import Game from "$lib/ws/game.svelte";
     import PlayerView from "./PlayerView.svelte";
 
     let { id, name }: { id: number, name: string } = $props();

@@ -3,17 +3,14 @@ import { GameMessages } from "$types/messages";
 import WSClient from "./wsclient";
 
 export default new class Game extends WSClient<"game"> {
+    route = "game";
     players: Player[] = $state([]);
     playersMap = new Map<string, Player>();
     killfeed: KillfeedEntry[] = $state([]);
     // stored in reverse order for performance
     chat: ChatMessage[] = $state([]);
 
-    constructor() {
-        super("game");
-    }
-
-    init() {
+    setup() {
         this.on(GameMessages.Initial, (data) => {
             this.players = data.players;
             this.playersMap.clear();
