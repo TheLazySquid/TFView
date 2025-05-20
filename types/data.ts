@@ -7,6 +7,7 @@ export interface ConfigType {
 export interface PastGamePlayer {
     id: string;
     name: string;
+    time: number;
 }
 
 export interface PastGame {
@@ -14,6 +15,20 @@ export interface PastGame {
     duration: number;
     map: string;
     players: PastGamePlayer[];
+}
+
+export interface PastGameEntry extends Omit<PastGame, "players"> {
+    players: string;
+}
+
+export interface PlayerEncounter {
+    chunk: number;
+    indexFromEnd: number;
+    name: string;
+}
+
+export interface PlayerInfo {
+    encounters: PlayerEncounter[];
 }
 
 export interface HistoryType {

@@ -128,6 +128,15 @@ export default class GameMonitor {
             if(this.playerMap.has(id)) {
                 if(diff) Socket.send("game", GameMessages.PlayerUpdate, diff);
             } else {
+                // track the player in the game history
+                if(!History.currentGame?.players.some(p => p.id === player.accountId)) {
+                    History.currentGame?.players.push({
+                        id: player.accountId,
+                        name: player.name,
+                        time: Date.now()
+                    });
+                }
+
                 Socket.send("game", GameMessages.PlayerJoin, player as Player);
                 this.lobby.players.push(player as Player);
                 this.playerMap.set(id, player as Player);

@@ -1,19 +1,18 @@
-import type { HistoryType, PastGame } from "$types/data";
+import type { HistoryType, PastGame, PastGameEntry } from "$types/data";
 import { HistoryMessages } from "$types/messages";
 import { dataPath, fakeData } from "src/consts";
 import { fakeHistory } from "src/fakedata/history";
 import LogParser from "src/logParser";
 import Socket from "src/socket";
 import { join } from "node:path";
-import fsp from "node:fs/promises";
+import { Database } from "bun:sqlite";
 
 export default class History {   
     static history: HistoryType = { pastGames: [] };
     static currentGame: PastGame | null = null;
     static gamesFile: Bun.BunFile;
     static pastGamesDir: string;
-    static currentChunkNumber = 0;
-    static currentChunk: PastGame[] = [];
+    static db: Database;
 
     static init() {
         Socket.onConnect("history", (send) => {
@@ -25,39 +24,27 @@ export default class History {
             return;
         }
 
+        this.db = new Database(join(dataPath, "history.sqlite"));
         this.loadInitial();
         this.listenToLog();
     }
 
     static async loadInitial() {
-        // Past games are stored in 50 game chunks, with most recent at the start of the chunk
-        this.pastGamesDir = join(dataPath, "pastGames");
+        this.db.run(`CREATE TABLE IF NOT EXISTS main.games (
+            map TEXT NOT NULL,
+            start INTEGER NOT NULL,
+            duration INTEGER NOT NULL,
+            players TEXT NOT NULL
+        ); CREATE TABLE IF NOT EXISTS main.encounters (
+            playerId TEXT NOT NULL,
+            map TEXT NOT NULL,
+            name TEXT NOT NULL,
+            gameId INTEGER NOT NULL,
+            time INTEGER NOT NULL
+        )`);
 
-        if(!await fsp.exists(this.pastGamesDir)) return;
-        const numberOfChunks = (await fsp.readdir(this.pastGamesDir)).length;
-
-        // read the most recent two, to guarantee we have >= 50 ready fast
-        if(numberOfChunks > 0) {
-            const chunk = await this.readChunk(numberOfChunks - 1);
-            this.currentChunk = chunk;
-            this.currentChunkNumber = numberOfChunks - 1;
-
-            this.history.pastGames = [...chunk];
-        }
-
-        if(numberOfChunks > 1) {
-            const chunk = await this.readChunk(numberOfChunks - 2);
-            this.history.pastGames = this.history.pastGames.concat(chunk);
-        }
-    }
-
-    static async readChunk(number: number): Promise<PastGame[]> {
-        try {
-            const text = await fsp.readFile(join(this.pastGamesDir, `${number}.json`));
-            return JSON.parse(text.toString());
-        } catch {
-            return [];
-        }
+        let data = this.db.query<PastGameEntry, []>(`SELECT * FROM games ORDER BY start DESC LIMIT 50`).all();
+        this.history.pastGames = data.map((g) => ({ ...g, players: JSON.parse(g.players) }));
     }
 
     static mapChangeRegex = /(?:\n|^)Team Fortress\r?\nMap: (.+)/g;
@@ -72,7 +59,7 @@ export default class History {
                 players: []
             }
 
-            console.log("Game started:", this.currentGame);
+            console.log("Game started:", this.currentGame.map);
         });
     }
 
@@ -81,13 +68,28 @@ export default class History {
         this.currentGame.duration = Date.now() - this.currentGame.start;
 
         // save the current game
-        if(this.currentChunk.length === 50) {
-            this.currentChunk = [];
-            this.currentChunkNumber++;
+        let val = this.db.query(`INSERT INTO games (map, start, duration, players)
+            VALUES($map, $start, $duration, $players)`).run({
+            $map: this.currentGame.map,
+            $players: JSON.stringify(this.currentGame.players),
+            $start: this.currentGame.start,
+            $duration: this.currentGame.duration
+        });
+
+        // There's probably some way to make this into one query
+        const addPlayer = this.db.query(`INSERT INTO encounters (playerId, map, name, gameId, time)
+            VALUES($playerId, $map, $name, $gameId, $time)`);
+        for(let player of this.currentGame.players) {
+            // Don't record bots
+            if(player.id.length <= 3) continue;
+            addPlayer.run({
+                $playerId: player.id,
+                $map: this.currentGame.map,
+                $name: player.name,
+                $gameId: val.lastInsertRowid,
+                $time: player.time
+            });
         }
-        this.currentChunk.unshift(this.currentGame);
-        const file = join(this.pastGamesDir, `${this.currentChunkNumber}.json`);
-        Bun.file(file).write(JSON.stringify(this.currentChunk));
 
         Socket.send("history", HistoryMessages.GameAdded, this.currentGame);
         this.history.pastGames.unshift(this.currentGame);
