@@ -1,5 +1,5 @@
 import type { HistoryType, PastGame, PastGameEntry } from "$types/data";
-import { HistoryMessages } from "$types/messages";
+import { HistoryMessages, HistoryRecieves } from "$types/messages";
 import { dataPath, fakeData } from "src/consts";
 import { fakeHistory } from "src/fakedata/history";
 import LogParser from "src/logParser";
@@ -13,14 +13,19 @@ export default class History {
     static gamesFile: Bun.BunFile;
     static pastGamesDir: string;
     static db: Database;
+    static pageSize = 20;
 
     static init() {
         Socket.onConnect("history", (send) => {
             send(HistoryMessages.Initial, this.history);
         });
 
+        Socket.on("history", HistoryRecieves.GetGames, (offset, reply) => {
+            reply(this.getGames(offset));
+        });
+
         if(fakeData) {
-            this.history = fakeHistory;
+            this.history.pastGames = this.getGames(0);
             return;
         }
 
@@ -29,7 +34,7 @@ export default class History {
         this.listenToLog();
     }
 
-    static async loadInitial() {
+    static loadInitial() {
         this.db.run(`CREATE TABLE IF NOT EXISTS main.games (
             map TEXT NOT NULL,
             start INTEGER NOT NULL,
@@ -43,8 +48,15 @@ export default class History {
             time INTEGER NOT NULL
         )`);
 
-        let data = this.db.query<PastGameEntry, []>(`SELECT * FROM games ORDER BY start DESC LIMIT 50`).all();
-        this.history.pastGames = data.map((g) => ({ ...g, players: JSON.parse(g.players) }));
+        this.history.pastGames = this.getGames(0);
+    }
+
+    static getGames(offset: number): PastGame[] {
+        if(fakeData) return fakeHistory.pastGames.slice(offset, offset + this.pageSize);
+
+        let data = this.db.query<PastGameEntry, {}>(`SELECT * FROM games ORDER BY start DESC LIMIT ${this.pageSize} OFFSET $offset`)
+            .all({ $offset: offset });
+        return data.map((g) => ({ ...g, players: JSON.parse(g.players) }));
     }
 
     static mapChangeRegex = /(?:\n|^)Team Fortress\r?\nMap: (.+)/g;

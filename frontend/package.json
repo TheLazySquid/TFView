@@ -31,6 +31,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"svelte-infinite-loading": "^1.4.0",
 		"svelte-resize-observer-action": "^0.0.4",
 		"svelte-tiny-virtual-list": "^2.1.2"
 	}
