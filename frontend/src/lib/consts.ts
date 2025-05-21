@@ -3,3 +3,7 @@ export const killfeedBlue = "#687d9c";
 export const chatRed = "#e96969";
 export const chatBlue = "#a9d5fe";
 export const chatSpectator = "#cdcdcd";
+export const timeFmt = new Intl.DateTimeFormat("en", {
+    dateStyle: "medium",
+    timeStyle: "short"
+});

@@ -7,8 +7,6 @@ export default abstract class WSClient<T extends keyof MessageTypes> {
     ws: WebSocket | undefined;
     listeners = new Map<keyof MessageTypes[T], (data: any) => void>();
     replies = new Map<keyof RecievesTypes[T], ((data: any) => void)[]>();
-    readyRes?: () => void;
-    ready = new Promise<void>((res) => this.readyRes = res);
 
     init() {
         this.setup();
@@ -43,8 +41,6 @@ export default abstract class WSClient<T extends keyof MessageTypes> {
                 let data = JSON.parse(event.data.slice(1));
                 this.listeners.get(type)?.(data);    
             }
-
-            this.readyRes?.();
         });
     }
 
@@ -58,8 +54,12 @@ export default abstract class WSClient<T extends keyof MessageTypes> {
     }
 
     sendAndRecieve<C extends keyof RecievesTypes[T]>(type: C, data: RecievesKey<T, C, "send">) {
-        return new Promise<RecievesKey<T, C, "reply">>((res, rej) => {
+        return new Promise<RecievesKey<T, C, "reply">>(async (res, rej) => {
             if(!this.ws || this.ws.readyState === 3) return rej();
+            if(this.ws.readyState === 0) {
+                await new Promise((res) => this.ws?.addEventListener("open", res, { once: true }));
+            }
+
             this.ws.send(type.toString() + JSON.stringify(data));
 
             if(!this.replies.has(type)) this.replies.set(type, []);

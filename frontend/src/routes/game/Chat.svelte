@@ -35,13 +35,13 @@
         </div>
     {/each}
     <div class="absolute w-full left-0 bottom-0 flex gap-2 px-2 pb-1">
-        <button class="bg-white text-black rounded-md px-3 py-1 cursor-pointer"
+        <button class="bg-white text-black rounded-md px-3 py-1"
             onclick={() => team = !team}>
             {team ? "Team" : "Public"}
         </button>
         <input class="border-1 rounded-sm flex-grow px-1" onkeydown={onKeydown}
             placeholder="Type here..." bind:value={message} />
-        <button class="cursor-pointer" onclick={send}>
+        <button onclick={send}>
             <Send />
         </button>
     </div>

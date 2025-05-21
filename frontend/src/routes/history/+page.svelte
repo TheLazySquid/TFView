@@ -1,27 +1,61 @@
 <script lang="ts">
+    import Time from "$lib/components/Time.svelte";
     import History from "$lib/ws/history.svelte";
     import { HistoryRecieves } from "$types/messages";
     import InfiniteLoading, { type InfiniteEvent } from "svelte-infinite-loading";
+    import PastGamePopup from "./PastGamePopup.svelte";
 
     History.init();
 
     async function infiniteHandler(e: InfiniteEvent) {
-        await History.ready;
         let games = await History.sendAndRecieve(HistoryRecieves.GetGames, History.pastGames.length);
 
         History.pastGames.push(...games);
         if(games.length === 0) e.detail.complete();
         else e.detail.loaded();
     }
+
+    let pastGamePopup: PastGamePopup;
 </script>
 
-<div>
-    {#each History.pastGames as game}
-        <div>{game.map}</div>
-    {/each}
+{#snippet historyEnd()}
+    End of history
+{/snippet}
 
-    <InfiniteLoading on:infinite={infiniteHandler}>
-        <svelte:fragment slot="noResults">End of history</svelte:fragment>
-        <svelte:fragment slot="noMore">End of history</svelte:fragment>
-    </InfiniteLoading>
+<PastGamePopup bind:this={pastGamePopup} />
+
+<div class="w-full flex justify-center">
+    <table class="table-fixed" style="width: min(1000px, 90%)">
+        <thead>
+            <tr class="*:sticky *:top-0 *:bg-background *:text-left">
+                <th class="w-2/7">Time</th>
+                <th class="w-2/7">Duration</th>
+                <th class="w-2/7">Map</th>
+                <th class="w-1/7"></th>
+            </tr>
+        </thead>
+        <tbody>
+            {#each History.pastGames as game}
+                <tr class="border-t-2 *:py-1">
+                    <td><Time date={game.start} /></td>
+                    <td><Time date={game.duration} duration={true} /></td>
+                    <td>{game.map}</td>
+                    <td>
+                        <button class="underline"
+                        onclick={() => pastGamePopup.open(game.rowid)}>
+                            Details
+                        </button>
+                    </td>
+                </tr>
+            {/each}
+            <tr>
+                <th colspan={4} class="border-t-2">
+                    <InfiniteLoading on:infinite={infiniteHandler}>
+                        <svelte:fragment slot="noResults">{@render historyEnd()}</svelte:fragment>
+                        <svelte:fragment slot="noMore">{@render historyEnd()}</svelte:fragment>
+                    </InfiniteLoading>
+                </th>
+            </tr>
+        </tbody>
+    </table>
 </div>

@@ -1,4 +1,4 @@
-import type { HistoryType, PastGame } from "./data";
+import type { PastGame, PastGameEntry } from "./data";
 import type { ChatMessage, KillfeedEntry, Lobby, Player } from "./lobby";
 
 // Sending messages from the backend
@@ -21,13 +21,11 @@ export interface GameMessageTypes {
 }
 
 export enum HistoryMessages {
-    Initial = "0",
-    GameAdded = "1"
+    GameAdded = "0"
 }
 
 export interface HistoryMessageTypes {
-    [HistoryMessages.Initial]: HistoryType;
-    [HistoryMessages.GameAdded]: PastGame;
+    [HistoryMessages.GameAdded]: PastGameEntry;
 }
 
 export interface MessageTypes {
@@ -49,11 +47,13 @@ export interface GameRecievesTypes {
 }
 
 export enum HistoryRecieves {
-    GetGames = "0"
+    GetGames = "0",
+    GetGame = "1"
 }
 
 export interface HistoryRecievesTypes {
-    [HistoryRecieves.GetGames]: Recieves<number, PastGame[]>;
+    [HistoryRecieves.GetGames]: Recieves<number, PastGameEntry[]>;
+    [HistoryRecieves.GetGame]: Recieves<number, PastGame>;
 }
 
 export interface RecievesTypes {

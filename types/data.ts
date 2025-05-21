@@ -17,20 +17,13 @@ export interface PastGame {
     players: PastGamePlayer[];
 }
 
-export interface PastGameEntry extends Omit<PastGame, "players"> {
-    players: string;
+export interface PastGameEntry {
+    start: number;
+    duration: number;
+    map: string;
+    rowid: number;
 }
 
-export interface PlayerEncounter {
-    chunk: number;
-    indexFromEnd: number;
-    name: string;
-}
-
-export interface PlayerInfo {
-    encounters: PlayerEncounter[];
-}
-
-export interface HistoryType {
-    pastGames: PastGame[];
+export type Stored<T> = {
+    [K in keyof T]: T[K] extends (string | number | boolean | null) ? T[K] : string;
 }
