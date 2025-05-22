@@ -15,7 +15,7 @@
 <PastGamePopup ws={Game} />
 <PastPlayerPopup ws={Game} />
 
-<div class="w-screen h-screen">
+<div class="w-full h-full">
     <!-- Temporary layout -->
     <Resizable.PaneGroup direction="horizontal">
         <Resizable.Pane defaultSize={50}>
