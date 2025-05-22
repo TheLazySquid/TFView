@@ -27,3 +27,11 @@ export interface PastGameEntry {
 export type Stored<T> = {
     [K in keyof T]: T[K] extends (string | number | boolean | null) ? T[K] : string;
 }
+
+export interface PlayerEncounter {
+    playerId: string;
+    map: string;
+    name: string;
+    gameId: number;
+    time: number;
+}

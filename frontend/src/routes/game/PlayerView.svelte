@@ -1,9 +1,10 @@
 <script lang="ts">
+    import Popups from "$lib/popups";
     import type { Player } from "$types/lobby";
 
     let { player }: { player: Player } = $props();
 </script>
 
-<div class="bg-accent">
+<button class="bg-accent" onclick={() => Popups.openPlayerPopup?.(player)}>
     {player.name}
-</div>
+</button>

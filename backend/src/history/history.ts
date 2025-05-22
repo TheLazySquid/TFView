@@ -1,11 +1,12 @@
-import type { Stored, PastGame, PastGameEntry } from "$types/data";
-import { HistoryMessages, HistoryRecieves } from "$types/messages";
+import type { Stored, PastGame, PastGameEntry, PlayerEncounter } from "$types/data";
+import { HistoryMessages, Recieves } from "$types/messages";
 import { dataPath, fakeData } from "src/consts";
-import { fakePastGames } from "src/fakedata/history";
 import LogParser from "src/logParser";
 import Socket from "src/socket";
 import { join } from "node:path";
 import { Database } from "bun:sqlite";
+import fs from "fs";
+import { createFakeHistory } from "src/fakedata/history";
 
 export default class History {   
     static currentGame: PastGame | null = null;
@@ -15,22 +16,30 @@ export default class History {
     static pageSize = 50;
 
     static init() {
-        Socket.on("history", HistoryRecieves.GetGames, (offset, reply) => {
+        Socket.on(Recieves.GetGames, (offset, reply) => {
             reply(this.getGames(offset));
         });
 
-        Socket.on("history", HistoryRecieves.GetGame, (rowid, reply) => {
+        Socket.on(Recieves.GetGame, (rowid, reply) => {
             reply(this.getGame(rowid));
         });
 
-        if(fakeData) return;
-
+        Socket.on(Recieves.GetEncounters, ({ id, offset }, reply) => {
+            reply(this.getEncounters(id, offset));
+        })
+        
         this.setupDb();
+
+        if(fakeData) return;
         this.listenToLog();
     }
 
     static setupDb() {
-        this.db = new Database(join(dataPath, "history.sqlite"));
+        let newDb = false;
+        const dbPath = join(dataPath, fakeData ? "testhistory.sqlite" : "history.sqlite");
+        if(fakeData && !fs.existsSync(dbPath)) newDb = true;
+
+        this.db = new Database(dbPath);
 
         this.db.run(`CREATE TABLE IF NOT EXISTS main.games (
             map TEXT NOT NULL,
@@ -44,22 +53,26 @@ export default class History {
             gameId INTEGER NOT NULL,
             time INTEGER NOT NULL
         )`);
+
+        if(newDb) createFakeHistory(this.db);
     }
 
     static getGames(offset: number): PastGameEntry[] {
-        if(fakeData) return fakePastGames.slice(offset, offset + this.pageSize);
-
         return this.db.query<PastGameEntry, {}>(`SELECT start, duration, map, rowid FROM games
             ORDER BY start DESC LIMIT ${this.pageSize} OFFSET $offset`)
             .all({ $offset: offset });
     }
 
     static getGame(id: number) {
-        if(fakeData) return fakePastGames.find((g) => g.rowid === id);
-
         let game = this.db.query<Stored<PastGame>, {}>(`SELECT * FROM games WHERE rowid = $rowid`)
             .get({ $rowid: id });
         return { ...game, players: JSON.parse(game.players) }
+    }
+
+    static getEncounters(id: string, offset: number): PlayerEncounter[] {
+        return this.db.query<PlayerEncounter, {}>(`SELECT * FROM encounters WHERE playerId = $id
+            ORDER BY time DESC LIMIT ${this.pageSize} OFFSET $offset`)
+            .all({ $id: id, $offset: offset });
     }
 
     static mapChangeRegex = /(?:\n|^)Team Fortress\r?\nMap: (.+)/g;

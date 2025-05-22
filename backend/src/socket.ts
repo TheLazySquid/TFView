@@ -31,7 +31,7 @@ export default class Socket {
                     let type = message[0];
                     let data = JSON.parse(message.slice(1));
 
-                    this.events.emit(`${ws.data.type}-${type}`, data, (response: any) => {
+                    this.events.emit(type, data, (response: any) => {
                         ws.send("r" + type + JSON.stringify(response));
                     });
                 },
@@ -59,10 +59,9 @@ export default class Socket {
         this.events.on(`${type}-connect`, callback);
     }
 
-    static on<T extends Type, C extends keyof RecievesTypes[T]>
-        (type: T, channel: C, callback: (data: RecievesKey<T, C, "send">,
-        reply: (response: RecievesKey<T, C, "reply">) => void) => void) {
-        this.events.on(`${type}-${channel.toString()}`, callback);
+    static on<C extends keyof RecievesTypes>(channel: C, callback: (data: RecievesKey<C, "send">,
+        reply: (response: RecievesKey<C, "reply">) => void) => void) {
+        this.events.on(channel.toString(), callback);
     }
 
     static send<T extends Type, C extends keyof MessageTypes[T]>

@@ -4,9 +4,16 @@
     import Chat from "./game/Chat.svelte";
     import Teams from "./game/Teams.svelte";
     import * as Resizable from "$lib/components/ui/resizable";
+    import PlayerPopup from "../lib/components/popups/PlayerPopup.svelte";
+    import PastGamePopup from "../lib/components/popups/PastGamePopup.svelte";
+    import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
 
     Game.init();
 </script>
+
+<PlayerPopup ws={Game} />
+<PastGamePopup ws={Game} />
+<PastPlayerPopup ws={Game} />
 
 <div class="w-screen h-screen">
     <!-- Temporary layout -->

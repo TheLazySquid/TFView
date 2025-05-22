@@ -14,7 +14,7 @@ await Config.init();
 Rcon.init();
 LogParser.init();
 
-GameMonitor.init();
 History.init();
+GameMonitor.init();
 
 Socket.init();

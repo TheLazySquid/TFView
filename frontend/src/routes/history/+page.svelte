@@ -1,28 +1,29 @@
 <script lang="ts">
     import Time from "$lib/components/Time.svelte";
     import History from "$lib/ws/history.svelte";
-    import { HistoryRecieves } from "$types/messages";
+    import { Recieves } from "$types/messages";
     import InfiniteLoading, { type InfiniteEvent } from "svelte-infinite-loading";
-    import PastGamePopup from "./PastGamePopup.svelte";
+    import Popups from "$lib/popups";
+    import PastGamePopup from "$lib/components/popups/PastGamePopup.svelte";
+    import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
 
     History.init();
 
     async function infiniteHandler(e: InfiniteEvent) {
-        let games = await History.sendAndRecieve(HistoryRecieves.GetGames, History.pastGames.length);
+        let games = await History.sendAndRecieve(Recieves.GetGames, History.pastGames.length);
 
         History.pastGames.push(...games);
         if(games.length === 0) e.detail.complete();
         else e.detail.loaded();
     }
-
-    let pastGamePopup: PastGamePopup;
 </script>
 
 {#snippet historyEnd()}
     End of history
 {/snippet}
 
-<PastGamePopup bind:this={pastGamePopup} />
+<PastGamePopup ws={History} />
+<PastPlayerPopup ws={History} />
 
 <div class="w-full flex justify-center">
     <table class="table-fixed" style="width: min(1000px, 90%)">
@@ -42,7 +43,7 @@
                     <td>{game.map}</td>
                     <td>
                         <button class="underline"
-                        onclick={() => pastGamePopup.open(game.rowid)}>
+                        onclick={() => Popups.openGamePopup?.(game.rowid)}>
                             Details
                         </button>
                     </td>

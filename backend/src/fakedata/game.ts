@@ -76,6 +76,6 @@ export const fakeLobby: Lobby = {
             senderTeam: 1,
             dead: false,
             team: false
-        },
+        }
     ]
 }

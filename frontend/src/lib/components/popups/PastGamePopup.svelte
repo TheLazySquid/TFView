@@ -1,31 +1,36 @@
 <script lang="ts">
     import Time from "$lib/components/Time.svelte";
     import * as Dialog from "$lib/components/ui/dialog";
-    import History from "$lib/ws/history.svelte";
     import type { PastGame } from "$types/data";
-    import { HistoryRecieves } from "$types/messages";
+    import { Recieves } from "$types/messages";
     import { NinetyRingWithBg } from "svelte-svg-spinners";
+    import Popups from "$lib/popups";
+    import type WSClient from "$lib/ws/wsclient";
 
+    let { ws }: { ws: WSClient<any> } = $props();
     let rowid: number | null = $state(null);
     let game: PastGame | null = $state.raw(null);
     let modalOpen = $state(false);
+    let zIndex = $state(50);
     
-    export function open(id: number) {
+    Popups.openGamePopup = (id: number) => {
+        console.log(id);
         if(rowid !== id) game = null;
         rowid = id;
         modalOpen = true;
+        zIndex = Popups.zIndex++;
     }
 
     $effect(() => {
         if(rowid === null) return;
-        History.sendAndRecieve(HistoryRecieves.GetGame, rowid).then((gotGame) => {
+        ws.sendAndRecieve(Recieves.GetGame, rowid).then((gotGame) => {
             game = gotGame;
         });
-    })
+    });
 </script>
 
 <Dialog.Root bind:open={modalOpen}>
-    <Dialog.Content>
+    <Dialog.Content style="z-index: {zIndex}">
         {#if !game}
             <NinetyRingWithBg color="white" />
         {:else}
@@ -33,9 +38,12 @@
             <div>Start time: <Time date={game.start} /></div>
             <div>Duration: <Time date={game.duration} duration={true} /></div>
             <h2>Players:</h2>
-            <div class="overflow-y-auto max-h-[400px]">
+            <div class="overflow-y-auto max-h-[400px] flex flex-col items-start">
                 {#each game.players as player}
-                    <div>{player.name}</div>
+                    <button class="underline"
+                    onclick={() => Popups.openPastPlayerPopup?.(player.id, player.name)}>
+                        {player.name}
+                    </button>
                 {/each}
             </div>
         {/if}

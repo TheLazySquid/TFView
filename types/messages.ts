@@ -1,4 +1,4 @@
-import type { PastGame, PastGameEntry } from "./data";
+import type { PastGame, PastGameEntry, PlayerEncounter } from "./data";
 import type { ChatMessage, KillfeedEntry, Lobby, Player } from "./lobby";
 
 // Sending messages from the backend
@@ -34,32 +34,23 @@ export interface MessageTypes {
 }
 
 // Recieving messages
-export type Recieves<Send, Reply = void> = { send: Send, reply: Reply };
+export type Recieved<Send, Reply = void> = { send: Send, reply: Reply };
 
-export enum GameRecieves {
+export enum Recieves {
     Chat = "0",
-    ChatTeam = "1"
-}
-
-export interface GameRecievesTypes {
-    [GameRecieves.Chat]: Recieves<string>;
-    [GameRecieves.ChatTeam]: Recieves<string>;
-}
-
-export enum HistoryRecieves {
-    GetGames = "0",
-    GetGame = "1"
-}
-
-export interface HistoryRecievesTypes {
-    [HistoryRecieves.GetGames]: Recieves<number, PastGameEntry[]>;
-    [HistoryRecieves.GetGame]: Recieves<number, PastGame>;
+    ChatTeam = "1",
+    GetGames = "2",
+    GetGame = "3",
+    GetEncounters = "4"
 }
 
 export interface RecievesTypes {
-    game: GameRecievesTypes;
-    history: HistoryRecievesTypes;
+    [Recieves.Chat]: Recieved<string>;
+    [Recieves.ChatTeam]: Recieved<string>;
+    [Recieves.GetGames]: Recieved<number, PastGameEntry[]>;
+    [Recieves.GetGame]: Recieved<number, PastGame>;
+    [Recieves.GetEncounters]: Recieved<{ id: string, offset: number }, PlayerEncounter[]>;
 }
 
-export type RecievesKey<T extends keyof RecievesTypes, C extends keyof RecievesTypes[T], K extends keyof Recieves<any, any>> =
-    RecievesTypes[T][C] extends Recieves<any, any> ? RecievesTypes[T][C][K] : never;
+export type RecievesKey<C extends keyof RecievesTypes, K extends keyof Recieved<any, any>> =
+    RecievesTypes[C] extends Recieved<any, any> ? RecievesTypes[C][K] : never;

@@ -6,7 +6,7 @@ export default abstract class WSClient<T extends keyof MessageTypes> {
     pollInterval = 1000;
     ws: WebSocket | undefined;
     listeners = new Map<keyof MessageTypes[T], (data: any) => void>();
-    replies = new Map<keyof RecievesTypes[T], ((data: any) => void)[]>();
+    replies = new Map<keyof RecievesTypes, ((data: any) => void)[]>();
 
     init() {
         this.setup();
@@ -48,13 +48,13 @@ export default abstract class WSClient<T extends keyof MessageTypes> {
         this.listeners.set(type, callback);
     }
 
-    send<C extends keyof RecievesTypes[T]>(type: C, data: RecievesKey<T, C, "send">) {
+    send<C extends keyof RecievesTypes>(type: C, data: RecievesKey<C, "send">) {
         if(!this.ws || this.ws.readyState === 3) return;
         this.ws.send(type.toString() + JSON.stringify(data));
     }
 
-    sendAndRecieve<C extends keyof RecievesTypes[T]>(type: C, data: RecievesKey<T, C, "send">) {
-        return new Promise<RecievesKey<T, C, "reply">>(async (res, rej) => {
+    sendAndRecieve<C extends keyof RecievesTypes>(type: C, data: RecievesKey<C, "send">) {
+        return new Promise<RecievesKey<C, "reply">>(async (res, rej) => {
             if(!this.ws || this.ws.readyState === 3) return rej();
             if(this.ws.readyState === 0) {
                 await new Promise((res) => this.ws?.addEventListener("open", res, { once: true }));

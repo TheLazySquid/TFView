@@ -1,11 +1,12 @@
 import type { ChatMessage, G15Player, KillfeedEntry, Lobby, Player } from "$types/lobby";
-import { GameMessages, GameRecieves } from "$types/messages";
+import type { PlayerEncounter } from "$types/data";
+import { GameMessages, Recieves } from "$types/messages";
 import Socket from "../socket";
 import Rcon from "./rcon";
-import { fakeLobby } from "src/fakedata/game";
 import { fakeData } from "src/consts";
 import LogParser from "src/logParser";
 import History from "src/history/history";
+import { fakeLobby } from "src/fakedata/game";
 
 export default class GameMonitor {
     static logPath: string;
@@ -19,18 +20,23 @@ export default class GameMonitor {
             respond(GameMessages.Initial, this.lobby);
         });
 
-        Socket.on("game", GameRecieves.Chat, (msg) => {
+        Socket.on(Recieves.Chat, (msg) => {
             if(fakeData) this.addFakeMessage(msg, false);
             else Rcon.server.execute(`say ${msg}`);
         });
 
-        Socket.on("game", GameRecieves.ChatTeam, (msg) => {
+        Socket.on(Recieves.ChatTeam, (msg) => {
             if(fakeData) this.addFakeMessage(msg, true);
             else Rcon.server.execute(`say_team ${msg}`);
         });
 
         if(fakeData) {
             this.lobby = fakeLobby;
+            let people = History.db.query<PlayerEncounter, []>(`SELECT * FROM encounters LIMIT ${this.lobby.players.length}`)
+                .all();
+            for(let i = 0; i < people.length; i++) {
+                this.lobby.players[i].accountId = people[i].playerId;
+            }
             return;
         }
 
