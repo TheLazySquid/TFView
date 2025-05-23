@@ -1,9 +1,9 @@
 import type { ChatMessage, KillfeedEntry, Player } from "$types/lobby";
 import { GameMessages } from "$types/messages";
-import WSClient from "./wsclient";
+import { PageState } from "./wsclient";
 
-export default new class Game extends WSClient<"game"> {
-    route = "game";
+export default new class Game extends PageState<"game"> {
+    type = "game";
     players: Player[] = $state([]);
     playersMap = new Map<string, Player>();
     killfeed: KillfeedEntry[] = $state([]);
@@ -11,7 +11,7 @@ export default new class Game extends WSClient<"game"> {
     chat: ChatMessage[] = $state([]);
 
     setup() {
-        this.on(GameMessages.Initial, (data) => {
+        this.ws.on(GameMessages.Initial, (data) => {
             this.players = data.players;
             this.playersMap.clear();
             for(let player of this.players) {
@@ -22,12 +22,12 @@ export default new class Game extends WSClient<"game"> {
             this.chat = data.chat.toReversed();
         })
 
-        this.on(GameMessages.PlayerJoin, (player) => {
+        this.ws.on(GameMessages.PlayerJoin, (player) => {
             this.players.push(player);
             this.playersMap.set(player.userId, this.players[this.players.length - 1]);
         });
 
-        this.on(GameMessages.PlayerLeave, (id) => {
+        this.ws.on(GameMessages.PlayerLeave, (id) => {
             let index = this.players.findIndex((p) => p.userId === id);
             if(index === -1) return;
 
@@ -35,7 +35,7 @@ export default new class Game extends WSClient<"game"> {
             this.playersMap.delete(id);
         });
 
-        this.on(GameMessages.PlayerUpdate, (data) => {
+        this.ws.on(GameMessages.PlayerUpdate, (data) => {
             let player = this.playersMap.get(data.userId);
             if(!player) return;
 
@@ -45,11 +45,11 @@ export default new class Game extends WSClient<"game"> {
             }
         });
 
-        this.on(GameMessages.KillfeedAdded, (entry) => {
+        this.ws.on(GameMessages.KillfeedAdded, (entry) => {
             this.killfeed.push(entry);
         });
 
-        this.on(GameMessages.ChatAdded, (message) => {
+        this.ws.on(GameMessages.ChatAdded, (message) => {
             this.chat.unshift(message);
         });
     }

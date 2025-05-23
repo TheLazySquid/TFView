@@ -9,7 +9,9 @@ export const fakeLobby: Lobby = {
             alive: true,
             health: 125,
             ping: 33,
-            team: 2
+            team: 2,
+            avatarHash: "a4b63f307e56cd23d448e0447f8e0c4e4f7db387",
+            createdTimestamp: 1556925320
         },
         {
             name: "Screamin' Eagles",

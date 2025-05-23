@@ -1,13 +1,13 @@
 <script lang="ts">
-    import type WSClient from "$lib/ws/wsclient";
     import type { PlayerEncounter } from "$types/data";
     import type { InfiniteEvent } from "svelte-infinite-loading";
     import { Recieves } from "$types/messages";
     import Time from "../Time.svelte";
     import Popups from "$lib/popups";
     import InfiniteLoading from "svelte-infinite-loading";
+    import WS from "$lib/ws/wsclient";
 
-    let { ws, id }: { ws: WSClient<any>, id: string } = $props();
+    let { id }: { id: string } = $props();
     let encounters: PlayerEncounter[] = $state([]);
 
     $effect(() => {
@@ -16,7 +16,7 @@
     });
 
     async function onInfinite({ detail: { complete, loaded }}: InfiniteEvent) {
-        let newEncounters = await ws.sendAndRecieve(Recieves.GetEncounters,
+        let newEncounters = await WS.sendAndRecieve(Recieves.GetEncounters,
             { id, offset: encounters.length });
         encounters.push(...newEncounters);
 

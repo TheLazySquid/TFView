@@ -5,9 +5,8 @@
     import { Recieves } from "$types/messages";
     import { NinetyRingWithBg } from "svelte-svg-spinners";
     import Popups from "$lib/popups";
-    import type WSClient from "$lib/ws/wsclient";
+    import WS from "$lib/ws/wsclient";
 
-    let { ws }: { ws: WSClient<any> } = $props();
     let rowid: number | null = $state(null);
     let game: PastGame | null = $state.raw(null);
     let modalOpen = $state(false);
@@ -23,7 +22,7 @@
 
     $effect(() => {
         if(rowid === null) return;
-        ws.sendAndRecieve(Recieves.GetGame, rowid).then((gotGame) => {
+        WS.sendAndRecieve(Recieves.GetGame, rowid).then((gotGame) => {
             game = gotGame;
         });
     });

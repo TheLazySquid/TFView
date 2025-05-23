@@ -14,6 +14,10 @@ export interface G15Player {
 }
 
 export interface Player {    
+    // From steam api
+    avatarHash?: string;
+    createdTimestamp?: number;
+
     // From status command
     connectTime?: number;
     
@@ -50,4 +54,9 @@ export interface Lobby {
     players: Player[];
     killfeed: KillfeedEntry[];
     chat: ChatMessage[];
+}
+
+export interface PlayerSummary {
+    avatarHash: string;
+    createdTimestamp: number;
 }

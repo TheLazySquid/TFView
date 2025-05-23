@@ -11,9 +11,9 @@
     Game.init();
 </script>
 
-<PlayerPopup ws={Game} />
-<PastGamePopup ws={Game} />
-<PastPlayerPopup ws={Game} />
+<PlayerPopup />
+<PastGamePopup />
+<PastPlayerPopup />
 
 <div class="w-full h-full">
     <!-- Temporary layout -->

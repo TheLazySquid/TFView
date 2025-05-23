@@ -1,19 +1,17 @@
 import type { MessageTypes, RecievesKey, RecievesTypes } from "$types/messages";
 
-export default abstract class WSClient<T extends keyof MessageTypes> {
-    abstract route: string;
+class WSClient<T extends keyof MessageTypes = any> {
+    route = "";
     port = 7523;
     pollInterval = 1000;
     ws: WebSocket | undefined;
     listeners = new Map<keyof MessageTypes[T], (data: any) => void>();
     replies = new Map<keyof RecievesTypes, ((data: any) => void)[]>();
 
-    init() {
-        this.setup();
+    init(route: string) {
+        this.route = route;
         this.connectSocket();
     }
-
-    abstract setup(): void;
 
     connectSocket() {
         this.ws = new WebSocket(`ws://localhost:${this.port}/${this.route}`);
@@ -67,3 +65,19 @@ export default abstract class WSClient<T extends keyof MessageTypes> {
         });
     }
 }
+
+const WS = new WSClient();
+
+export abstract class PageState<T extends keyof MessageTypes> {
+    abstract type: string;
+    ws = WS as WSClient<T>;
+
+    init() {
+        WS.init(this.type);
+        this.setup();
+    }
+
+    abstract setup(): void;
+}
+
+export default WS;

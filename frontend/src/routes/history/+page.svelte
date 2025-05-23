@@ -6,11 +6,12 @@
     import Popups from "$lib/popups";
     import PastGamePopup from "$lib/components/popups/PastGamePopup.svelte";
     import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
+    import WS from "$lib/ws/wsclient";
 
     History.init();
 
     async function infiniteHandler(e: InfiniteEvent) {
-        let games = await History.sendAndRecieve(Recieves.GetGames, History.pastGames.length);
+        let games = await WS.sendAndRecieve(Recieves.GetGames, History.pastGames.length);
 
         History.pastGames.push(...games);
         if(games.length === 0) e.detail.complete();
@@ -22,8 +23,8 @@
     End of history
 {/snippet}
 
-<PastGamePopup ws={History} />
-<PastPlayerPopup ws={History} />
+<PastGamePopup />
+<PastPlayerPopup />
 
 <div class="w-full flex justify-center">
     <table class="table-fixed" style="width: min(1000px, 90%)">

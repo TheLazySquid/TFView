@@ -1,6 +1,7 @@
 <script lang="ts">
     import { chatBlue, chatRed, chatSpectator } from "$lib/consts";
     import Game from "$lib/ws/game.svelte";
+    import WS from "$lib/ws/wsclient";
     import { Recieves } from "$types/messages";
     import Send from "@lucide/svelte/icons/send";
 
@@ -12,8 +13,8 @@
     }
 
     function send() {
-        if(team) Game.send(Recieves.ChatTeam, message);
-        else Game.send(Recieves.Chat, message);
+        if(team) WS.send(Recieves.ChatTeam, message);
+        else WS.send(Recieves.Chat, message);
         message = "";
     }
 </script>

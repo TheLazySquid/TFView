@@ -1,13 +1,13 @@
 import type { PastGameEntry } from "$types/data";
 import { HistoryMessages } from "$types/messages";
-import WSClient from "./wsclient";
+import { PageState } from "./wsclient";
 
-export default new class History extends WSClient<"history"> {
-    route = "history";
+export default new class History extends PageState<"history"> {
+    type = "history";
     pastGames: PastGameEntry[] = $state([]);
 
     setup() {
-        this.on(HistoryMessages.GameAdded, (game) => {
+        this.ws.on(HistoryMessages.GameAdded, (game) => {
             this.pastGames.unshift(game);
         });
     }

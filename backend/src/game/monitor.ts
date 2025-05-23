@@ -7,6 +7,8 @@ import { fakeData } from "src/consts";
 import LogParser from "src/logParser";
 import History from "src/history/history";
 import { fakeLobby } from "src/fakedata/game";
+import PlayerData from "./playerdata";
+import Config from "src/config";
 
 export default class GameMonitor {
     static logPath: string;
@@ -22,12 +24,12 @@ export default class GameMonitor {
 
         Socket.on(Recieves.Chat, (msg) => {
             if(fakeData) this.addFakeMessage(msg, false);
-            else Rcon.server.execute(`say ${msg}`);
+            else Rcon.run(`say ${msg}`);
         });
 
         Socket.on(Recieves.ChatTeam, (msg) => {
             if(fakeData) this.addFakeMessage(msg, true);
-            else Rcon.server.execute(`say_team ${msg}`);
+            else Rcon.run(`say_team ${msg}`);
         });
 
         if(fakeData) {
@@ -41,29 +43,47 @@ export default class GameMonitor {
         }
 
         this.listenToLog();
-        setInterval(() => this.poll(), this.pollInterval);
+
+        this.poll();
+        History.events.on("startGame", () => {
+            this.gotResponse = false;
+        });
     }
 
     static gotResponse = false;
-    static poll() {
-        if(!Rcon.connected) return;
+    static responseTime = 0;
+    static async poll() {
+        const runAgain = () => {
+            setTimeout(() => this.poll(), this.pollInterval);
+        }
 
-        Rcon.server.execute("g15_dumpplayer")
-            .then((text) => {
-                // check if the game ended
-                if(typeof text !== "string" || text === "") {
-                    // Wait 10 seconds before calling that the game ended- for some reason during load screens
-                    // whether or not dumpplayer returns something is pretty random
-                    if(!History.currentGame || Date.now() - History.currentGame.start < 10e3) return;
+        if(!Rcon.connected) return runAgain();
 
-                    if(this.gotResponse) History.onGameEnd();
-                    this.gotResponse = false;
-                    return;
-                }
+        // This can potentially take a long time when loading into a map
+        let text = await Rcon.run("g15_dumpplayer");
+        runAgain();
 
-                this.gotResponse = true;
-                this.parseG15(text);
-            });
+        // check if the game ended
+        if(!text || text === "") {
+            if(!History.currentGame) return;
+
+            // Disconnect after a minute of no response, or 10 seconds after having recieved a response with no responses since
+            // since the dumpplayer command will sometimes return empty when loading in
+            const gameDuration = Date.now() - History.currentGame.start;
+            const responseGap = Date.now() - this.responseTime;
+            if(
+                (!this.gotResponse && gameDuration >= 60e3) ||
+                (this.gotResponse && responseGap >= 10e3)
+            ) {
+                History.onGameEnd();
+            }
+
+            return;
+        }
+
+        this.gotResponse = true;
+        this.responseTime = Date.now();
+        this.parseG15(text);
     }
 
     // Doesn't handle suicides
@@ -123,7 +143,7 @@ export default class GameMonitor {
             const playerInfo = info[i] as G15Player;
             const id = playerInfo.iUserID;
             ids.add(id);
-            if(id === "0" || id === undefined) continue;
+            if(id === "0" || id === undefined || playerInfo.szName === undefined) continue;
             
             let player: Partial<Player> = {};
             if(this.playerMap.has(id)) player = this.playerMap.get(id);
@@ -146,6 +166,18 @@ export default class GameMonitor {
                 Socket.send("game", GameMessages.PlayerJoin, player as Player);
                 this.lobby.players.push(player as Player);
                 this.playerMap.set(id, player as Player);
+
+                // These are almost certainly tfbots
+                if(!Config.get("steamApiKey") || player.accountId.length <= 2) continue;
+
+                PlayerData.getSummary(player.accountId).then((summary) => {
+                    player.avatarHash = summary.avatarHash;
+                    player.createdTimestamp = summary.createdTimestamp;
+                    Socket.send("game", GameMessages.PlayerUpdate, {
+                        userId: player.userId,
+                        ...summary
+                    });
+                });
             }
         }
 
@@ -168,7 +200,7 @@ export default class GameMonitor {
         let changed = false;
         
         const copy = (key: string, value: any) => {
-            if(player[key] === value) return;
+            if(value === undefined || player[key] === value) return;
 
             diff[key] = value;
             player[key] = value;
@@ -178,15 +210,14 @@ export default class GameMonitor {
         copy("accountId", info.iAccountID);
         copy("userId", info.iUserID);
         copy("name", info.szName);
-        copy("alive", info.bAlive === "true");
         copy("ping", parseInt(info.iPing));
         copy("team", parseInt(info.iTeam));
         copy("health", parseInt(info.iHealth));
+        if(info.bAlive !== undefined) copy("alive", info.bAlive === "true");
 
         if(!changed) return null;
         return diff;
     }
-
     
     static addFakeMessage(msg: string, team: boolean) {   
         let message: ChatMessage = {

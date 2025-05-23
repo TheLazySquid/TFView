@@ -44,4 +44,12 @@ export default class Rcon {
             })
             .catch(pollReconnect);
     }
+
+    static run(command: string) {
+        return new Promise<string | null>((res) => {
+            this.server.execute(command)
+                .then((response) => res(response.toString()))
+                .catch(() => res(null));
+        });
+    }
 }

@@ -16,10 +16,10 @@
 	const [send, recieve] = crossfade({
 		duration: 500,
 		easing: quintOut
-	})
+	});
 </script>
 
-<div class="flex">
+<div class="flex h-full">
 	<div class="w-12 border-r-2 flex flex-col items-center pt-1 shrink-0">
 		{#each links as { Icon, href }}
 			<div class="relative w-full flex justify-center items-center py-1">

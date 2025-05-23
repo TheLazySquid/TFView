@@ -7,6 +7,7 @@ import { join } from "node:path";
 import { Database } from "bun:sqlite";
 import fs from "fs";
 import { createFakeHistory } from "src/fakedata/history";
+import EventEmitter from "node:events";
 
 export default class History {   
     static currentGame: PastGame | null = null;
@@ -14,6 +15,7 @@ export default class History {
     static pastGamesDir: string;
     static db: Database;
     static pageSize = 50;
+    static events = new EventEmitter();
 
     static init() {
         Socket.on(Recieves.GetGames, (offset, reply) => {
@@ -80,6 +82,7 @@ export default class History {
         LogParser.on(this.mapChangeRegex, (data) => {
             this.onGameEnd();
 
+            this.events.emit("startGame");
             this.currentGame = {
                 map: data[1],
                 start: Date.now(),
@@ -109,8 +112,9 @@ export default class History {
         const addPlayer = this.db.query(`INSERT INTO encounters (playerId, map, name, gameId, time)
             VALUES($playerId, $map, $name, $gameId, $time)`);
         for(let player of this.currentGame.players) {
-            // Don't record bots
-            if(player.id.length <= 3) continue;
+            // Don't record bots (Technically there's 100 people who this won't track, but they're all valve employees so I don't care)
+            // This does raise the question of what if someone with id 1 joins a game with a bot, will they have the same id?
+            if(player.id.length <= 2) continue;
             addPlayer.run({
                 $playerId: player.id,
                 $map: this.currentGame.map,
@@ -123,7 +127,7 @@ export default class History {
         const entry = { ...this.currentGame, rowid: rowid, players: undefined };
         Socket.send("history", HistoryMessages.GameAdded, entry);
         
-        console.log(`Recorded game: ${this.currentGame.map}`);
+        console.trace(`Recorded game: ${this.currentGame.map}`);
         this.currentGame = null;
     }
 }

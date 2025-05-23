@@ -9,7 +9,7 @@
 
 <div>
     <h2 class="w-full text-center text-5xl">{name}</h2>
-    <div class="flex flex-col px-4">
+    <div class="flex flex-col px-4 gap-1">
         {#each team as player}
             <PlayerView {player} />
         {/each}
