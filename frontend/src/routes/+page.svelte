@@ -1,7 +1,7 @@
 <script lang="ts">
     import Game from "$lib/ws/game.svelte";
-    import Killfeed from "./game/Killfeed.svelte";
-    import Chat from "./game/Chat.svelte";
+    import Killfeed from "$lib/components/game/Killfeed.svelte";
+    import Chat from "$lib/components/game/Chat.svelte";
     import Teams from "./game/Teams.svelte";
     import * as Resizable from "$lib/components/ui/resizable";
     import PlayerPopup from "../lib/components/popups/PlayerPopup.svelte";

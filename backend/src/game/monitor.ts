@@ -93,18 +93,27 @@ export default class GameMonitor {
         // parse the killfeed
         LogParser.on(this.killfeedRegex, (match) => {
             let killer = this.lobby.players.find(p => p.name === match[1]);
-            if(!killer) return;
+            let victim = this.lobby.players.find(p => p.name === match[2]);
+            if(!killer || !victim) return;
 
             let entry: KillfeedEntry = {
                 killer: match[1],
                 victim: match[2],
                 weapon: match[3],
                 crit: match[4] !== undefined,
-                killerTeam: killer.team
+                killerTeam: killer.team,
+                killerId: killer.userId,
+                victimId: victim.userId
             }
 
             this.lobby.killfeed.push(entry);
             Socket.send("game", GameMessages.KillfeedAdded, entry);
+
+            killer.kills++;
+            victim.deaths++;
+
+            Socket.send("game", GameMessages.PlayerUpdate, { userId: killer.userId, kills: killer.kills });
+            Socket.send("game", GameMessages.PlayerUpdate, { userId: victim.userId, deaths: victim.deaths });
         });
 
         // parse the chat
@@ -117,7 +126,8 @@ export default class GameMonitor {
                 team: match[2] !== undefined,
                 name: match[3],
                 text: match[4],
-                senderTeam: player.team
+                senderTeam: player.team,
+                senderId: player.userId
             }
 
             this.lobby.chat.push(message);
@@ -145,7 +155,7 @@ export default class GameMonitor {
             ids.add(id);
             if(id === "0" || id === undefined || playerInfo.szName === undefined) continue;
             
-            let player: Partial<Player> = {};
+            let player: Partial<Player> = { kills: 0, deaths: 0 };
             if(this.playerMap.has(id)) player = this.playerMap.get(id);
 
             let diff = this.updatePlayer(player, playerInfo);
@@ -225,7 +235,8 @@ export default class GameMonitor {
             senderTeam: 2,
             dead: false,
             team,
-            text: msg
+            text: msg,
+            senderId: "1"
         }
         this.lobby.chat.push(message);
         Socket.send("game", GameMessages.ChatAdded, message);

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import '../app.css';
-	import Game from "@lucide/svelte/icons/gamepad-2";
-	import FolderClock from "@lucide/svelte/icons/folder-clock";
     import { page } from '$app/state';
 	import { crossfade } from 'svelte/transition';
     import { quintOut } from 'svelte/easing';
+	import Game from "@lucide/svelte/icons/gamepad-2";
+	import FolderClock from "@lucide/svelte/icons/folder-clock";
 	
 	let { children } = $props();
 

@@ -6,6 +6,7 @@
     import { onMount, tick } from "svelte";
     import { killfeedBlue, killfeedRed } from "$lib/consts";
     
+    let { id, height }: { id?: string, height?: number } = $props();
     let container: HTMLElement;
     let containerHeight = $state(window.innerHeight);
     let list: HTMLElement;
@@ -15,8 +16,11 @@
         if(el) list = el;
     });
 
+    const killfeed = $derived(id ? Game.killfeed.filter(m => m.killerId === id || m.victimId === id) : Game.killfeed);
+    $inspect(killfeed);
+
     $effect(() => {
-        Game.killfeed.length;
+        killfeed.length;
         if(!list) return;
         tick().then(() => {
             if(list.scrollTop > 41) list.scrollTop += 40;
@@ -24,10 +28,10 @@
     });
 </script>
 
-<div use:resize={(e) => containerHeight = e.contentRect.height} bind:this={container}>
-    <VirtualList height={containerHeight} itemCount={Game.killfeed.length} itemSize={40}>
+<div class="h-full" use:resize={(e) => containerHeight = e.contentRect.height} bind:this={container}>
+    <VirtualList height={containerHeight} itemCount={killfeed.length} itemSize={40}>
         <div slot="item" let:index let:style {style}>
-            {@const kill = Game.killfeed[Game.killfeed.length - index - 1]}
+            {@const kill = killfeed[killfeed.length - index - 1]}
             <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill mb-2 w-fit"
                 class:crit={kill.crit}>
                 <div class="whitespace-nowrap"

@@ -31,7 +31,9 @@ export interface Player {
     userId: string;
     accountId: string;
 
-    // TODO: Killfeed related things
+    // From killfeed parser
+    kills: number;
+    deaths: number;
 }
 
 export interface KillfeedEntry {
@@ -40,6 +42,8 @@ export interface KillfeedEntry {
     weapon: string;
     crit: boolean;
     killerTeam: number;
+    killerId: string;
+    victimId: string;
 }
 
 export interface ChatMessage {
@@ -48,6 +52,7 @@ export interface ChatMessage {
     senderTeam: number;
     team: boolean;
     dead: boolean;
+    senderId: string;
 }
 
 export interface Lobby {

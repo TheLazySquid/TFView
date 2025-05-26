@@ -11,7 +11,9 @@ export const fakeLobby: Lobby = {
             ping: 33,
             team: 2,
             avatarHash: "a4b63f307e56cd23d448e0447f8e0c4e4f7db387",
-            createdTimestamp: 1556925320
+            createdTimestamp: 1556925320,
+            kills: 9,
+            deaths: 0
         },
         {
             name: "Screamin' Eagles",
@@ -20,7 +22,9 @@ export const fakeLobby: Lobby = {
             alive: false,
             health: 0,
             ping: 161,
-            team: 2
+            team: 2,
+            kills: 1,
+            deaths: 5
         },
         {
             name: "Still Alive",
@@ -29,7 +33,9 @@ export const fakeLobby: Lobby = {
             alive: true,
             health: 166,
             ping: 39,
-            team: 3
+            team: 3,
+            kills: 5,
+            deaths: 2
         },
         {
             name: "Mentlegen",
@@ -38,7 +44,9 @@ export const fakeLobby: Lobby = {
             alive: true,
             health: 356,
             ping: 7,
-            team: 1
+            team: 1,
+            kills: 0,
+            deaths: 0
         }
     ],
     killfeed: [
@@ -47,14 +55,18 @@ export const fakeLobby: Lobby = {
             victim: "Screamin' Eagles",
             killerTeam: 3,
             weapon: "tf_projectile_rocket",
-            crit: true
+            crit: true,
+            killerId: "109",
+            victimId: "106"
         },
         {
             killer: "Grim Bloody Fable",
             victim: "Still Alive",
             killerTeam: 2,
             weapon: "scattergun",
-            crit: false
+            crit: false,
+            killerId: "105",
+            victimId: "109"
         }
     ],
     chat: [
@@ -63,21 +75,24 @@ export const fakeLobby: Lobby = {
             text: "I'm not even angry",
             senderTeam: 3,
             dead: true,
-            team: false
+            team: false,
+            senderId: "109"
         },
         {
             name: "Screamin' Eagles",
             text: "You are all weak. You are all bleeders!",
             senderTeam: 2,
             dead: false,
-            team: true
+            team: true,
+            senderId: "106"
         },
         {
             name: "Mentlegen",
             text: "Go to hell, and take your cheap suit with you!",
             senderTeam: 1,
             dead: false,
-            team: false
+            team: false,
+            senderId: "110"
         }
     ]
 }
