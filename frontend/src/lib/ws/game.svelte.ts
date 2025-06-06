@@ -1,5 +1,6 @@
 import type { ChatMessage, KillfeedEntry, Player } from "$types/lobby";
 import { GameMessages } from "$types/messages";
+import { maxKillfeedSize } from "../../../../shared/consts";
 import { PageState } from "./wsclient";
 
 export default new class Game extends PageState<"game"> {
@@ -47,6 +48,7 @@ export default new class Game extends PageState<"game"> {
 
         this.ws.on(GameMessages.KillfeedAdded, (entry) => {
             this.killfeed.push(entry);
+            if(this.killfeed.length > maxKillfeedSize) this.killfeed.shift();
         });
 
         this.ws.on(GameMessages.ChatAdded, (message) => {

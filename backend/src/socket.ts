@@ -1,3 +1,4 @@
+import { websocketPort } from "$shared/consts";
 import type { MessageTypes, RecievesKey, RecievesTypes } from "$types/messages";
 import EventEmitter from "node:events";
 
@@ -5,7 +6,6 @@ type Type = keyof MessageTypes;
 type WS = Bun.ServerWebSocket<{ type: Type }>;
 
 export default class Socket {
-    static port = 7523;
     static types: Type[] = ["game", "history"];
     static sockets = new Map<Type, WS[]>();
     static events = new EventEmitter();
@@ -50,7 +50,7 @@ export default class Socket {
                     sockets.splice(index, 1);
                 }
             },
-            port: this.port
+            port: websocketPort
         });
     }
 

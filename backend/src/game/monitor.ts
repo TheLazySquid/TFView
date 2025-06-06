@@ -9,6 +9,7 @@ import History from "src/history/history";
 import { fakeLobby } from "src/fakedata/game";
 import PlayerData from "./playerdata";
 import Config from "src/config";
+import { maxKillfeedSize } from "$shared/consts";
 
 export default class GameMonitor {
     static logPath: string;
@@ -107,6 +108,7 @@ export default class GameMonitor {
             }
 
             this.lobby.killfeed.push(entry);
+            if(this.lobby.killfeed.length > maxKillfeedSize) this.lobby.killfeed.shift();
             Socket.send("game", GameMessages.KillfeedAdded, entry);
 
             killer.kills++;

@@ -1,8 +1,8 @@
 import type { MessageTypes, RecievesKey, RecievesTypes } from "$types/messages";
+import { websocketPort } from "../../../../shared/consts";
 
 class WSClient<T extends keyof MessageTypes = any> {
     route = "";
-    port = 7523;
     pollInterval = 1000;
     ws: WebSocket | undefined;
     listeners = new Map<keyof MessageTypes[T], (data: any) => void>();
@@ -14,7 +14,7 @@ class WSClient<T extends keyof MessageTypes = any> {
     }
 
     connectSocket() {
-        this.ws = new WebSocket(`ws://localhost:${this.port}/${this.route}`);
+        this.ws = new WebSocket(`ws://localhost:${websocketPort}/${this.route}`);
 
         const retry = () => {
             setTimeout(() => this.connectSocket(), this.pollInterval);
