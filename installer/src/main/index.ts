@@ -1,39 +1,9 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron';
-import { join } from 'path';
-import { electronApp, optimizer, is } from '@electron-toolkit/utils';
-import icon from '../../resources/icon.png?asset';
-
-function createWindow(): void {
-    // Create the browser window.
-    const mainWindow = new BrowserWindow({
-        width: 640,
-        height: 360,
-        show: false,
-        autoHideMenuBar: true,
-        ...(process.platform === 'linux' ? { icon } : {}),
-        webPreferences: {
-            preload: join(__dirname, '../preload/index.js'),
-            sandbox: false
-        }
-    });
-
-    mainWindow.on('ready-to-show', () => {
-        mainWindow.show()
-    });
-
-    mainWindow.webContents.setWindowOpenHandler((details) => {
-        shell.openExternal(details.url)
-        return { action: 'deny' }
-    });
-
-    // HMR for renderer base on electron-vite cli.
-    // Load the remote URL for development or the local html file for production.
-    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-        mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-    } else {
-        mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
-    }
-}
+import { app } from 'electron';
+import { electronApp, optimizer } from '@electron-toolkit/utils';
+import Dirs from './dirs';
+import LaunchOptions from './launchOptions';
+import { createWindow } from './window';
+import Config from './config';
 
 app.whenReady().then(() => {
     electronApp.setAppUserModelId('io.tfview.installer');
@@ -45,8 +15,9 @@ app.whenReady().then(() => {
         optimizer.watchWindowShortcuts(window)
     });
 
-    // IPC test
-    ipcMain.on('ping', () => console.log('pong'));
+    Dirs.init();
+    LaunchOptions.init();
+    Config.init();
 
     createWindow();
 })

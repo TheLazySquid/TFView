@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+@layer base {
+    :root {
+        font-family: Verdana, sans-serif;
+    }
+
+    button {
+        @apply cursor-pointer;
+    }
+
+    button:disabled {
+        @apply cursor-default;
+        @apply opacity-50;
+    }
+}

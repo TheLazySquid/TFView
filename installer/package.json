@@ -21,8 +21,13 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
+    "@lucide/svelte": "^0.513.0",
     "@tailwindcss/vite": "^4.1.7",
-    "tailwindcss": "^4.1.7"
+    "find-process": "^1.4.10",
+    "svelte-sonner": "^1.0.4",
+    "svelte-toggle": "^4.0.1",
+    "tailwindcss": "^4.1.7",
+    "vdf-parser": "^1.2.1"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
