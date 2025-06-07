@@ -12,9 +12,10 @@
 <div>
     <h2 class="w-full text-center text-5xl">{name}</h2>
     <div class="grid px-4 gap-1 items-center justify-center"
-    style="grid-template-columns: auto 1fr auto 36px 36px">
+    style="grid-template-columns: auto 1fr auto auto 36px 36px">
         <div></div>
         <div></div>
+        <div class="text-center"></div>
         <div class="text-center">K/D</div>
         <div class="flex justify-center"><HeartPulse /></div>
         <div class="flex justify-center"><Ping /></div>

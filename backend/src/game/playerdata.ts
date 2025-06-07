@@ -18,6 +18,8 @@ export default class PlayerData {
 
 	static getSummary(id3: string) {
 		return new Promise<PlayerSummary>((res, rej) => {
+			res();
+			return;
 			const id = new SteamID(`[U:1:${id3}]`).getSteamID64();
 			if(this.summaries.has(id)) return res(this.summaries.get(id));
 	

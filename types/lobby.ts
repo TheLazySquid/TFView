@@ -1,3 +1,15 @@
+export const enum TF2Class {
+    Scout,
+    Soldier,
+    Pyro,
+    Demo,
+    Heavy,
+    Engineer,
+    Medic,
+    Sniper,
+    Spy
+}
+
 export interface G15Player {
     iAmmo: string;
     szName: string;
@@ -34,6 +46,9 @@ export interface Player {
     // From killfeed parser
     kills: number;
     deaths: number;
+
+    // Estimated based on killfeed and health
+    class?: TF2Class;
 }
 
 export interface KillfeedEntry {

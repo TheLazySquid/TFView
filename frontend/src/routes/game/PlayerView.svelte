@@ -3,8 +3,10 @@
     import User from "@lucide/svelte/icons/square-user-round";
     import Skull from "@lucide/svelte/icons/skull";
     import Popups from "$lib/popups";
+    import { classIcons } from "$lib/consts";
 
     let { player }: { player: Player } = $props();
+
 </script>
 
 {#if player.avatarHash}
@@ -15,7 +17,15 @@
 {/if}
 <button class="flex-grow text-left"
 onclick={() => Popups.openPlayerPopup?.(player)}>{player.name}</button>
-<div class="w-8 text-center">{player.kills}-{player.deaths}</div>
+<div>
+    {#if player.class}
+        <img src="/classIcons/{classIcons[player.class]}" 
+            class="w-6 h-6" alt="Class Icon" />
+    {/if}
+</div>
+<div class="w-8 text-center">
+    {player.kills}-{player.deaths}
+</div>
 <div class="w-8 flex items-center justify-center">
     {#if player.alive}
         {player.health}

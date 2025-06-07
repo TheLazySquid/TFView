@@ -1,4 +1,4 @@
-import type { ChatMessage, G15Player, KillfeedEntry, Lobby, Player } from "$types/lobby";
+import type { ChatMessage, G15Player, KillfeedEntry, Lobby, Player, TF2Class } from "$types/lobby";
 import type { PlayerEncounter } from "$types/data";
 import { GameMessages, Recieves } from "$types/messages";
 import Socket from "../socket";
@@ -10,9 +10,11 @@ import { fakeLobby } from "src/fakedata/game";
 import PlayerData from "./playerdata";
 import Config from "src/config";
 import { maxKillfeedSize } from "$shared/consts";
+import { killClasses, startingHealths } from "./classConsts";
 
 export default class GameMonitor {
     static logPath: string;
+    static potentialClasses = new Map<string, TF2Class[]>();
     static lobby: Lobby = { players: [], killfeed: [], chat: [] };
     static playerMap = new Map<string, Player>();
     static pollInterval = 1000;
@@ -114,7 +116,38 @@ export default class GameMonitor {
             killer.kills++;
             victim.deaths++;
 
-            Socket.send("game", GameMessages.PlayerUpdate, { userId: killer.userId, kills: killer.kills });
+            let killerUpdate: Partial<Player> & { userId: string } = { userId: killer.userId, kills: killer.kills };
+
+            // See if we can guess the player's class
+            const classes = killClasses[match[3]];
+            if(classes) {
+                const options = this.potentialClasses.get(killer.userId);
+
+                if(classes.length === 1) {
+                    killer.class = classes[0];
+                    killerUpdate.class = classes[0];
+
+                    // Quick sanity check
+                    if(options && !options.includes(classes[0])) {
+                        this.potentialClasses.delete(killer.userId);
+                    }
+                } else if(options) {
+                    let possibilities: TF2Class[] = [];
+
+                    for(let option of options) {
+                        if(classes.includes(option)) possibilities.push(option);
+                    }
+
+                    // Clearly our current options are no good
+                    if(possibilities.length === 0) this.potentialClasses.delete(killer.userId);
+                    else if(possibilities.length === 1) {
+                        killer.class = possibilities[0];
+                        killerUpdate.class = possibilities[0];
+                    }
+                }
+            }
+
+            Socket.send("game", GameMessages.PlayerUpdate, killerUpdate);
             Socket.send("game", GameMessages.PlayerUpdate, { userId: victim.userId, deaths: victim.deaths });
         });
 
@@ -182,14 +215,17 @@ export default class GameMonitor {
                 // These are almost certainly tfbots
                 if(!Config.get("steamApiKey") || player.accountId.length <= 2) continue;
 
-                PlayerData.getSummary(player.accountId).then((summary) => {
-                    player.avatarHash = summary.avatarHash;
-                    player.createdTimestamp = summary.createdTimestamp;
-                    Socket.send("game", GameMessages.PlayerUpdate, {
-                        userId: player.userId,
-                        ...summary
-                    });
-                });
+                PlayerData.getSummary(player.accountId)
+                    .then((summary) => {
+                        return;
+                        player.avatarHash = summary.avatarHash;
+                        player.createdTimestamp = summary.createdTimestamp;
+                        Socket.send("game", GameMessages.PlayerUpdate, {
+                            userId: player.userId,
+                            ...summary
+                        });
+                    })
+                    .catch();
             }
         }
 
@@ -199,6 +235,7 @@ export default class GameMonitor {
             if(ids.has(id)) continue;
 
             this.playerMap.delete(id);
+            this.potentialClasses.delete(id);
             this.lobby.players.splice(i, 1);
             i--;
 
@@ -219,12 +256,21 @@ export default class GameMonitor {
             changed = true;
         }
 
+        // Check if the person just respawned, and then try to infer what class they might be on
+        const health = parseInt(info.iHealth);
+        if(player.alive === false && info.bAlive === "true" && startingHealths[health]) {
+            const classes = startingHealths[health];
+
+            this.potentialClasses.set(info.iUserID, classes);
+            if(classes.length === 1) copy("class", classes[0]);
+        }
+
         copy("accountId", info.iAccountID);
         copy("userId", info.iUserID);
         copy("name", info.szName);
         copy("ping", parseInt(info.iPing));
         copy("team", parseInt(info.iTeam));
-        copy("health", parseInt(info.iHealth));
+        copy("health", health);
         if(info.bAlive !== undefined) copy("alive", info.bAlive === "true");
 
         if(!changed) return null;

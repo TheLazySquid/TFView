@@ -221,7 +221,7 @@ const knownIcons = [
     'wrap_assassin',
     'wrench',
     'wrench_golden',
-    'wrench_jag',
+    'wrench_jag'
 ];
 const backupIcon = 'suicide';
 
