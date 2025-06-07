@@ -10,7 +10,7 @@ import { fakeLobby } from "src/fakedata/game";
 import PlayerData from "./playerdata";
 import Config from "src/config";
 import { maxKillfeedSize } from "$shared/consts";
-import { killClasses, startingHealths } from "./classConsts";
+import { killClasses, startingAmmo, startingHealths } from "./classConsts";
 
 export default class GameMonitor {
     static logPath: string;
@@ -258,11 +258,30 @@ export default class GameMonitor {
 
         // Check if the person just respawned, and then try to infer what class they might be on
         const health = parseInt(info.iHealth);
-        if(player.alive === false && info.bAlive === "true" && startingHealths[health]) {
-            const classes = startingHealths[health];
+        if(player.alive === false && info.bAlive === "true") {
+            const healthClasses = startingHealths[health];
+            const ammoClasses = startingAmmo[parseInt(info.iAmmo)];
 
-            this.potentialClasses.set(info.iUserID, classes);
-            if(classes.length === 1) copy("class", classes[0]);
+            let potentialClasses: TF2Class[] = [];
+            if(healthClasses && ammoClasses) {
+                // Get all classes that satisfy both
+                for(let tfclass of healthClasses) {
+                    if(ammoClasses.includes(tfclass)) {
+                        potentialClasses.push(tfclass);
+                    }
+                }
+            }
+            else if(healthClasses) potentialClasses = healthClasses;
+            else if(ammoClasses) potentialClasses = ammoClasses;
+
+            if(potentialClasses.length === 1) copy("class", potentialClasses[0]);
+            else if(potentialClasses.length > 0) {
+                this.potentialClasses.set(info.iUserID, potentialClasses);
+                // Check whether the current class makes sense
+                if(typeof player.class === "number" && !potentialClasses.includes(player.class)) {
+                    copy("class", null);
+                }
+            }
         }
 
         copy("accountId", info.iAccountID);

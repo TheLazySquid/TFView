@@ -18,12 +18,12 @@
 <button class="flex-grow text-left"
 onclick={() => Popups.openPlayerPopup?.(player)}>{player.name}</button>
 <div>
-    {#if player.class}
+    {#if typeof player.class === "number"}
         <img src="/classIcons/{classIcons[player.class]}" 
             class="w-6 h-6" alt="Class Icon" />
     {/if}
 </div>
-<div class="w-8 text-center">
+<div class="w-8 text-center whitespace-nowrap">
     {player.kills}-{player.deaths}
 </div>
 <div class="w-8 flex items-center justify-center">

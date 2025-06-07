@@ -1,5 +1,6 @@
 import { TF2Class } from "$types/lobby";
 
+// This leaves room for ambiguity between stock scout and stock engineer
 export const startingHealths: Record<number, TF2Class[]> = {
     [70]: [TF2Class.Spy], // Kunai
     [100]: [TF2Class.Spy], // Big earner
@@ -9,7 +10,23 @@ export const startingHealths: Record<number, TF2Class[]> = {
     [150]: [TF2Class.Engineer, TF2Class.Demo, TF2Class.Medic], // gunslinger, eyelander
     [175]: [TF2Class.Pyro, TF2Class.Demo],
     [200]: [TF2Class.Demo, TF2Class.Soldier],
-    [220]: [TF2Class.Soldier] // Batallion's backup
+    [220]: [TF2Class.Soldier], // Batallion's backup
+    [300]: [TF2Class.Heavy]
+}
+
+export const startingAmmo: Record<number, TF2Class[]> = {
+    [3]: [TF2Class.Demo], // Persian persuader
+    [12]: [TF2Class.Sniper], // Huntsman
+    [16]: [TF2Class.Demo, TF2Class.Engineer], // Rescue Ranger
+    // For some reason spy always is counted as having 20 ammo regardless of his actual clip
+    [20]: [TF2Class.Soldier, TF2Class.Spy],
+    [25]: [TF2Class.Sniper],
+    [32]: [TF2Class.Scout, TF2Class.Engineer],
+    [38]: [TF2Class.Medic], // Crusader's Crossbow
+    [40]: [TF2Class.Pyro], // Dragon's Fury
+    [60]: [TF2Class.Soldier], // Rocket jumper
+    [150]: [TF2Class.Medic],
+    [200]: [TF2Class.Pyro, TF2Class.Heavy]
 }
 
 const allClassMelee = [TF2Class.Scout, TF2Class.Soldier, TF2Class.Pyro,
