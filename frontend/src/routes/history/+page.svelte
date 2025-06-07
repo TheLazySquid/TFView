@@ -6,7 +6,7 @@
     import Popups from "$lib/popups";
     import PastGamePopup from "$lib/components/popups/PastGamePopup.svelte";
     import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
-    import WS from "$lib/ws/wsclient";
+    import WS from "$lib/ws/wsclient.svelte";
 
     History.init();
 

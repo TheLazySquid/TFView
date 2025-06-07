@@ -1,7 +1,7 @@
 <script lang="ts">
     import { nameColors } from "$lib/consts";
     import Game from "$lib/ws/game.svelte";
-    import WS from "$lib/ws/wsclient";
+    import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
     import Send from "@lucide/svelte/icons/send";
 

@@ -1,27 +1,47 @@
 import type { MessageTypes, RecievesKey, RecievesTypes } from "$types/messages";
 import { websocketPort } from "../../../../shared/consts";
 
+type Status = "idle" | "connecting" | "connected" | "disconnected";
+
 class WSClient<T extends keyof MessageTypes = any> {
     route = "";
     pollInterval = 1000;
-    ws: WebSocket | undefined;
+    timeout = 5000;
+    ws?: WebSocket;
     listeners = new Map<keyof MessageTypes[T], (data: any) => void>();
     replies = new Map<keyof RecievesTypes, ((data: any) => void)[]>();
+    status: Status = $state("idle");
 
     init(route: string) {
         this.route = route;
+        this.status = "connecting";
         this.connectSocket();
     }
 
+    connectTimeout?: Timer;
     connectSocket() {
-        this.ws = new WebSocket(`ws://localhost:${websocketPort}/${this.route}`);
-
         const retry = () => {
             setTimeout(() => this.connectSocket(), this.pollInterval);
         }
 
-        this.ws.addEventListener("close", retry, { once: true });
+        this.ws = new WebSocket(`ws://localhost:${websocketPort}/${this.route}`);
+
+        // Kill the connection after 5 seconds
+        this.connectTimeout = setTimeout(() => {
+            this.ws?.close();
+            this.status = "disconnected";
+            retry();
+        }, this.timeout);
+
+        this.ws.addEventListener("close", () => {
+            clearTimeout(this.connectTimeout);
+            this.status = "disconnected";
+            retry();
+        }, { once: true });
+
         this.ws.addEventListener("open", () => {
+            clearTimeout(this.connectTimeout);
+            this.status = "connected";
             console.log("Websocket connected")
         }, { once: true });
 

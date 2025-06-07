@@ -1,12 +1,12 @@
 import type { Player } from "$types/lobby";
 
-interface PopupsType {
+export interface PopupsType {
     openPlayerPopup: (player: Player) => void;
     openGamePopup: (rowid: number) => void;
     openPastPlayerPopup: (id: string, name: string) => void;
 }
 
-let Popups: Partial<PopupsType> & { zIndex: number } = {
-    zIndex: 50
+let Popups: Partial<PopupsType> & { popupsOpen: number } = {
+    popupsOpen: 0
 };
 export default Popups;

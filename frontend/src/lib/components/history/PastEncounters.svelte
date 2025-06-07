@@ -5,7 +5,7 @@
     import Time from "../Time.svelte";
     import Popups from "$lib/popups";
     import InfiniteLoading from "svelte-infinite-loading";
-    import WS from "$lib/ws/wsclient";
+    import WS from "$lib/ws/wsclient.svelte";
 
     let { id }: { id: string } = $props();
     let encounters: PlayerEncounter[] = $state([]);

@@ -76,9 +76,12 @@
         --ring: 20.5 90.2% 48.2%;
         --radius: 0.75rem;
     }
-}
 
-@layer base {
+    .verdana {
+        font-family: Verdana, sans-serif;
+        font-weight: bold;
+    }
+
     * {
         @apply border-border;
     }

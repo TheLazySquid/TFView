@@ -5,6 +5,10 @@
     import { quintOut } from 'svelte/easing';
 	import Game from "@lucide/svelte/icons/gamepad-2";
 	import FolderClock from "@lucide/svelte/icons/folder-clock";
+    import { Toaster } from '$lib/components/ui/sonner';
+    import WS from '$lib/ws/wsclient.svelte';
+	import { WifiFade } from 'svelte-svg-spinners';
+	import * as AlertDialog from "$lib/components/ui/alert-dialog";
 	
 	let { children } = $props();
 
@@ -19,8 +23,17 @@
 	});
 </script>
 
+<Toaster />
+
+<AlertDialog.Root open={WS.status === "disconnected"}>
+	<AlertDialog.Content style="z-index: 100">
+		<h1 class="text-2xl verdana">Connection with backend failed</h1>
+		<p>Please confirm that the backend is running</p>
+	</AlertDialog.Content>
+</AlertDialog.Root>
+
 <div class="flex h-full">
-	<div class="w-12 border-r-2 flex flex-col items-center pt-1 shrink-0">
+	<div class="w-12 border-r-2 flex flex-col items-center py-1 shrink-0">
 		{#each links as { Icon, href }}
 			<div class="relative w-full flex justify-center items-center py-1">
 				{#if page.url.pathname === href}
@@ -35,6 +48,10 @@
 				</a>
 			</div>
 		{/each}
+		<div class="flex-grow"></div>
+		{#if WS.status === "connecting" || WS.status === "disconnected"}
+			<WifiFade dur="0.2" />
+		{/if}
 	</div>
 	<div class="flex-grow">
 		{@render children()}

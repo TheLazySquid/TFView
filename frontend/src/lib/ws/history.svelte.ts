@@ -1,6 +1,6 @@
 import type { PastGameEntry } from "$types/data";
 import { HistoryMessages } from "$types/messages";
-import { PageState } from "./wsclient";
+import { PageState } from "./wsclient.svelte";
 
 export default new class History extends PageState<"history"> {
     type = "history";

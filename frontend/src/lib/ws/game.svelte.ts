@@ -1,7 +1,7 @@
 import type { ChatMessage, KillfeedEntry, Player } from "$types/lobby";
 import { GameMessages } from "$types/messages";
 import { maxKillfeedSize } from "../../../../shared/consts";
-import { PageState } from "./wsclient";
+import { PageState } from "./wsclient.svelte";
 
 export default new class Game extends PageState<"game"> {
     type = "game";

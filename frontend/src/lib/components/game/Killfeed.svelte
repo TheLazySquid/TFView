@@ -17,7 +17,6 @@
     });
 
     const killfeed = $derived(id ? Game.killfeed.filter(m => m.killerId === id || m.victimId === id) : Game.killfeed);
-    $inspect(killfeed);
 
     $effect(() => {
         killfeed.length;
