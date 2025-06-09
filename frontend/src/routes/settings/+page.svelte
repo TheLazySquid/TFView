@@ -41,7 +41,7 @@
                     bind:value={Settings.settings[setting.id]} />
             {:else if setting.type === "password"}
                 {@const Eye = passwordsOpen[setting.id] ? EyeOpen : EyeClosed}
-                <div class="flex items-center">
+                <div class="flex items-center gap-2">
                     <input type={passwordsOpen[setting.id] ? "text" : "password"} {onchange}
                         class="grow outline-none border-b border-zinc-600"
                         bind:value={Settings.settings[setting.id]} />

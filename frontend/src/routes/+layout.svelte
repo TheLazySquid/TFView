@@ -45,7 +45,7 @@
 			<div class="relative w-full flex justify-center items-center py-1">
 				{#if page.url.pathname === href}
 					<div class="absolute top-0 left-0 bg-accent h-full z-0 border-r-2
-					border-white" style="width: calc(100% + 2px)"
+					border-primary" style="width: calc(100% + 2px)"
 					in:recieve={{ key: "location" }}
 					out:send={{ key: "location" }}
 					></div>
