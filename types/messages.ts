@@ -1,7 +1,17 @@
-import type { PastGame, PastGameEntry, PlayerEncounter } from "./data";
+import type { SettingsType, PastGame, PastGameEntry, PlayerEncounter } from "./data";
 import type { ChatMessage, KillfeedEntry, Lobby, Player } from "./lobby";
 
 // Sending messages from the backend
+export enum GlobalMessages {
+    Warning = "w",
+    Error = "e"
+}
+
+export interface GlobalMessageTypes {
+    [GlobalMessages.Warning]: string;
+    [GlobalMessages.Error]: string;
+}
+
 export enum GameMessages {
     Initial = "0",
     PlayerJoin = "1",
@@ -28,9 +38,20 @@ export interface HistoryMessageTypes {
     [HistoryMessages.GameAdded]: PastGameEntry;
 }
 
+export enum SettingsMessages {
+    Initial = "0",
+    Update = "1"
+}
+
+export interface SettingsMessageTypes {
+    [SettingsMessages.Initial]: SettingsType;
+    [SettingsMessages.Update]: { key: keyof SettingsType, value: any };
+}
+
 export interface MessageTypes {
     game: GameMessageTypes;
     history: HistoryMessageTypes;
+    settings: SettingsMessageTypes;
 }
 
 // Recieving messages
@@ -41,7 +62,8 @@ export enum Recieves {
     ChatTeam = "1",
     GetGames = "2",
     GetGame = "3",
-    GetEncounters = "4"
+    GetEncounters = "4",
+    UpdateSetting = "5"
 }
 
 export interface RecievesTypes {
@@ -50,6 +72,7 @@ export interface RecievesTypes {
     [Recieves.GetGames]: Recieved<number, PastGameEntry[]>;
     [Recieves.GetGame]: Recieved<number, PastGame>;
     [Recieves.GetEncounters]: Recieved<{ id: string, offset: number }, PlayerEncounter[]>;
+    [Recieves.UpdateSetting]: Recieved<{ key: keyof SettingsType, value: any }>;
 }
 
 export type RecievesKey<C extends keyof RecievesTypes, K extends keyof Recieved<any, any>> =

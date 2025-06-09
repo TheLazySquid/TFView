@@ -3,6 +3,7 @@ import os from "node:os";
 import fs from "node:fs";
 import { join, basename } from "node:path";
 import { parse } from "vdf-parser";
+import { validateSteamPath, validateTfPath } from "$shared/validate";
 
 const tfPath = ["steamapps", "common", "Team Fortress 2", "tf"];
 
@@ -19,9 +20,9 @@ export default class Dirs {
         this.tfDir = join(this.steamDir, ...tfPath);
         
         // Attempt to automatically determine where the tf folder is
-        this.steamValid = this.checkSteamValid();
+        this.steamValid = validateSteamPath(this.steamDir);
         if(this.steamValid) this.autofillTf();
-        else this.tfValid = this.checkTfValid();
+        else this.tfValid = validateTfPath(this.tfDir);
 
         ipcMain.handle("getDirs", () => this.getState());
         ipcMain.handle("pickDir", this.pickDir.bind(this));
@@ -36,7 +37,7 @@ export default class Dirs {
             for(let folder of Object.values<any>(vdf.libraryfolders)) {
                 if(Object.keys(folder.apps).includes("440")) {
                     this.tfDir = join(folder.path, ...tfPath);
-                    this.tfValid = this.checkTfValid();
+                    this.tfValid = validateTfPath(this.tfDir);
                     break;
                 }
             }
@@ -48,20 +49,6 @@ export default class Dirs {
             steam: this.steamDir, steamValid: this.steamValid,
             tf: this.tfDir, tfValid: this.steamValid
         }
-    }
-
-    static checkSteamValid() {
-        if(basename(this.steamDir) !== "Steam") return false;
-        if(!fs.existsSync(this.steamDir)) return false;
-        if(this.checkMissingChildren(this.steamDir, ["userdata", "config"])) return false;
-        return true;
-    }
-
-    static checkTfValid() {
-        if(basename(this.tfDir) !== "tf") return false;
-        if(!fs.existsSync(this.tfDir)) return false;
-        if(this.checkMissingChildren(this.tfDir, ["tf2_misc_dir.vpk", "steam.inf"])) return false;
-        return true;
     }
 
     static checkMissingChildren(dir: string, children: string[]) {
@@ -86,8 +73,8 @@ export default class Dirs {
 
         if(res.canceled) return;
         this.steamDir = res.filePaths[0];
-        this.steamValid = this.checkSteamValid();
-        if(this.steamValid && !this.tfValid) this.autofillTf();
+        this.steamValid = validateSteamPath(this.steamDir);
+        if(this.steamValid && !this.tfValid) validateTfPath(this.tfDir);
     }
 
     static async pickTfDir() {
@@ -106,6 +93,6 @@ export default class Dirs {
                 this.tfDir = join(this.tfDir, path[i + 1]);
             }
         }
-        this.tfValid = this.checkTfValid();
+        this.tfValid = validateTfPath(this.tfDir);
     }
 }

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import { join } from "node:path";
-import Config from "./config";
+import Settings from "./settings/settings";
 
 interface LogListener {
     regex: RegExp;
@@ -16,24 +16,12 @@ export default class LogParser {
 
     static init() {
         // watch the log for updates
-        let logExists = false;
-        this.logPath = join(Config.get("tf2Path"), "tf", "console.log");
+        this.logPath = join(Settings.get("tfPath"), "console.log");
         this.logFile = Bun.file(this.logPath);
-        this.logFile.exists().then((exists) => logExists = exists);
-        this.logFile.stat().then(s => this.readStart = s.size);
+        this.poll();
 
         // fs.watch can't be relied on for log updates, somehow the log
-        // doesn't trigger whatever listeners this uses
-        fs.watch(this.logPath, (type) => {
-            if(type === "rename") {
-                logExists = !logExists;
-                if(!logExists) return;
-
-                this.logFile.stat().then(s => this.readStart = s.size);
-                return;
-            }
-        });
-
+        // doesn't trigger whatever listeners it uses
         setInterval(() => this.poll(), this.pollInterval);
     }
 
@@ -41,10 +29,20 @@ export default class LogParser {
         this.listeners.push({ regex, callback });
     }
 
+    static shouldRestart = true;
     static poll() {
-        this.logFile.stat().then(stat => {
-            if(stat.size > this.readStart) this.readLog();
-        });
+        this.logFile.stat()
+            .then(stat => {
+                if(this.shouldRestart) {
+                    this.shouldRestart = false;
+                    this.readStart = stat.size;
+                } else if(stat.size > this.readStart) {
+                    this.readLog();
+                }
+            })
+            .catch(() => {
+                this.shouldRestart = true;
+            })
     }
 
     static readLog() {

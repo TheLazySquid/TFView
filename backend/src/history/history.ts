@@ -18,15 +18,15 @@ export default class History {
     static events = new EventEmitter();
 
     static init() {
-        Socket.on(Recieves.GetGames, (offset, reply) => {
+        Socket.on(Recieves.GetGames, (offset, { reply }) => {
             reply(this.getGames(offset));
         });
 
-        Socket.on(Recieves.GetGame, (rowid, reply) => {
+        Socket.on(Recieves.GetGame, (rowid, { reply }) => {
             reply(this.getGame(rowid));
         });
 
-        Socket.on(Recieves.GetEncounters, ({ id, offset }, reply) => {
+        Socket.on(Recieves.GetEncounters, ({ id, offset }, { reply }) => {
             reply(this.getEncounters(id, offset));
         })
         

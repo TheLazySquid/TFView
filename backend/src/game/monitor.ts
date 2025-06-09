@@ -8,7 +8,7 @@ import LogParser from "src/logParser";
 import History from "src/history/history";
 import { fakeLobby } from "src/fakedata/game";
 import PlayerData from "./playerdata";
-import Config from "src/config";
+import Settings from "src/settings/settings";
 import { maxKillfeedSize } from "$shared/consts";
 import { killClasses, startingAmmo, startingHealths } from "./classConsts";
 
@@ -213,7 +213,7 @@ export default class GameMonitor {
                 this.playerMap.set(id, player as Player);
 
                 // These are almost certainly tfbots
-                if(!Config.get("steamApiKey") || player.accountId.length <= 2) continue;
+                if(!Settings.get("steamApiKey") || player.accountId.length <= 2) continue;
 
                 PlayerData.getSummary(player.accountId)
                     .then((summary) => {

@@ -6,7 +6,6 @@
     import { classIcons } from "$lib/consts";
 
     let { player }: { player: Player } = $props();
-
 </script>
 
 {#if player.avatarHash}

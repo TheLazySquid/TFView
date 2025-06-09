@@ -1,5 +1,5 @@
 import type { PlayerSummary } from "$types/lobby";
-import Config from "src/config";
+import Settings from "src/settings/settings";
 import SteamAPI from "steamapi";
 import SteamID from "steamid";
 
@@ -10,7 +10,7 @@ export default class PlayerData {
 	static maxSummaries = 150;
 
 	static init() {
-		const key = Config.get("steamApiKey");
+		const key = Settings.get("steamApiKey");
 		if(!key) return;
 
 		this.api = new SteamAPI(key);

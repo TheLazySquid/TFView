@@ -1,4 +1,4 @@
-import Config from "./config";
+import Settings from "./settings/settings";
 import { fakeData } from "./consts";
 import GameMonitor from "./game/monitor";
 import PlayerData from "./game/playerdata";
@@ -11,7 +11,7 @@ if(fakeData) {
     console.log("Using fake data for backend");
 }
 
-await Config.init();
+await Settings.init();
 Rcon.init();
 LogParser.init();
 PlayerData.init();

@@ -3,27 +3,34 @@
     import { page } from '$app/state';
 	import { crossfade } from 'svelte/transition';
     import { quintOut } from 'svelte/easing';
-	import Game from "@lucide/svelte/icons/gamepad-2";
-	import FolderClock from "@lucide/svelte/icons/folder-clock";
     import { Toaster } from '$lib/components/ui/sonner';
     import WS from '$lib/ws/wsclient.svelte';
 	import { WifiFade } from 'svelte-svg-spinners';
 	import * as AlertDialog from "$lib/components/ui/alert-dialog";
+	import Game from "@lucide/svelte/icons/gamepad-2";
+	import FolderClock from "@lucide/svelte/icons/folder-clock";
+	import Settings from "@lucide/svelte/icons/settings";
+    import { GlobalMessages } from '$types/messages';
+    import { toast } from 'svelte-sonner';
 	
 	let { children } = $props();
 
 	const links = [
 		{ Icon: Game, href: "/" },
-		{ Icon: FolderClock, href: "/history" }
+		{ Icon: FolderClock, href: "/history" },
+		{ Icon: Settings, href: "/settings" }
 	]
 
 	const [send, recieve] = crossfade({
 		duration: 500,
 		easing: quintOut
 	});
+
+	WS.onGlobal(GlobalMessages.Warning, (message) => toast.warning(message));
+	WS.onGlobal(GlobalMessages.Error, (message) => toast.error(message));
 </script>
 
-<Toaster />
+<Toaster richColors />
 
 <AlertDialog.Root open={WS.status === "disconnected"}>
 	<AlertDialog.Content style="z-index: 100">

@@ -1,4 +1,4 @@
-import type { MessageTypes, RecievesKey, RecievesTypes } from "$types/messages";
+import type { GlobalMessageTypes, MessageTypes, RecievesKey, RecievesTypes } from "$types/messages";
 import { websocketPort } from "../../../../shared/consts";
 
 type Status = "idle" | "connecting" | "connected" | "disconnected";
@@ -8,7 +8,7 @@ class WSClient<T extends keyof MessageTypes = any> {
     pollInterval = 1000;
     timeout = 5000;
     ws?: WebSocket;
-    listeners = new Map<keyof MessageTypes[T], (data: any) => void>();
+    listeners = new Map<any, (data: any) => void>();
     replies = new Map<keyof RecievesTypes, ((data: any) => void)[]>();
     status: Status = $state("idle");
 
@@ -57,12 +57,17 @@ class WSClient<T extends keyof MessageTypes = any> {
                 this.replies.get(channel)?.shift()?.(data);
             } else {
                 let data = JSON.parse(event.data.slice(1));
-                this.listeners.get(type)?.(data);    
+                this.listeners.get(type)?.(data);
             }
         });
     }
 
     on<C extends keyof MessageTypes[T]>(type: C, callback: (data: MessageTypes[T][C]) => void) {
+        this.listeners.set(type, callback);
+    }
+
+    // Could be an overload but typescript complains
+    onGlobal<C extends keyof GlobalMessageTypes>(type: C, callback: (data: GlobalMessageTypes[C]) => void) {
         this.listeners.set(type, callback);
     }
 

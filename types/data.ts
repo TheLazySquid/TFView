@@ -1,5 +1,6 @@
-export interface ConfigType {
-    tf2Path: string;
+export interface SettingsType {
+    steamPath: string;
+    tfPath: string;
     rconPort: number;
     rconPassword: string;
     steamApiKey?: string;

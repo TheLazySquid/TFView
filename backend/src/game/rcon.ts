@@ -1,5 +1,5 @@
 import RconServer from "rcon-srcds";
-import Config from "../config";
+import Settings from "../settings/settings";
 import { fakeData } from "src/consts";
 import History from "src/history/history";
 
@@ -13,7 +13,7 @@ export default class Rcon {
         
         this.server = new RconServer({
             host: "127.0.0.1",
-            port: Config.get("rconPort")
+            port: Settings.get("rconPort")
         });
 
         this.connect();
@@ -24,7 +24,7 @@ export default class Rcon {
             setTimeout(() => this.connect(), this.pollInterval);
         }
 
-        const password = Config.get("rconPassword");
+        const password = Settings.get("rconPassword");
         if(!password) {
             pollReconnect();
             return;
