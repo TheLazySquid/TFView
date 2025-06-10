@@ -10,6 +10,7 @@
     import KillfeedIcon from "@lucide/svelte/icons/swords";
     import Killfeed from "../game/Killfeed.svelte";
     import Popup from "./Popup.svelte";
+    import Game from "$lib/ws/game.svelte";
 
     let player: Player | null = $state.raw(null);
 
@@ -19,6 +20,7 @@
 
     const teams = ["Unassigned", "Spectator", "Red", "Blue"];
     let tab = $state("info");
+    let showHealth = $derived(Game.user?.team === 1 || player!?.team === Game.user?.team);
 </script>
 
 <Popup type="openPlayerPopup" {onOpen} class="min-h-[450px] flex flex-col *:nth-[2]:flex-grow"
@@ -36,7 +38,9 @@ style="max-width: min(700px, 85%);">
                 <div>Team: {teams[player.team]}</div>
                 <div>Ping: {player.ping}</div>
                 <div>Alive: {player.alive}</div>
-                <div>Health: {player.health}</div>
+                {#if showHealth}
+                    <div>Health: {player.health}</div>
+                {/if}
             </Tabs.Content>
             <Tabs.Content value="encounters">
                 <!-- Required for infinite loading for some reason -->

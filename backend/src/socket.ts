@@ -82,7 +82,6 @@ export default class Socket {
     // Type is technically redundant since it always equals ws.data.type but it allows for better types
     static replyOthers<T extends Type, C extends keyof MessageTypes[T]>(ws: WS, type: T, channel: C, data: MessageTypes[T][C]) {
         const sockets = this.sockets.get(type);
-        console.log(sockets.length, "sockets");
         for(let socket of sockets) {
             if(socket === ws) continue;
             socket.send(channel.toString() + JSON.stringify(data));

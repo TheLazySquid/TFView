@@ -7,7 +7,8 @@
     import Game from "$lib/ws/game.svelte";
 
     let { player }: { player: Player } = $props();
-    let color = $derived(player.accountId === Game.userAccountId ? "var(--color-amber-700)" : "");
+    let color = $derived(player === Game.user ? "var(--color-amber-700)" : "");
+    let showHealth = $derived(Game.user?.team === 1 || player.team === Game.user?.team);
 </script>
 
 <tr style="background-color: {color}">
@@ -35,7 +36,9 @@
     <td class="w-8">
         <div class="flex items-center justify-center">
             {#if player.alive}
-                {player.health}
+                {#if showHealth}
+                    {player.health}
+                {/if}
             {:else}
                 <Skull />
             {/if}

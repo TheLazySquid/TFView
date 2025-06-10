@@ -18,7 +18,8 @@ import getActiveUser from "$shared/getActiveUser";
 export default class GameMonitor {
     static logPath: string;
     static potentialClasses = new Map<string, TF2Class[]>();
-    static lobby: Lobby = { players: [], killfeed: [], chat: [], userAccountId: "" };
+    static userAccountId = "";
+    static lobby: Lobby = { players: [], killfeed: [], chat: [] };
     static playerMap = new Map<string, Player>();
     static pollInterval = 1000;
     static readStart = 0;
@@ -46,8 +47,6 @@ export default class GameMonitor {
             for(let i = 0; i < people.length; i++) {
                 this.lobby.players[i].accountId = people[i].playerId;
             }
-
-            this.lobby.userAccountId = people[0].playerId;
             return;
         }
 
@@ -55,7 +54,7 @@ export default class GameMonitor {
 
         // TODO: Error handling
         fsp.readFile(path).then((loginusers) => {
-            this.lobby.userAccountId = getActiveUser(loginusers.toString());
+            this.userAccountId = getActiveUser(loginusers.toString());
         });
 
         this.listenToLog();
@@ -204,6 +203,7 @@ export default class GameMonitor {
             if(id === "0" || id === undefined || playerInfo.szName === undefined) continue;
             
             let player: Partial<Player> = { kills: 0, deaths: 0 };
+            if(playerInfo.iAccountID === this.userAccountId) player.user = true;
             if(this.playerMap.has(id)) player = this.playerMap.get(id);
 
             let diff = this.updatePlayer(player, playerInfo);

@@ -5,8 +5,7 @@ import { PageState } from "./wsclient.svelte";
 
 export default new class Game extends PageState<"game"> {
     type = "game";
-    // Intentionally not $state(), should never change
-    userAccountId = "";
+    user: Player | null = $state(null);
     players: Player[] = $state([]);
     playersMap = new Map<string, Player>();
     killfeed: KillfeedEntry[] = $state([]);
@@ -17,24 +16,28 @@ export default new class Game extends PageState<"game"> {
         this.ws.on(GameMessages.Initial, (data) => {
             this.players = data.players;
             this.playersMap.clear();
+
             for(let player of this.players) {
+                if(player.user) this.user = player;
                 this.playersMap.set(player.userId, player);
             }
 
             this.killfeed = data.killfeed;
-            this.chat = data.chat.toReversed();
-            this.userAccountId = data.userAccountId;
-        })
+            this.chat = data.chat.toReversed(); 
+        });
 
         this.ws.on(GameMessages.PlayerJoin, (player) => {
             this.players.push(player);
             this.playersMap.set(player.userId, this.players[this.players.length - 1]);
+
+            if(player.user) this.user = player;
         });
 
         this.ws.on(GameMessages.PlayerLeave, (id) => {
             let index = this.players.findIndex((p) => p.userId === id);
             if(index === -1) return;
 
+            if(this.players[index].user) this.user = null;
             this.players.splice(index, 1);
             this.playersMap.delete(id);
         });

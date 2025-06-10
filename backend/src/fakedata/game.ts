@@ -13,7 +13,8 @@ export const fakeLobby: Lobby = {
             avatarHash: "a4b63f307e56cd23d448e0447f8e0c4e4f7db387",
             createdTimestamp: 1556925320,
             kills: 9,
-            deaths: 0
+            deaths: 0,
+            user: true
         },
         {
             name: "Screamin' Eagles",
@@ -94,6 +95,5 @@ export const fakeLobby: Lobby = {
             team: false,
             senderId: "110"
         }
-    ],
-    userAccountId: "7618970238"
+    ]
 }

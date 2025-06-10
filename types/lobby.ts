@@ -49,6 +49,9 @@ export interface Player {
 
     // Estimated based on killfeed and health
     class?: TF2Class;
+
+    // Gotten from loginusers.vdf
+    user?: boolean;
 }
 
 export interface KillfeedEntry {
@@ -71,7 +74,6 @@ export interface ChatMessage {
 }
 
 export interface Lobby {
-    userAccountId: string;
     players: Player[];
     killfeed: KillfeedEntry[];
     chat: ChatMessage[];
