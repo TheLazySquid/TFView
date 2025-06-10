@@ -24,6 +24,7 @@
     "@lucide/svelte": "^0.513.0",
     "@tailwindcss/vite": "^4.1.7",
     "find-process": "^1.4.10",
+    "steamid": "^2.1.0",
     "svelte-sonner": "^1.0.4",
     "svelte-toggle": "^4.0.1",
     "tailwindcss": "^4.1.7",

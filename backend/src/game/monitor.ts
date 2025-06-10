@@ -11,11 +11,14 @@ import PlayerData from "./playerdata";
 import Settings from "src/settings/settings";
 import { maxKillfeedSize } from "$shared/consts";
 import { killClasses, startingAmmo, startingHealths } from "./classConsts";
+import fsp from "fs/promises";
+import { join } from "path";
+import getActiveUser from "$shared/getActiveUser";
 
 export default class GameMonitor {
     static logPath: string;
     static potentialClasses = new Map<string, TF2Class[]>();
-    static lobby: Lobby = { players: [], killfeed: [], chat: [] };
+    static lobby: Lobby = { players: [], killfeed: [], chat: [], userAccountId: "" };
     static playerMap = new Map<string, Player>();
     static pollInterval = 1000;
     static readStart = 0;
@@ -37,13 +40,23 @@ export default class GameMonitor {
 
         if(fakeData) {
             this.lobby = fakeLobby;
+
             let people = History.db.query<PlayerEncounter, []>(`SELECT * FROM encounters LIMIT ${this.lobby.players.length}`)
                 .all();
             for(let i = 0; i < people.length; i++) {
                 this.lobby.players[i].accountId = people[i].playerId;
             }
+
+            this.lobby.userAccountId = people[0].playerId;
             return;
         }
+
+        const path = join(Settings.get("steamPath"), "config", "loginusers.vdf");
+
+        // TODO: Error handling
+        fsp.readFile(path).then((loginusers) => {
+            this.lobby.userAccountId = getActiveUser(loginusers.toString());
+        });
 
         this.listenToLog();
 

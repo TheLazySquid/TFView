@@ -71,6 +71,7 @@ export interface ChatMessage {
 }
 
 export interface Lobby {
+    userAccountId: string;
     players: Player[];
     killfeed: KillfeedEntry[];
     chat: ChatMessage[];

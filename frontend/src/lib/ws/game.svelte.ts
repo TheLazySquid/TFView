@@ -5,6 +5,8 @@ import { PageState } from "./wsclient.svelte";
 
 export default new class Game extends PageState<"game"> {
     type = "game";
+    // Intentionally not $state(), should never change
+    userAccountId = "";
     players: Player[] = $state([]);
     playersMap = new Map<string, Player>();
     killfeed: KillfeedEntry[] = $state([]);
@@ -21,6 +23,7 @@ export default new class Game extends PageState<"game"> {
 
             this.killfeed = data.killfeed;
             this.chat = data.chat.toReversed();
+            this.userAccountId = data.userAccountId;
         })
 
         this.ws.on(GameMessages.PlayerJoin, (player) => {

@@ -6,6 +6,7 @@ import { ipcMain } from "electron";
 import { send } from "./window";
 import { kill } from "node:process";
 import find from "find-process";
+import getActiveUser from "$shared/getActiveUser";
 
 export default class LaunchOptions {
     static options = ["-condebug", "-conclearlog", "-usercon", "-g15"];
@@ -30,25 +31,9 @@ export default class LaunchOptions {
 
     static getConfigPath() {
         try {
-            const userdata = join(Dirs.steamDir, "userdata");
-            const users = fs.readdirSync(userdata);
-
-            let lastModified = 0;
-            let path: string | null = null;
-
-            // Get the most recent config
-            for(let user of users) {
-                const configPath = join(userdata, user, "config", "localconfig.vdf");
-                if(!fs.existsSync(configPath)) continue;
-                const stat = fs.statSync(configPath);
-
-                if(stat.mtimeMs > lastModified) {
-                    lastModified = stat.mtimeMs;
-                    path = configPath;
-                }
-            }
-
-            return path;
+            const loginusersPath = join(Dirs.steamDir, "config", "loginusers.vdf");
+            const loginusers = fs.readFileSync(loginusersPath).toString();
+            return getActiveUser(loginusers);
         } catch (e) {
             console.error(e);
             send("error", "Failed to locate file with launch options");

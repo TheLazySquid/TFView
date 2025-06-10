@@ -11,16 +11,21 @@
 
 <div>
     <h2 class="w-full text-center text-5xl">{name}</h2>
-    <div class="grid px-4 gap-1 items-center justify-center"
-    style="grid-template-columns: auto 1fr auto auto 36px 36px">
-        <div></div>
-        <div></div>
-        <div class="text-center"></div>
-        <div class="text-center">K/D</div>
-        <div class="flex justify-center"><HeartPulse /></div>
-        <div class="flex justify-center"><Ping /></div>
-        {#each team as player}
-            <PlayerView {player} />
-        {/each}
-    </div>
+    <table>
+        <thead>
+            <tr class="*:pr-1.5">
+                <th></th> 
+                <th class="w-full"></th> 
+                <th></th> 
+                <th class="whitespace-nowrap">K/D</th> 
+                <th class="w-9"><div class="flex w-full h-full items-center justify-center"><HeartPulse /></div></th> 
+                <th class="w-9"><div class="flex w-full h-full items-center justify-center"><Ping /></div></th> 
+            </tr>
+        </thead>
+        <tbody class="[&>tr>td]:pr-1.5">
+            {#each team as player}
+                <PlayerView {player} />
+            {/each}
+        </tbody>
+    </table>
 </div>
