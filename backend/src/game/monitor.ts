@@ -1,6 +1,6 @@
 import type { ChatMessage, G15Player, KillfeedEntry, Lobby, Player, TF2Class } from "$types/lobby";
 import type { PlayerEncounter } from "$types/data";
-import { GameMessages, Recieves } from "$types/messages";
+import { Recieves, Message } from "$types/messages";
 import Socket from "../socket";
 import Rcon from "./rcon";
 import { fakeData } from "src/consts";
@@ -26,7 +26,7 @@ export default class GameMonitor {
 
     static init() {
         Socket.onConnect("game", (respond) => {
-            respond(GameMessages.Initial, this.lobby);
+            respond(Message.InitialGame, this.lobby);
         });
 
         Socket.on(Recieves.Chat, (msg) => {
@@ -123,7 +123,7 @@ export default class GameMonitor {
 
             this.lobby.killfeed.push(entry);
             if(this.lobby.killfeed.length > maxKillfeedSize) this.lobby.killfeed.shift();
-            Socket.send("game", GameMessages.KillfeedAdded, entry);
+            Socket.send("game", Message.KillfeedAdded, entry);
 
             killer.kills++;
             victim.deaths++;
@@ -159,8 +159,8 @@ export default class GameMonitor {
                 }
             }
 
-            Socket.send("game", GameMessages.PlayerUpdate, killerUpdate);
-            Socket.send("game", GameMessages.PlayerUpdate, { userId: victim.userId, deaths: victim.deaths });
+            Socket.send("game", Message.PlayerUpdate, killerUpdate);
+            Socket.send("game", Message.PlayerUpdate, { userId: victim.userId, deaths: victim.deaths });
         });
 
         // parse the chat
@@ -178,7 +178,7 @@ export default class GameMonitor {
             }
 
             this.lobby.chat.push(message);
-            Socket.send("game", GameMessages.ChatAdded, message);
+            Socket.send("game", Message.ChatAdded, message);
         });
     }
 
@@ -210,7 +210,7 @@ export default class GameMonitor {
 
             // dispatch the changes
             if(this.playerMap.has(id)) {
-                if(diff) Socket.send("game", GameMessages.PlayerUpdate, diff);
+                if(diff) Socket.send("game", Message.PlayerUpdate, diff);
             } else {
                 // track the player in the game history
                 if(!History.currentGame?.players.some(p => p.id === player.accountId)) {
@@ -221,7 +221,7 @@ export default class GameMonitor {
                     });
                 }
 
-                Socket.send("game", GameMessages.PlayerJoin, player as Player);
+                Socket.send("game", Message.PlayerJoin, player as Player);
                 this.lobby.players.push(player as Player);
                 this.playerMap.set(id, player as Player);
 
@@ -233,7 +233,7 @@ export default class GameMonitor {
                         return;
                         player.avatarHash = summary.avatarHash;
                         player.createdTimestamp = summary.createdTimestamp;
-                        Socket.send("game", GameMessages.PlayerUpdate, {
+                        Socket.send("game", Message.PlayerUpdate, {
                             userId: player.userId,
                             ...summary
                         });
@@ -253,7 +253,7 @@ export default class GameMonitor {
             i--;
 
             // dispatch the change
-            Socket.send("game", GameMessages.PlayerLeave, id);
+            Socket.send("game", Message.PlayerLeave, id);
         }
     }
 
@@ -319,6 +319,6 @@ export default class GameMonitor {
             senderId: "1"
         }
         this.lobby.chat.push(message);
-        Socket.send("game", GameMessages.ChatAdded, message);
+        Socket.send("game", Message.ChatAdded, message);
     }
 }

@@ -2,7 +2,7 @@ import { join } from "node:path";
 import type { SettingsType } from "$types/data";
 import { dataPath } from "../consts";
 import Socket from "src/socket";
-import { Recieves, SettingsMessages } from "$types/messages";
+import { Recieves, Message } from "$types/messages";
 
 export default class Settings {
     static file: Bun.BunFile;
@@ -18,7 +18,7 @@ export default class Settings {
         }
 
         Socket.onConnect("settings", (reply) => {
-            reply(SettingsMessages.Initial, this.config);
+            reply(Message.InitialSettings, this.config);
         });
 
         // I'd love to do an actual directory picker when picking the steam/tf directories
@@ -27,7 +27,7 @@ export default class Settings {
         Socket.on(Recieves.UpdateSetting, ({ key, value }, { ws }) => {
             this.set(key, value);
 
-            Socket.replyOthers(ws, "settings", SettingsMessages.Update, { key, value });
+            Socket.sendOthers(ws, "settings", Message.SettingUpdate, { key, value });
         });
     }
 

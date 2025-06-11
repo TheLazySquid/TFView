@@ -1,5 +1,5 @@
 import type { Stored, PastGame, PastGameEntry, PlayerEncounter } from "$types/data";
-import { HistoryMessages, Recieves } from "$types/messages";
+import { Recieves, Message } from "$types/messages";
 import { dataPath, fakeData } from "src/consts";
 import LogParser from "src/logParser";
 import Socket from "src/socket";
@@ -125,7 +125,7 @@ export default class History {
         }
 
         const entry = { ...this.currentGame, rowid: rowid, players: undefined };
-        Socket.send("history", HistoryMessages.GameAdded, entry);
+        Socket.send("history", Message.GameAdded, entry);
         
         console.trace(`Recorded game: ${this.currentGame.map}`);
         this.currentGame = null;

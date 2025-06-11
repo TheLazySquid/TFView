@@ -1,9 +1,9 @@
 import type { ChatMessage, KillfeedEntry, Player } from "$types/lobby";
-import { GameMessages } from "$types/messages";
+import { Message } from "$types/messages";
 import { maxKillfeedSize } from "../../../../shared/consts";
 import { PageState } from "./wsclient.svelte";
 
-export default new class Game extends PageState<"game"> {
+export default new class Game extends PageState {
     type = "game";
     user: Player | null = $state(null);
     players: Player[] = $state([]);
@@ -13,7 +13,7 @@ export default new class Game extends PageState<"game"> {
     chat: ChatMessage[] = $state([]);
 
     setup() {
-        this.ws.on(GameMessages.Initial, (data) => {
+        this.ws.on(Message.InitialGame, (data) => {
             this.players = data.players;
             this.playersMap.clear();
 
@@ -26,14 +26,14 @@ export default new class Game extends PageState<"game"> {
             this.chat = data.chat.toReversed(); 
         });
 
-        this.ws.on(GameMessages.PlayerJoin, (player) => {
+        this.ws.on(Message.PlayerJoin, (player) => {
             this.players.push(player);
             this.playersMap.set(player.userId, this.players[this.players.length - 1]);
 
             if(player.user) this.user = player;
         });
 
-        this.ws.on(GameMessages.PlayerLeave, (id) => {
+        this.ws.on(Message.PlayerLeave, (id) => {
             let index = this.players.findIndex((p) => p.userId === id);
             if(index === -1) return;
 
@@ -42,7 +42,7 @@ export default new class Game extends PageState<"game"> {
             this.playersMap.delete(id);
         });
 
-        this.ws.on(GameMessages.PlayerUpdate, (data) => {
+        this.ws.on(Message.PlayerUpdate, (data) => {
             let player = this.playersMap.get(data.userId);
             if(!player) return;
 
@@ -52,12 +52,12 @@ export default new class Game extends PageState<"game"> {
             }
         });
 
-        this.ws.on(GameMessages.KillfeedAdded, (entry) => {
+        this.ws.on(Message.KillfeedAdded, (entry) => {
             this.killfeed.push(entry);
             if(this.killfeed.length > maxKillfeedSize) this.killfeed.shift();
         });
 
-        this.ws.on(GameMessages.ChatAdded, (message) => {
+        this.ws.on(Message.ChatAdded, (message) => {
             this.chat.unshift(message);
         });
     }

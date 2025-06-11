@@ -10,7 +10,7 @@
 	import Game from "@lucide/svelte/icons/gamepad-2";
 	import FolderClock from "@lucide/svelte/icons/folder-clock";
 	import Settings from "@lucide/svelte/icons/settings";
-    import { GlobalMessages } from '$types/messages';
+    import { Message } from '$types/messages';
     import { toast } from 'svelte-sonner';
 	
 	let { children } = $props();
@@ -26,8 +26,8 @@
 		easing: quintOut
 	});
 
-	WS.onGlobal(GlobalMessages.Warning, (message) => toast.warning(message));
-	WS.onGlobal(GlobalMessages.Error, (message) => toast.error(message));
+	WS.on(Message.Warning, (message) => toast.warning(message));
+	WS.on(Message.Error, (message) => toast.error(message));
 </script>
 
 <Toaster richColors />

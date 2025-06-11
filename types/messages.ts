@@ -2,68 +2,44 @@ import type { SettingsType, PastGame, PastGameEntry, PlayerEncounter } from "./d
 import type { ChatMessage, KillfeedEntry, Lobby, Player } from "./lobby";
 
 // Sending messages from the backend
-export enum GlobalMessages {
-    Warning = "w",
-    Error = "e"
-}
-
-export interface GlobalMessageTypes {
-    [GlobalMessages.Warning]: string;
-    [GlobalMessages.Error]: string;
-}
-
-export enum GameMessages {
-    Initial = "0",
-    PlayerJoin = "1",
-    PlayerLeave = "2",
-    PlayerUpdate = "3",
-    KillfeedAdded = "4",
-    ChatAdded = "5"
-}
-
-export interface GameMessageTypes {
-    [GameMessages.Initial]: Lobby;
-    [GameMessages.PlayerJoin]: Player;
-    [GameMessages.PlayerLeave]: string;
-    [GameMessages.PlayerUpdate]: Partial<Player> & { userId: string };
-    [GameMessages.KillfeedAdded]: KillfeedEntry;
-    [GameMessages.ChatAdded]: ChatMessage;
-}
-
-export enum HistoryMessages {
-    GameAdded = "0"
-}
-
-export interface HistoryMessageTypes {
-    [HistoryMessages.GameAdded]: PastGameEntry;
-}
-
-export enum SettingsMessages {
-    Initial = "0",
-    Update = "1"
-}
-
-export interface SettingsMessageTypes {
-    [SettingsMessages.Initial]: SettingsType;
-    [SettingsMessages.Update]: { key: keyof SettingsType, value: any };
+export enum Message {
+    Warning,
+    Error,
+    InitialGame,
+    PlayerJoin,
+    PlayerLeave,
+    PlayerUpdate,
+    KillfeedAdded,
+    ChatAdded,
+    GameAdded,
+    InitialSettings,
+    SettingUpdate
 }
 
 export interface MessageTypes {
-    game: GameMessageTypes;
-    history: HistoryMessageTypes;
-    settings: SettingsMessageTypes;
+    [Message.Warning]: string;
+    [Message.Error]: string;
+    [Message.InitialGame]: Lobby;
+    [Message.PlayerJoin]: Player;
+    [Message.PlayerLeave]: string;
+    [Message.PlayerUpdate]: Partial<Player> & { userId: string };
+    [Message.KillfeedAdded]: KillfeedEntry;
+    [Message.ChatAdded]: ChatMessage;
+    [Message.GameAdded]: PastGameEntry;
+    [Message.InitialSettings]: SettingsType;
+    [Message.SettingUpdate]: { key: keyof SettingsType, value: any };
 }
 
 // Recieving messages
 export type Recieved<Send, Reply = void> = { send: Send, reply: Reply };
 
 export enum Recieves {
-    Chat = "0",
-    ChatTeam = "1",
-    GetGames = "2",
-    GetGame = "3",
-    GetEncounters = "4",
-    UpdateSetting = "5"
+    Chat,
+    ChatTeam,
+    GetGames,
+    GetGame,
+    GetEncounters,
+    UpdateSetting
 }
 
 export interface RecievesTypes {

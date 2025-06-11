@@ -1,21 +1,26 @@
-import type { GlobalMessageTypes, MessageTypes, RecievesKey, RecievesTypes } from "$types/messages";
-import { websocketPort } from "../../../../shared/consts";
+import type { Message, MessageTypes, RecievesKey, RecievesTypes } from "$types/messages";
+import { networkPort } from "$shared/consts";
 
 type Status = "idle" | "connecting" | "connected" | "disconnected";
 
-class WSClient<T extends keyof MessageTypes = any> {
+class WSClient {
     route = "";
     pollInterval = 1000;
     timeout = 5000;
     ws?: WebSocket;
     listeners = new Map<any, (data: any) => void>();
-    replies = new Map<keyof RecievesTypes, ((data: any) => void)[]>();
+    replies = new Map<string, (data: any) => void>();
     status: Status = $state("idle");
 
     init(route: string) {
         this.route = route;
         this.status = "connecting";
-        this.connectSocket();
+        
+        if(this.ws) {
+            this.ws.send(JSON.stringify({ navigate: route }));
+        } else {
+            this.connectSocket();
+        }
     }
 
     connectTimeout?: Timer;
@@ -24,7 +29,7 @@ class WSClient<T extends keyof MessageTypes = any> {
             setTimeout(() => this.connectSocket(), this.pollInterval);
         }
 
-        this.ws = new WebSocket(`ws://localhost:${websocketPort}/${this.route}`);
+        this.ws = new WebSocket(`ws://localhost:${networkPort}/ws/${this.route}`);
 
         // Kill the connection after 5 seconds
         this.connectTimeout = setTimeout(() => {
@@ -46,56 +51,46 @@ class WSClient<T extends keyof MessageTypes = any> {
         }, { once: true });
 
         this.ws.addEventListener("message", (event) => {
-            let type = event.data[0];
+            let message = JSON.parse(event.data);
 
-            if(type === "r") {
-                // handle replies
-                let channel = event.data[1];
-                let data = JSON.parse(event.data.slice(2));
-                
-                // this assumes that replies are going to arrive in the same order that they are sent
-                this.replies.get(channel)?.shift()?.(data);
+            if(message.reply) {
+                this.replies.get(message.reply)?.(message.data);
+                this.replies.delete(message.reply);
             } else {
-                let data = JSON.parse(event.data.slice(1));
-                this.listeners.get(type)?.(data);
+                this.listeners.get(message.channel)?.(message.data);
             }
         });
     }
 
-    on<C extends keyof MessageTypes[T]>(type: C, callback: (data: MessageTypes[T][C]) => void) {
+    on<C extends Message>(type: C, callback: (data: MessageTypes[C]) => void) {
         this.listeners.set(type, callback);
     }
 
-    // Could be an overload but typescript complains
-    onGlobal<C extends keyof GlobalMessageTypes>(type: C, callback: (data: GlobalMessageTypes[C]) => void) {
-        this.listeners.set(type, callback);
-    }
-
-    send<C extends keyof RecievesTypes>(type: C, data: RecievesKey<C, "send">) {
+    send<C extends keyof RecievesTypes>(channel: C, data: RecievesKey<C, "send">) {
         if(!this.ws || this.ws.readyState === 3) return;
-        this.ws.send(type.toString() + JSON.stringify(data));
+        this.ws.send(JSON.stringify({ channel, data }));
     }
 
-    sendAndRecieve<C extends keyof RecievesTypes>(type: C, data: RecievesKey<C, "send">) {
+    sendAndRecieve<C extends keyof RecievesTypes>(channel: C, data: RecievesKey<C, "send">) {
         return new Promise<RecievesKey<C, "reply">>(async (res, rej) => {
             if(!this.ws || this.ws.readyState === 3) return rej();
+
             if(this.ws.readyState === 0) {
                 await new Promise((res) => this.ws?.addEventListener("open", res, { once: true }));
             }
 
-            this.ws.send(type.toString() + JSON.stringify(data));
-
-            if(!this.replies.has(type)) this.replies.set(type, []);
-            this.replies.get(type)?.push(res);
+            let id = crypto.randomUUID();
+            this.ws.send(JSON.stringify({ id, channel, data }));
+            this.replies.set(id, res);
         });
     }
 }
 
 const WS = new WSClient();
 
-export abstract class PageState<T extends keyof MessageTypes> {
+export abstract class PageState {
     abstract type: string;
-    ws = WS as WSClient<T>;
+    ws = WS;
 
     init() {
         WS.init(this.type);

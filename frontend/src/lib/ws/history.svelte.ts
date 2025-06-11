@@ -1,13 +1,13 @@
 import type { PastGameEntry } from "$types/data";
-import { HistoryMessages } from "$types/messages";
+import { Message } from "$types/messages";
 import { PageState } from "./wsclient.svelte";
 
-export default new class History extends PageState<"history"> {
+export default new class History extends PageState {
     type = "history";
     pastGames: PastGameEntry[] = $state([]);
 
     setup() {
-        this.ws.on(HistoryMessages.GameAdded, (game) => {
+        this.ws.on(Message.GameAdded, (game) => {
             this.pastGames.unshift(game);
         });
     }
