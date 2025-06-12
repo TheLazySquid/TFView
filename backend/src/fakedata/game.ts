@@ -41,7 +41,6 @@ export const fakeLobby: Lobby = {
             team: 3,
             kills: 5,
             deaths: 2
-
         },
         {
             name: "Mentlegen",
@@ -53,7 +52,7 @@ export const fakeLobby: Lobby = {
             ping: 7,
             team: 1,
             kills: 0,
-            deaths: 0,
+            deaths: 0
         }
     ],
     killfeed: [

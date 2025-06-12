@@ -1,9 +1,16 @@
+export interface Tag {
+    id: string;
+    name: string;
+    color?: string;
+}
+
 export interface SettingsType {
     steamPath: string;
     tfPath: string;
     rconPort: number;
     rconPassword: string;
     steamApiKey?: string;
+    tags: Tag[];
 }
 
 export interface PastGamePlayer {

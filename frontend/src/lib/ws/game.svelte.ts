@@ -1,6 +1,6 @@
 import type { ChatMessage, KillfeedEntry, Player } from "$types/lobby";
 import { Message } from "$types/messages";
-import { maxKillfeedSize } from "../../../../shared/consts";
+import { maxKillfeedSize } from "$shared/consts";
 import { PageState } from "./wsclient.svelte";
 
 export default new class Game extends PageState {
@@ -14,6 +14,8 @@ export default new class Game extends PageState {
 
     setup() {
         this.ws.on(Message.InitialGame, (data) => {
+            this.killfeed = data.killfeed;
+            this.chat = data.chat.toReversed(); 
             this.players = data.players;
             this.playersMap.clear();
 
@@ -21,9 +23,6 @@ export default new class Game extends PageState {
                 if(player.user) this.user = player;
                 this.playersMap.set(player.userId, player);
             }
-
-            this.killfeed = data.killfeed;
-            this.chat = data.chat.toReversed(); 
         });
 
         this.ws.on(Message.PlayerJoin, (player) => {

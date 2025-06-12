@@ -5,6 +5,7 @@
     import { Recieves } from "$types/messages";
     import EyeOpen from "@lucide/svelte/icons/eye";
     import EyeClosed from "@lucide/svelte/icons/eye-off";
+    import Tags from "./Tags.svelte";
 
     Settings.init();
     
@@ -26,30 +27,32 @@
 </script>
 
 <div class="flex justify-center pt-5">
-    <div class="w-3/5 grid gap-y-2"
-        style="grid-template-columns: 1fr 300px;">
+    <div style="width: min(750px, 60%)">
         <h1 class="text-2xl verdana col-span-2">Settings</h1>
-        {#each settings as setting}
-            {@const onchange = () => WS.send(Recieves.UpdateSetting, { key: setting.id, value: Settings.settings[setting.id]})}
-            <div>{setting.name}</div>
-
-            {#if setting.type === "string"}
-                <input class="border-b border-zinc-600 outline-none" {onchange}
-                    bind:value={Settings.settings[setting.id]} />
-            {:else if setting.type === "number"}
-                <input class="border-b border-zinc-600 outline-none" type="number" {onchange}
-                    bind:value={Settings.settings[setting.id]} />
-            {:else if setting.type === "password"}
-                {@const Eye = passwordsOpen[setting.id] ? EyeOpen : EyeClosed}
-                <div class="flex items-center gap-2">
-                    <input type={passwordsOpen[setting.id] ? "text" : "password"} {onchange}
-                        class="grow outline-none border-b border-zinc-600"
+        <div class="grid gap-y-2" style="grid-template-columns: 1fr 300px;">
+            {#each settings as setting}
+                {@const onchange = () => WS.send(Recieves.UpdateSetting, { key: setting.id, value: Settings.settings[setting.id]})}
+                <div>{setting.name}</div>
+    
+                {#if setting.type === "string"}
+                    <input class="border-b border-zinc-600 outline-none" {onchange}
                         bind:value={Settings.settings[setting.id]} />
-                    <button onclick={() => passwordsOpen[setting.id] = !passwordsOpen[setting.id]}>
-                        <Eye />
-                    </button>
-                </div>
-            {/if}
-        {/each}
+                {:else if setting.type === "number"}
+                    <input class="border-b border-zinc-600 outline-none" type="number" {onchange}
+                        bind:value={Settings.settings[setting.id]} />
+                {:else if setting.type === "password"}
+                    {@const Eye = passwordsOpen[setting.id] ? EyeOpen : EyeClosed}
+                    <div class="flex items-center gap-2">
+                        <input type={passwordsOpen[setting.id] ? "text" : "password"} {onchange}
+                            class="grow outline-none border-b border-zinc-600"
+                            bind:value={Settings.settings[setting.id]} />
+                        <button onclick={() => passwordsOpen[setting.id] = !passwordsOpen[setting.id]}>
+                            <Eye />
+                        </button>
+                    </div>
+                {/if}
+            {/each}
+        </div>
+        <Tags />
     </div>
 </div>

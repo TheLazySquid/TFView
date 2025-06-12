@@ -14,11 +14,11 @@ class WSClient {
 
     init(route: string) {
         this.route = route;
-        this.status = "connecting";
         
         if(this.ws) {
             this.ws.send(JSON.stringify({ navigate: route }));
         } else {
+            this.status = "connecting";
             this.connectSocket();
         }
     }

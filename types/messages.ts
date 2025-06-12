@@ -1,4 +1,4 @@
-import type { SettingsType, PastGame, PastGameEntry, PlayerEncounter } from "./data";
+import type { SettingsType, PastGame, PastGameEntry, PlayerEncounter, Tag } from "./data";
 import type { ChatMessage, KillfeedEntry, Lobby, Player } from "./lobby";
 
 // Sending messages from the backend
