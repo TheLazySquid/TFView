@@ -7,6 +7,7 @@
     import PlayerPopup from "../lib/components/popups/PlayerPopup.svelte";
     import PastGamePopup from "../lib/components/popups/PastGamePopup.svelte";
     import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
+    import ProfilePicturePopup from "$lib/components/popups/ProfilePicturePopup.svelte";
 
     Game.init();
 </script>
@@ -14,6 +15,7 @@
 <PlayerPopup />
 <PastGamePopup />
 <PastPlayerPopup />
+<ProfilePicturePopup />
 
 <div class="w-full h-full">
     <!-- Temporary layout -->

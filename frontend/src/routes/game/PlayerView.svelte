@@ -23,8 +23,11 @@
 <tr style="background-color: {color}">
     <td>
         {#if player.avatarHash}
-            <img class="w-8 h-8"
-            src="https://avatars.steamstatic.com/{player.avatarHash}_medium.jpg" alt="Avatar" />
+            <button onclick={() => Popups.openProfilePicturePopup?.(player.avatarHash!, player.name)}
+            class="contents">
+                <img src="https://avatars.steamstatic.com/{player.avatarHash}_medium.jpg"
+                class="w-8 h-8" alt="Avatar" />
+            </button>
         {:else}
             <User size={32} />
         {/if}
