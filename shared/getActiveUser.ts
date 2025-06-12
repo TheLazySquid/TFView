@@ -1,5 +1,5 @@
-import SteamID from "steamid";
 import { parse } from "vdf-parser";
+import { id64ToId3 } from "./steamid";
 
 export default function getActiveUser(loginusers: string) {
 	const vdf = parse<any>(loginusers);
@@ -14,10 +14,5 @@ export default function getActiveUser(loginusers: string) {
 	}
 
 	if(!id64) return null;
-
-	const steamId = new SteamID(id64);
-	let id = steamId.getSteam3RenderedID();
-
-	// Remove the [U:1: and ]
-	return id.slice(5, -1);
+	return id64ToId3(id64);
 }

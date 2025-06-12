@@ -1,7 +1,7 @@
+import { id3ToId64 } from "$shared/steamid";
 import type { PlayerSummary } from "$types/lobby";
 import Settings from "src/settings/settings";
 import SteamAPI from "steamapi";
-import SteamID from "steamid";
 
 export default class PlayerData {
 	static api: SteamAPI;
@@ -18,12 +18,10 @@ export default class PlayerData {
 
 	static getSummary(id3: string) {
 		return new Promise<PlayerSummary>((res, rej) => {
-			res();
-			return;
-			const id = new SteamID(`[U:1:${id3}]`).getSteamID64();
-			if(this.summaries.has(id)) return res(this.summaries.get(id));
+			const id64 = id3ToId64(id3);
+			if(this.summaries.has(id64)) return res(this.summaries.get(id64));
 	
-			this.api.getUserSummary(id)
+			this.api.getUserSummary(id64)
 				.then((summaryRes) => {
 					// only reply with the bits we care about
 					const summary: PlayerSummary = {

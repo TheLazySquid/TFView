@@ -14,11 +14,12 @@ import { killClasses, startingAmmo, startingHealths } from "./classConsts";
 import fsp from "fs/promises";
 import { join } from "path";
 import getActiveUser from "$shared/getActiveUser";
+import { id3ToId64 } from "$shared/steamid";
 
 export default class GameMonitor {
     static logPath: string;
     static potentialClasses = new Map<string, TF2Class[]>();
-    static userAccountId = "";
+    static userAccountID3 = "";
     static lobby: Lobby = { players: [], killfeed: [], chat: [] };
     static playerMap = new Map<string, Player>();
     static pollInterval = 1000;
@@ -45,7 +46,7 @@ export default class GameMonitor {
             let people = History.db.query<PlayerEncounter, []>(`SELECT * FROM encounters LIMIT ${this.lobby.players.length}`)
                 .all();
             for(let i = 0; i < people.length; i++) {
-                this.lobby.players[i].accountId = people[i].playerId;
+                this.lobby.players[i].ID3 = people[i].playerId;
             }
             return;
         }
@@ -54,7 +55,7 @@ export default class GameMonitor {
 
         // TODO: Error handling
         fsp.readFile(path).then((loginusers) => {
-            this.userAccountId = getActiveUser(loginusers.toString());
+            this.userAccountID3 = getActiveUser(loginusers.toString());
         });
 
         this.listenToLog();
@@ -203,7 +204,7 @@ export default class GameMonitor {
             if(id === "0" || id === undefined || playerInfo.szName === undefined) continue;
             
             let player: Partial<Player> = { kills: 0, deaths: 0 };
-            if(playerInfo.iAccountID === this.userAccountId) player.user = true;
+            if(playerInfo.iAccountID === this.userAccountID3) player.user = true;
             if(this.playerMap.has(id)) player = this.playerMap.get(id);
 
             let diff = this.updatePlayer(player, playerInfo);
@@ -213,9 +214,9 @@ export default class GameMonitor {
                 if(diff) Socket.send("game", Message.PlayerUpdate, diff);
             } else {
                 // track the player in the game history
-                if(!History.currentGame?.players.some(p => p.id === player.accountId)) {
+                if(!History.currentGame?.players.some(p => p.id === player.ID3)) {
                     History.currentGame?.players.push({
-                        id: player.accountId,
+                        id: player.ID3,
                         name: player.name,
                         time: Date.now()
                     });
@@ -226,11 +227,10 @@ export default class GameMonitor {
                 this.playerMap.set(id, player as Player);
 
                 // These are almost certainly tfbots
-                if(!Settings.get("steamApiKey") || player.accountId.length <= 2) continue;
+                if(!Settings.get("steamApiKey") || player.ID3.length <= 2) continue;
 
-                PlayerData.getSummary(player.accountId)
+                PlayerData.getSummary(player.ID3)
                     .then((summary) => {
-                        return;
                         player.avatarHash = summary.avatarHash;
                         player.createdTimestamp = summary.createdTimestamp;
                         Socket.send("game", Message.PlayerUpdate, {
@@ -297,7 +297,8 @@ export default class GameMonitor {
             }
         }
 
-        copy("accountId", info.iAccountID);
+        copy("ID3", info.iAccountID);
+        copy("ID64", id3ToId64(info.iAccountID));
         copy("userId", info.iUserID);
         copy("name", info.szName);
         copy("ping", parseInt(info.iPing));

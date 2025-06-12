@@ -5,7 +5,7 @@ import { PageState } from "./wsclient.svelte";
 
 export default new class Game extends PageState {
     type = "game";
-    user: Player | null = $state(null);
+    user: Player | null = $state.raw(null);
     players: Player[] = $state([]);
     playersMap = new Map<string, Player>();
     killfeed: KillfeedEntry[] = $state([]);

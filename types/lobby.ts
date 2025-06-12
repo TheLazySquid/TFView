@@ -41,7 +41,8 @@ export interface Player {
     health: number;
     alive: boolean;
     userId: string;
-    accountId: string;
+    ID3: string;
+    ID64: string;
 
     // From killfeed parser
     kills: number;

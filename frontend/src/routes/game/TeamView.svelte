@@ -14,9 +14,9 @@
     <table>
         <thead>
             <tr class="*:pr-1.5">
-                <th></th> 
+                <th class="min-w-10"></th> 
                 <th class="w-full"></th> 
-                <th></th> 
+                <th class="min-w-8"></th> 
                 <th class="whitespace-nowrap">K/D</th> 
                 <th class="w-9"><div class="flex w-full h-full items-center justify-center"><HeartPulse /></div></th> 
                 <th class="w-9"><div class="flex w-full h-full items-center justify-center"><Ping /></div></th> 

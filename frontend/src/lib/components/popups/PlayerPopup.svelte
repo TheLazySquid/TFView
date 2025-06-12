@@ -45,7 +45,7 @@ style="max-width: min(700px, 85%);">
             <Tabs.Content value="encounters">
                 <!-- Required for infinite loading for some reason -->
                 {#if tab === "encounters"}
-                    <PastEncounters id={player.accountId} />
+                    <PastEncounters id={player.ID3} />
                 {/if}
             </Tabs.Content>
             <Tabs.Content value="chat">

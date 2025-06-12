@@ -5,7 +5,8 @@ export const fakeLobby: Lobby = {
         {
             name: "Grim Bloody Fable",
             userId: "105",
-            accountId: "7618970238",
+            ID3: "1127822620",
+            ID64: "76561199088088348",
             alive: true,
             health: 125,
             ping: 33,
@@ -14,12 +15,14 @@ export const fakeLobby: Lobby = {
             createdTimestamp: 1556925320,
             kills: 9,
             deaths: 0,
+            class: 1,
             user: true
         },
         {
             name: "Screamin' Eagles",
             userId: "106",
-            accountId: "7618970252",
+            ID3: "10403381",
+            ID64: "76561197970669109",
             alive: false,
             health: 0,
             ping: 161,
@@ -30,24 +33,27 @@ export const fakeLobby: Lobby = {
         {
             name: "Still Alive",
             userId: "109",
-            accountId: "761897686",
+            ID3: "97733808",
+            ID64: "76561198057999536",
             alive: true,
             health: 166,
             ping: 39,
             team: 3,
             kills: 5,
             deaths: 2
+
         },
         {
             name: "Mentlegen",
             userId: "110",
-            accountId: "761897689",
+            ID3: "83927554",
+            ID64: "76561198044193282",
             alive: true,
             health: 356,
             ping: 7,
             team: 1,
             kills: 0,
-            deaths: 0
+            deaths: 0,
         }
     ],
     killfeed: [
