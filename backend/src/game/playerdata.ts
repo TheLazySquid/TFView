@@ -8,6 +8,7 @@ interface WaitingSummary {
 	id3: string;
 	id64: string;
 	res: (summary: PlayerSummary) => void;
+	failedQueries: number;
 }
 
 export default class PlayerData {
@@ -28,8 +29,10 @@ export default class PlayerData {
 			const url = this.apiBase + path + "/?" + searchParams.toString();
 
 			fetch(url)
-				.then(res => res.json(), rej)
-				.then(res, rej);
+				.then((resp) => {
+					if(resp.status !== 200) return rej();
+					return resp.json().then(res, rej);
+				}, rej)
 		});
 	}
 
@@ -40,31 +43,45 @@ export default class PlayerData {
 
 		const ids = summaries.map(s => s.id64).join(",");
 
+		// Steam really loves to give 429s despite 
 		this.query("ISteamUser/GetPlayerSummaries/v0002", [["steamids", ids]])
 			.then((res) => {
-				for(let i = 0; i < res.response.players.length; i++) {
-					let player = res.response.players[i];
+				for(let player of res.response.players) {
+					let waiting = summaries.find((s) => s.id64 === player.steamid);
+					if(!waiting) continue;
 
 					const summary: PlayerSummary = {
 						avatarHash: player.avatarhash,
 						createdTimestamp: player.timecreated
 					}
 
-					summaries[i].res(summary);
+					waiting.res(summary);
 
 					// add the summary to cache
-					this.summaries.set(summaries[i].id3, summary);
-					this.removeQueue.push(summaries[i].id3);
+					this.summaries.set(waiting.id3, summary);
+					this.removeQueue.push(waiting.id3);
 					if(this.removeQueue.length > this.maxSummaries) {
 						this.summaries.delete(this.removeQueue.shift());
 					}
 				}
 			})
-			.catch(() => console.trace("Failed to get player summaries"));
+			.catch(() => {
+				for(let i = 0; i < summaries.length; i++) {
+					if(summaries[i].failedQueries > 3) {
+						summaries.splice(i, 1);
+						i--;
+					} else {
+						summaries[i].failedQueries++;
+					}
+				}
+
+				this.summaryQueue.push(...summaries);
+				this.processSummaries();
+			});
 	}
 
-	// The steam api has a ratelimit of 100k/day, but there's an undocumented secondary ratelimit
-	static minDelay = 1000;
+	// The steam api has a ratelimit of 100k/day, but there's an undocumented secondary ratelimit that's really low
+	static minDelay = 7500;
 	static processSummaries = throttle(this.processSummariesFn.bind(this), this.minDelay);
 
 	static getSummary(id3: string) {
@@ -73,7 +90,7 @@ export default class PlayerData {
 			
 			// small cache for stuff like switching servers
 			if(this.summaries.has(id64)) return res(this.summaries.get(id64));
-			this.summaryQueue.push({ id3, id64, res });
+			this.summaryQueue.push({ id3, id64, res, failedQueries: 0 });
 
 			// Let summaries accumilate if there's multiple in the same event loop
 			setTimeout(() => this.processSummaries(), 0);

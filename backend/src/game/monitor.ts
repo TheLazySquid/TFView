@@ -201,7 +201,7 @@ export default class GameMonitor {
             const playerInfo = info[i] as G15Player;
             const id = playerInfo.iUserID;
             ids.add(id);
-            if(id === "0" || id === undefined || playerInfo.szName === undefined) continue;
+            if(id === "0" || id === undefined || !playerInfo.iAccountID || playerInfo.szName === undefined) continue;
             
             let player: Partial<Player> = { kills: 0, deaths: 0 };
             if(playerInfo.iAccountID === this.userAccountID3) player.user = true;
