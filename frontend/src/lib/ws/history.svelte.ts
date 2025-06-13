@@ -10,5 +10,13 @@ export default new class History extends PageState {
         this.ws.on(Message.GameAdded, (game) => {
             this.pastGames.unshift(game);
         });
+
+        this.ws.on(Message.GameUpdated, (update) => {
+            let game = this.pastGames.find(g => g.rowid === update.rowid);
+            if(!game) return;
+
+            game.hostname = update.hostname;
+            game.ip = update.ip;
+        });
     }
 }

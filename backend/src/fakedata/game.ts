@@ -1,4 +1,14 @@
 import type { Lobby } from "$types/lobby";
+import type { CurrentGame } from "src/history/history";
+
+export const fakeCurrentGame: CurrentGame = {
+    map: "pl_borneo",
+    players: [],
+    rowid: 0,
+    startTime: Date.now() - 900000,
+    hostname: "Valve Matchmaking Server (Chicago srcds1020-ord1 #101)",
+    ip: "169.254.116.201:5472"
+}
 
 export const fakeLobby: Lobby = {
     players: [

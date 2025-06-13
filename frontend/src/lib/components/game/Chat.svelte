@@ -14,6 +14,8 @@
     }
 
     function send() {
+        if(message.length === 0) return;
+
         if(team) WS.send(Recieves.ChatTeam, message);
         else WS.send(Recieves.Chat, message);
         message = "";
@@ -22,23 +24,25 @@
     const messages = $derived(id ? Game.chat.filter(m => m.senderId === id) : Game.chat);
 </script>
 
-<div class="flex flex-col items-start relative h-full">
-    {#each messages as message}
-        <div class="text-[0px] *:text-base">
-            {#if message.dead}
-                <span class="mr-1">*DEAD*</span>
-            {/if}
-            {#if message.team}
-                <span class="mr-1">(TEAM)</span>
-            {/if}
-            <span style="color: {nameColors[message.senderTeam]}">
-                {message.name}
-            </span>
-            <span>: {message.text}</span>
-        </div>
-    {/each}
+<div class="h-full flex flex-col gap-2">
+    <div class="flex flex-col items-start overflow-y-auto grow">
+        {#each messages as message}
+            <div class="text-[0px] *:text-base">
+                {#if message.dead}
+                    <span class="mr-1">*DEAD*</span>
+                {/if}
+                {#if message.team}
+                    <span class="mr-1">(TEAM)</span>
+                {/if}
+                <span style="color: {nameColors[message.senderTeam]}">
+                    {message.name}
+                </span>
+                <span>: {message.text}</span>
+            </div>
+        {/each}
+    </div>
     {#if !id}
-        <div class="absolute w-full left-0 bottom-0 flex gap-2 px-2 pb-1">
+        <div class="w-full flex gap-2 pb-1">
             <button class="bg-white text-black rounded-md px-3 py-1"
                 onclick={() => team = !team}>
                 {team ? "Team" : "Public"}

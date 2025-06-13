@@ -30,6 +30,7 @@
         <div>Map: {game.map}</div>
         <div>Start time: <Time date={game.start} /></div>
         <div>Duration: <Time date={game.duration} duration={true} /></div>
+        <div>Server: {game.hostname ? `${game.hostname} (${game.ip})` : "Unknown"}</div>
         <h2>Players:</h2>
         <div class="overflow-y-auto max-h-[400px] flex flex-col items-start">
             {#each game.players as player}

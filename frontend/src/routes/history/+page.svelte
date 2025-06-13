@@ -30,10 +30,11 @@
     <table class="table-fixed" style="width: min(1000px, 90%)">
         <thead>
             <tr class="*:sticky *:top-0 *:bg-background *:text-left">
-                <th class="w-2/7">Time</th>
-                <th class="w-2/7">Duration</th>
-                <th class="w-2/7">Map</th>
-                <th class="w-1/7"></th>
+                <th>Time</th>
+                <th style="width: 15%">Duration</th>
+                <th>Map</th>
+                <th style="width: 30%">Server</th>
+                <th style="width: 10%"></th>
             </tr>
         </thead>
         <tbody>
@@ -42,6 +43,7 @@
                     <td><Time date={game.start} /></td>
                     <td><Time date={game.duration} duration={true} /></td>
                     <td>{game.map}</td>
+                    <td>{game.hostname ?? "Unknown"}</td>
                     <td>
                         <button class="underline"
                         onclick={() => Popups.openGamePopup?.(game.rowid)}>
@@ -51,7 +53,7 @@
                 </tr>
             {/each}
             <tr>
-                <th colspan={4} class="border-t-2">
+                <th colspan={5} class="border-t-2">
                     <InfiniteLoading on:infinite={infiniteHandler}>
                         <svelte:fragment slot="noResults">{@render historyEnd()}</svelte:fragment>
                         <svelte:fragment slot="noMore">{@render historyEnd()}</svelte:fragment>

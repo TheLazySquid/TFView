@@ -74,6 +74,13 @@ export interface ChatMessage {
     senderId: string;
 }
 
+export interface CurrentServerInfo {
+    start: number;
+    map: string;
+    hostname: string;
+    ip: string;
+}
+
 export interface Lobby {
     players: Player[];
     killfeed: KillfeedEntry[];

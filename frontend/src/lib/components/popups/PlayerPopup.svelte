@@ -6,7 +6,7 @@
     import Chat from "../game/Chat.svelte";
     import InfoIcon from "@lucide/svelte/icons/user";
     import HistoryIcon from "@lucide/svelte/icons/folder-clock";
-    import ChatIcon from "@lucide/svelte/icons/message-square-more"
+    import ChatIcon from "@lucide/svelte/icons/message-square-more";
     import KillfeedIcon from "@lucide/svelte/icons/swords";
     import Killfeed from "../game/Killfeed.svelte";
     import Popup from "./Popup.svelte";

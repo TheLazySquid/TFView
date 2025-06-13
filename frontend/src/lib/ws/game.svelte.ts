@@ -1,4 +1,4 @@
-import type { ChatMessage, KillfeedEntry, Player } from "$types/lobby";
+import type { ChatMessage, CurrentServerInfo, KillfeedEntry, Player } from "$types/lobby";
 import { Message } from "$types/messages";
 import { maxKillfeedSize } from "$shared/consts";
 import { PageState } from "./wsclient.svelte";
@@ -11,6 +11,7 @@ export default new class Game extends PageState {
     killfeed: KillfeedEntry[] = $state([]);
     // stored in reverse order for performance
     chat: ChatMessage[] = $state([]);
+    currentServer: CurrentServerInfo | null = $state(null);
 
     setup() {
         this.ws.on(Message.InitialGame, (data) => {
@@ -58,6 +59,10 @@ export default new class Game extends PageState {
 
         this.ws.on(Message.ChatAdded, (message) => {
             this.chat.unshift(message);
+        });
+
+        this.ws.on(Message.CurrentServer, (server) => {
+            this.currentServer = server;
         });
     }
 }

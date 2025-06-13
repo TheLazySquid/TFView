@@ -1,5 +1,5 @@
-import type { SettingsType, PastGame, PastGameEntry, PlayerEncounter, Tag } from "./data";
-import type { ChatMessage, KillfeedEntry, Lobby, Player } from "./lobby";
+import type { SettingsType, PastGame, PastGameEntry, PlayerEncounter } from "./data";
+import type { ChatMessage, CurrentServerInfo, KillfeedEntry, Lobby, Player } from "./lobby";
 
 // Sending messages from the backend
 export enum Message {
@@ -12,8 +12,10 @@ export enum Message {
     KillfeedAdded,
     ChatAdded,
     GameAdded,
+    GameUpdated,
     InitialSettings,
-    SettingUpdate
+    SettingUpdate,
+    CurrentServer
 }
 
 export interface MessageTypes {
@@ -26,8 +28,10 @@ export interface MessageTypes {
     [Message.KillfeedAdded]: KillfeedEntry;
     [Message.ChatAdded]: ChatMessage;
     [Message.GameAdded]: PastGameEntry;
+    [Message.GameUpdated]: { rowid: number, hostname: string, ip: string };
     [Message.InitialSettings]: SettingsType;
     [Message.SettingUpdate]: { key: keyof SettingsType, value: any };
+    [Message.CurrentServer]: CurrentServerInfo | null;
 }
 
 // Recieving messages

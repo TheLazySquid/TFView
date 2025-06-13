@@ -67,7 +67,7 @@ export default class Socket {
                         return;
                     }
 
-                    if(!data.channel) return;
+                    if(data.channel === undefined) return;
 
                     let actions = {
                         reply: (response: any) => {
@@ -95,8 +95,7 @@ export default class Socket {
         });
     }
 
-    static onConnect<T extends Topic, C extends Message>
-        (topic: T, callback: (send: (channel: C, data: MessageTypes[C]) => void) => void) {
+    static onConnect<C extends Message>(topic: Topic, callback: (send: (channel: C, data: MessageTypes[C]) => void) => void) {
         this.events.on(`${topic}-connect`, callback);
     }
 
@@ -108,11 +107,11 @@ export default class Socket {
         this.events.on(channel.toString(), callback);
     }
 
-    static send<T extends Topic, C extends Message>(topic: T, channel: C, data: MessageTypes[C]) {
+    static send<C extends Message>(topic: Topic, channel: C, data: MessageTypes[C]) {
         this.server.publish(topic, JSON.stringify({ channel, data }));
     }
 
-    static sendOthers<T extends Topic, C extends Message>(ws: WS, topic: T, channel: C, data: MessageTypes[C]) {
+    static sendOthers<C extends Message>(ws: WS, topic: Topic, channel: C, data: MessageTypes[C]) {
         ws.publish(topic, JSON.stringify({ channel, data }));
     }
 }

@@ -23,6 +23,8 @@ export interface PastGame {
     start: number;
     duration: number;
     map: string;
+    hostname?: string;
+    ip?: string;
     players: PastGamePlayer[];
 }
 
@@ -30,7 +32,16 @@ export interface PastGameEntry {
     start: number;
     duration: number;
     map: string;
+    hostname?: string;
+    ip?: string;
     rowid: number;
+}
+
+export interface CurrentGame {
+    start: number;
+    map: string;
+    hostname?: string;
+    ip?: string;
 }
 
 export type Stored<T> = {

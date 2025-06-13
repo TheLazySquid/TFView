@@ -1,4 +1,5 @@
 import type { Stored, PastGame, PastGameEntry, PlayerEncounter, PastGamePlayer } from "$types/data";
+import type { Player } from "$types/lobby";
 import { Recieves, Message } from "$types/messages";
 import { dataPath, fakeData } from "src/consts";
 import LogParser from "src/logParser";
@@ -9,13 +10,16 @@ import fs from "fs";
 import { createFakeHistory } from "src/fakedata/history";
 import EventEmitter from "node:events";
 import Log from "src/log";
-import type { Player } from "$types/lobby";
+import Rcon from "src/game/rcon";
+import { fakeCurrentGame } from "src/fakedata/game";
 
-interface CurrentGame {
+export interface CurrentGame {
     map: string;
     startTime: number;
     players: PastGamePlayer[];
     rowid: number;
+    hostname?: string;
+    ip?: string;
 }
 
 export default class History {
@@ -40,14 +44,32 @@ export default class History {
             reply(this.getEncounters(id, offset));
         })
         
+        Socket.onConnect("game", (send) => {
+            if(!this.currentGame) return;
+            send(Message.CurrentServer, this.getCurrentServer());
+        });
+
         this.setupDb();
 
-        if(fakeData) return;
+        if(fakeData) {
+            this.currentGame = fakeCurrentGame;
+            return;
+        }
+
         this.listenToLog();
 
         setInterval(() => {
             this.updateCurrentGame();
         }, this.updateInterval);
+    }
+
+    static getCurrentServer() {
+        return {
+            start: this.currentGame.startTime,
+            map: this.currentGame.map,
+            hostname: this.currentGame.hostname,
+            ip: this.currentGame.ip 
+        }
     }
 
     static setupDb() {
@@ -59,6 +81,8 @@ export default class History {
 
         this.db.run(`CREATE TABLE IF NOT EXISTS main.games (
             map TEXT NOT NULL,
+            hostname TEXT,
+            ip TEXT,
             start INTEGER NOT NULL,
             duration INTEGER NOT NULL,
             players TEXT NOT NULL
@@ -74,7 +98,7 @@ export default class History {
     }
 
     static getGames(offset: number): PastGameEntry[] {
-        return this.db.query<PastGameEntry, {}>(`SELECT start, duration, map, rowid FROM games
+        return this.db.query<PastGameEntry, {}>(`SELECT start, duration, map, hostname, ip, rowid FROM games
             ORDER BY start DESC LIMIT ${this.pageSize} OFFSET $offset`)
             .all({ $offset: offset });
     }
@@ -92,47 +116,71 @@ export default class History {
     }
 
     static mapChangeRegex = /(?:\n|^)Team Fortress\r?\nMap: (.+)/g;
-    static statusMapRegex = /(?:\n|^)map     : (.+) at:/g;
+    static statusRegex = /(?:\n|^)hostname: (.+)\n.*\nudp\/ip  : (.+)\n.*\n.*\nmap     : (.+) at:/g;
     static listenToLog() {
-        const onMapLoaded = (map: string) => {            
-            this.currentGame = {
-                map,
-                startTime: Date.now(),
-                players: [],
-                rowid: 0
-            }
-
-            let val = this.db.query(`INSERT INTO games (map, start, duration, players)
-                VALUES($map, $start, $duration, $players)`).run({
-                $map: this.currentGame.map,
-                $players: JSON.stringify(this.currentGame.players),
-                $start: this.currentGame.startTime,
-                $duration: 0
-            });
-
-            this.currentGame.rowid = val.lastInsertRowid as number;
-
-            this.events.emit("startGame");
-            this.onGameStart();
-
-            Log.info("Game started:", map);
-            Socket.send("history", Message.GameAdded, {
-                start: this.currentGame.startTime,
-                duration: 0,
-                map: this.currentGame.map,
-                rowid: this.currentGame.rowid
-            });
-        }
-
         LogParser.on(this.mapChangeRegex, (data) => {
             this.onGameEnd();
 
-            onMapLoaded(data[1]);
+            this.startGame(data[1]);
+            // Figure out hostname and ip
+            Rcon.run("status");
         });
 
-        LogParser.on(this.statusMapRegex, (data) => {
-            if(this.currentGame) return;
-            onMapLoaded(data[1]);
+        LogParser.on(this.statusRegex, (data) => {      
+            let [_, hostname, ip, map] = data;
+            
+            if(!this.currentGame) this.startGame(map, hostname, ip);
+
+            // update the current game to include hostname/ip
+            if(!this.currentGame.hostname) {
+                this.db.query(`UPDATE games SET hostname = $hostname, ip = $ip WHERE rowid = $rowid`).run({
+                    $hostname: hostname,
+                    $ip: ip,
+                    $rowid: this.currentGame.rowid
+                });
+                Socket.send("history", Message.GameUpdated, {
+                    rowid: this.currentGame.rowid,
+                    hostname, ip
+                });
+                
+                Log.info("Updated server with ip", ip, "hostname", hostname);
+            }
+        });
+    }
+
+    static startGame(map: string, hostname?: string, ip?: string) {
+        this.currentGame = {
+            map, hostname, ip,
+            startTime: Date.now(),
+            players: [],
+            rowid: 0
+        }
+
+        let val = this.db.query(`INSERT INTO games (map, hostname, ip, start, duration, players)
+            VALUES($map, $hostname, $ip, $start, $duration, $players)`).run({
+            $map: this.currentGame.map,
+            $hostname: hostname,
+            $ip: ip,
+            $players: JSON.stringify(this.currentGame.players),
+            $start: this.currentGame.startTime,
+            $duration: 0
+        });
+
+        this.currentGame.rowid = val.lastInsertRowid as number;
+
+        this.events.emit("startGame");
+        this.onGameStart();
+
+        if(hostname) Log.info("Game started:", map, hostname, ip);
+        else Log.warning("Game started:", map, "(missing hostname)");
+
+        Socket.send("game", Message.CurrentServer, this.getCurrentServer());
+        Socket.send("history", Message.GameAdded, {
+            start: this.currentGame.startTime,
+            duration: 0,
+            map: this.currentGame.map,
+            hostname, ip,
+            rowid: this.currentGame.rowid
         });
     }
 
@@ -195,6 +243,7 @@ export default class History {
     static onGameEnd() {
         if(!this.currentGame || fakeData) return;
 
+        Socket.send("game", Message.CurrentServer, null);
         this.updateCurrentGame();
         
         Log.info(`Recorded game: ${this.currentGame.map}`);
