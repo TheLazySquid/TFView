@@ -15,7 +15,6 @@ import fsp from "fs/promises";
 import { join } from "path";
 import getActiveUser from "$shared/getActiveUser";
 import { id3ToId64 } from "$shared/steamid";
-import Log from "src/log";
 
 export default class GameMonitor {
     static logPath: string;
@@ -97,6 +96,10 @@ export default class GameMonitor {
 
             return;
         }
+
+        // If we've got a response we're in a game, if we never detected that (such as if tfview was turned on mid-game)
+        // Then send the status command to figure out where we are. Only works in casual for some reason.
+        if(!History.currentGame) Rcon.run("status");
 
         this.gotResponse = true;
         this.responseTime = Date.now();

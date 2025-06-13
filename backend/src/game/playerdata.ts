@@ -31,7 +31,7 @@ export default class PlayerData {
 
 			fetch(url)
 				.then((resp) => {
-					if(resp.status !== 200) return rej();
+					if(resp.status !== 200) return rej(resp.status);
 					return resp.json().then(res, rej);
 				}, rej)
 		});
@@ -44,7 +44,7 @@ export default class PlayerData {
 
 		const ids = summaries.map(s => s.id64).join(",");
 
-		// Steam really loves to give 429s despite 
+		// Steam really loves to give 429s
 		this.query("ISteamUser/GetPlayerSummaries/v0002", [["steamids", ids]])
 			.then((res) => {
 				for(let player of res.response.players) {
@@ -66,11 +66,15 @@ export default class PlayerData {
 					}
 				}
 			})
-			.catch(() => {
-				Log.warning("Failed to get player summaries");
+			.catch((e) => {
+				if(typeof e === "number") {
+					Log.warning(`Failed to get player summaries (status ${e})`);
+				} else {
+					Log.warning("Failed to get player summaries");
+				}
 
 				for(let i = 0; i < summaries.length; i++) {
-					if(summaries[i].failedQueries > 3) {
+					if(summaries[i].failedQueries >= 3) {
 						summaries.splice(i, 1);
 						i--;
 					} else {

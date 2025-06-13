@@ -66,7 +66,7 @@ export default class History {
             playerId TEXT NOT NULL,
             map TEXT NOT NULL,
             name TEXT NOT NULL,
-            gameId INTEGER,
+            gameId INTEGER NOT NULL,
             time INTEGER NOT NULL
         )`);
 
@@ -92,14 +92,11 @@ export default class History {
     }
 
     static mapChangeRegex = /(?:\n|^)Team Fortress\r?\nMap: (.+)/g;
+    static statusMapRegex = /(?:\n|^)map     : (.+) at:/g;
     static listenToLog() {
-        LogParser.on(this.mapChangeRegex, (data) => {
-            this.onGameEnd();
-
-            this.events.emit("startGame");
-            
+        const onMapLoaded = (map: string) => {            
             this.currentGame = {
-                map: data[1],
+                map,
                 startTime: Date.now(),
                 players: [],
                 rowid: 0
@@ -115,13 +112,27 @@ export default class History {
 
             this.currentGame.rowid = val.lastInsertRowid as number;
 
-            Log.info("Game started:", data[1]);
+            this.events.emit("startGame");
+            this.onGameStart();
+
+            Log.info("Game started:", map);
             Socket.send("history", Message.GameAdded, {
                 start: this.currentGame.startTime,
                 duration: 0,
                 map: this.currentGame.map,
                 rowid: this.currentGame.rowid
             });
+        }
+
+        LogParser.on(this.mapChangeRegex, (data) => {
+            this.onGameEnd();
+
+            onMapLoaded(data[1]);
+        });
+
+        LogParser.on(this.statusMapRegex, (data) => {
+            if(this.currentGame) return;
+            onMapLoaded(data[1]);
         });
     }
 
@@ -136,12 +147,18 @@ export default class History {
         });
     }
 
-    static onJoin(player: Player) {
-        if(this.currentGame && this.currentGame.players.some(p => p.id === player.ID3)) return;
-        // Don't record bots (Technically there's 100 people who this won't track, but they're all valve employees so I don't care)
-        // This does raise the question of what if someone with id 1 joins a game with a bot, will they have the same id?
-        if(player.ID3.length <= 2) return;
+    static pendingPlayers: Player[] = [];
+    static onGameStart() {
+        if(this.pendingPlayers.length === 0) return;
+        
+        for(let player of this.pendingPlayers) {
+            this.addPlayer(player);
+        }
 
+        this.updateCurrentGame();
+    }
+
+    static addPlayer(player: Player) {
         const now = Date.now();
         this.currentGame.players.push({
             id: player.ID3,
@@ -157,7 +174,21 @@ export default class History {
             $gameId: this.currentGame.rowid,
             $time: now
         });
+    }
 
+    static onJoin(player: Player) {
+        // Don't record bots (Technically there's 100 people who this won't track, but they're all valve employees so I don't care)
+        // This does raise the question of what if someone with id 1 joins a game with a bot, will they have the same id?
+        if(player.ID3.length <= 2) return;
+
+        if(!this.currentGame) {
+            this.pendingPlayers.push(player);
+            return;
+        }
+
+        if(this.currentGame.players.some(p => p.id === player.ID3)) return;
+
+        this.addPlayer(player);
         this.updateCurrentGame();
     }
 
