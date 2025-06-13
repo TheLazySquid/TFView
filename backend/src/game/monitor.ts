@@ -86,7 +86,7 @@ export default class GameMonitor {
 
             // Disconnect after a minute of no response, or 10 seconds after having recieved a response with no responses since
             // since the dumpplayer command will sometimes return empty when loading in
-            const gameDuration = Date.now() - History.currentGame.start;
+            const gameDuration = Date.now() - History.currentGame.startTime;
             const responseGap = Date.now() - this.responseTime;
             if(
                 (!this.gotResponse && gameDuration >= 60e3) ||
@@ -215,13 +215,7 @@ export default class GameMonitor {
                 if(diff) Socket.send("game", Message.PlayerUpdate, diff);
             } else {
                 // track the player in the game history
-                if(!History.currentGame?.players.some(p => p.id === player.ID3)) {
-                    History.currentGame?.players.push({
-                        id: player.ID3,
-                        name: player.name,
-                        time: Date.now()
-                    });
-                }
+                History.onJoin(player as Player);
 
                 Socket.send("game", Message.PlayerJoin, player as Player);
                 this.lobby.players.push(player as Player);

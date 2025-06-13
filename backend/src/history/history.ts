@@ -1,4 +1,4 @@
-import type { Stored, PastGame, PastGameEntry, PlayerEncounter } from "$types/data";
+import type { Stored, PastGame, PastGameEntry, PlayerEncounter, PastGamePlayer } from "$types/data";
 import { Recieves, Message } from "$types/messages";
 import { dataPath, fakeData } from "src/consts";
 import LogParser from "src/logParser";
@@ -9,14 +9,23 @@ import fs from "fs";
 import { createFakeHistory } from "src/fakedata/history";
 import EventEmitter from "node:events";
 import Log from "src/log";
+import type { Player } from "$types/lobby";
 
-export default class History {   
-    static currentGame: PastGame | null = null;
+interface CurrentGame {
+    map: string;
+    startTime: number;
+    players: PastGamePlayer[];
+    rowid: number;
+}
+
+export default class History {
+    static currentGame: CurrentGame | null = null;
     static gamesFile: Bun.BunFile;
     static pastGamesDir: string;
     static db: Database;
     static pageSize = 50;
     static events = new EventEmitter();
+    static updateInterval = 10000;
 
     static init() {
         Socket.on(Recieves.GetGames, (offset, { reply }) => {
@@ -35,6 +44,10 @@ export default class History {
 
         if(fakeData) return;
         this.listenToLog();
+
+        setInterval(() => {
+            this.updateCurrentGame();
+        }, this.updateInterval);
     }
 
     static setupDb() {
@@ -53,7 +66,7 @@ export default class History {
             playerId TEXT NOT NULL,
             map TEXT NOT NULL,
             name TEXT NOT NULL,
-            gameId INTEGER NOT NULL,
+            gameId INTEGER,
             time INTEGER NOT NULL
         )`);
 
@@ -84,49 +97,74 @@ export default class History {
             this.onGameEnd();
 
             this.events.emit("startGame");
+            
             this.currentGame = {
                 map: data[1],
-                start: Date.now(),
-                duration: 0,
-                players: []
+                startTime: Date.now(),
+                players: [],
+                rowid: 0
             }
 
-            Log.info("Game started:", this.currentGame.map);
+            let val = this.db.query(`INSERT INTO games (map, start, duration, players)
+                VALUES($map, $start, $duration, $players)`).run({
+                $map: this.currentGame.map,
+                $players: JSON.stringify(this.currentGame.players),
+                $start: this.currentGame.startTime,
+                $duration: 0
+            });
+
+            this.currentGame.rowid = val.lastInsertRowid as number;
+
+            Log.info("Game started:", data[1]);
+            Socket.send("history", Message.GameAdded, {
+                start: this.currentGame.startTime,
+                duration: 0,
+                map: this.currentGame.map,
+                rowid: this.currentGame.rowid
+            });
         });
+    }
+
+    static updateCurrentGame() {
+        if(!this.currentGame) return;
+
+        this.db.query(`UPDATE games SET duration = $duration, players = $players
+            WHERE rowid = $rowid`).run({
+            $players: JSON.stringify(this.currentGame.players),
+            $duration: Date.now() - this.currentGame.startTime,
+            $rowid: this.currentGame.rowid
+        });
+    }
+
+    static onJoin(player: Player) {
+        if(this.currentGame && this.currentGame.players.some(p => p.id === player.ID3)) return;
+        // Don't record bots (Technically there's 100 people who this won't track, but they're all valve employees so I don't care)
+        // This does raise the question of what if someone with id 1 joins a game with a bot, will they have the same id?
+        if(player.ID3.length <= 2) return;
+
+        const now = Date.now();
+        this.currentGame.players.push({
+            id: player.ID3,
+            name: player.name,
+            time: now
+        });
+
+        this.db.query(`INSERT INTO encounters (playerId, map, name, gameId, time)
+            VALUES($playerId, $map, $name, $gameId, $time)`).run({
+            $playerId: player.ID3,
+            $map: this.currentGame.map,
+            $name: player.name,
+            $gameId: this.currentGame.rowid,
+            $time: now
+        });
+
+        this.updateCurrentGame();
     }
 
     static onGameEnd() {
         if(!this.currentGame || fakeData) return;
-        this.currentGame.duration = Date.now() - this.currentGame.start;
 
-        // save the current game
-        let val = this.db.query(`INSERT INTO games (map, start, duration, players)
-            VALUES($map, $start, $duration, $players)`).run({
-            $map: this.currentGame.map,
-            $players: JSON.stringify(this.currentGame.players),
-            $start: this.currentGame.start,
-            $duration: this.currentGame.duration
-        });
-        let rowid = val.lastInsertRowid as number;
-
-        // There's probably some way to make this into one query
-        const addPlayer = this.db.query(`INSERT INTO encounters (playerId, map, name, gameId, time)
-            VALUES($playerId, $map, $name, $gameId, $time)`);
-        for(let player of this.currentGame.players) {
-            // Don't record bots (Technically there's 100 people who this won't track, but they're all valve employees so I don't care)
-            // This does raise the question of what if someone with id 1 joins a game with a bot, will they have the same id?
-            if(player.id.length <= 2) continue;
-            addPlayer.run({
-                $playerId: player.id,
-                $map: this.currentGame.map,
-                $name: player.name,
-                $gameId: rowid,
-                $time: player.time
-            });
-        }
-
-        const entry = { ...this.currentGame, rowid: rowid, players: undefined };
-        Socket.send("history", Message.GameAdded, entry);
+        this.updateCurrentGame();
         
         Log.info(`Recorded game: ${this.currentGame.map}`);
         this.currentGame = null;

@@ -40,6 +40,9 @@ export default class LogParser {
                     Log.info("Restarting reading of logfile");
                 } else if(stat.size > this.readStart) {
                     this.readLog();
+                } else if(stat.size < this.readStart) {
+                    Log.info("Moving back in logfile");
+                    this.readStart = stat.size;
                 }
             })
             .catch(() => {
