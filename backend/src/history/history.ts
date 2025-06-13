@@ -172,7 +172,7 @@ export default class History {
         this.onGameStart();
 
         if(hostname) Log.info("Game started:", map, hostname, ip);
-        else Log.warning("Game started:", map, "(missing hostname)");
+        else Log.info("Game started:", map, "(hostname pending)");
 
         Socket.send("game", Message.CurrentServer, this.getCurrentServer());
         Socket.send("history", Message.GameAdded, {

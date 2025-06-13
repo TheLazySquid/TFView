@@ -43,8 +43,6 @@ export interface Player {
     userId: string;
     ID3: string;
     ID64: string;
-
-    // From killfeed parser
     kills: number;
     deaths: number;
 

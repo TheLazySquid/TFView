@@ -130,11 +130,6 @@ export default class GameMonitor {
             if(this.lobby.killfeed.length > maxKillfeedSize) this.lobby.killfeed.shift();
             Socket.send("game", Message.KillfeedAdded, entry);
 
-            killer.kills++;
-            victim.deaths++;
-
-            let killerUpdate: Partial<Player> & { userId: string } = { userId: killer.userId, kills: killer.kills };
-
             // See if we can guess the player's class
             const classes = killClasses[match[3]];
             if(classes) {
@@ -142,12 +137,13 @@ export default class GameMonitor {
 
                 if(classes.length === 1) {
                     killer.class = classes[0];
-                    killerUpdate.class = classes[0];
 
                     // Quick sanity check
                     if(options && !options.includes(classes[0])) {
                         this.potentialClasses.delete(killer.userId);
                     }
+
+                    Socket.send("game", Message.PlayerUpdate, { userId: killer.userId, class: classes[0] });
                 } else if(options) {
                     let possibilities: TF2Class[] = [];
 
@@ -159,13 +155,12 @@ export default class GameMonitor {
                     if(possibilities.length === 0) this.potentialClasses.delete(killer.userId);
                     else if(possibilities.length === 1) {
                         killer.class = possibilities[0];
-                        killerUpdate.class = possibilities[0];
+
+                        Socket.send("game", Message.PlayerUpdate, { userId: killer.userId, class: possibilities[0] });
                     }
                 }
             }
 
-            Socket.send("game", Message.PlayerUpdate, killerUpdate);
-            Socket.send("game", Message.PlayerUpdate, { userId: victim.userId, deaths: victim.deaths });
         });
 
         // parse the chat
@@ -302,6 +297,8 @@ export default class GameMonitor {
         copy("ping", parseInt(info.iPing));
         copy("team", parseInt(info.iTeam));
         copy("health", health);
+        copy("kills", parseInt(info.iScore));
+        copy("deaths", parseInt(info.iDeaths));
         if(info.bAlive !== undefined) copy("alive", info.bAlive === "true");
 
         if(!changed) return null;
