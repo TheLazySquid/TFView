@@ -3,6 +3,7 @@ import type { PlayerSummary } from "$types/lobby";
 import { id3ToId64 } from "$shared/steamid";
 import Settings from "src/settings/settings";
 import throttle from "throttleit";
+import Log from "src/log";
 
 interface WaitingSummary {
 	id3: string;
@@ -66,6 +67,8 @@ export default class PlayerData {
 				}
 			})
 			.catch(() => {
+				Log.warning("Failed to get player summaries");
+
 				for(let i = 0; i < summaries.length; i++) {
 					if(summaries[i].failedQueries > 3) {
 						summaries.splice(i, 1);

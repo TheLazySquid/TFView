@@ -6,11 +6,13 @@ import Rcon from "./game/rcon";
 import History from "./history/history";
 import LogParser from "./logParser";
 import Socket from "./socket";
+import Log from "./log";
 
 if(fakeData) {
     console.log("Using fake data for backend");
 }
 
+Log.init();
 await Settings.init();
 Rcon.init();
 LogParser.init();

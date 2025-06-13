@@ -2,6 +2,7 @@ import RconServer from "rcon-srcds";
 import Settings from "../settings/settings";
 import { fakeData } from "src/consts";
 import History from "src/history/history";
+import Log from "src/log";
 
 export default class Rcon {
     static server: RconServer;
@@ -33,12 +34,12 @@ export default class Rcon {
         this.server.authenticate(password)
             .then(() => {
                 this.connected = true;
-                console.log("RCON Connected");
+                Log.info("RCON Connected");
                 
                 this.server.connection.once("close", () => {
                     this.connected = false;
                     History.onGameEnd();
-                    console.log("RCON Disconnected");
+                    Log.info("RCON Disconnected");
                     pollReconnect();
                 });
             })

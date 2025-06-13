@@ -2,8 +2,9 @@ import { networkPort } from "$shared/consts";
 import type { Message, MessageTypes, RecievesKey, RecievesTypes } from "$types/messages";
 import EventEmitter from "node:events";
 import { join } from "node:path";
+import Log from "./log";
 
-type Topic = "game" | "history" | "settings" | "global";
+type Topic = "game" | "history" | "settings" | "global" | "logs";
 type WS = Bun.ServerWebSocket<{ topic: Topic }>;
 
 export default class Socket {
@@ -81,6 +82,7 @@ export default class Socket {
                     this.events.emit(data.channel.toString(), data.data, actions);
                 },
                 open: (ws: WS) => {
+                    Log.info("Websocket connection established:", ws.data.topic);
                     ws.subscribe(ws.data.topic);
                     ws.subscribe("global");
 

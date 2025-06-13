@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import { join } from "node:path";
 import Settings from "./settings/settings";
+import Log from "./log";
 
 interface LogListener {
     regex: RegExp;
@@ -36,11 +37,13 @@ export default class LogParser {
                 if(this.shouldRestart) {
                     this.shouldRestart = false;
                     this.readStart = stat.size;
+                    Log.info("Restarting reading of logfile");
                 } else if(stat.size > this.readStart) {
                     this.readLog();
                 }
             })
             .catch(() => {
+                if(!this.shouldRestart) Log.warning("Failed to stat logfile");
                 this.shouldRestart = true;
             })
     }

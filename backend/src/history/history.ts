@@ -8,6 +8,7 @@ import { Database } from "bun:sqlite";
 import fs from "fs";
 import { createFakeHistory } from "src/fakedata/history";
 import EventEmitter from "node:events";
+import Log from "src/log";
 
 export default class History {   
     static currentGame: PastGame | null = null;
@@ -90,7 +91,7 @@ export default class History {
                 players: []
             }
 
-            console.log("Game started:", this.currentGame.map);
+            Log.info("Game started:", this.currentGame.map);
         });
     }
 
@@ -127,7 +128,7 @@ export default class History {
         const entry = { ...this.currentGame, rowid: rowid, players: undefined };
         Socket.send("history", Message.GameAdded, entry);
         
-        console.trace(`Recorded game: ${this.currentGame.map}`);
+        Log.info(`Recorded game: ${this.currentGame.map}`);
         this.currentGame = null;
     }
 }

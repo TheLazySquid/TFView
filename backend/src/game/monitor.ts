@@ -15,6 +15,7 @@ import fsp from "fs/promises";
 import { join } from "path";
 import getActiveUser from "$shared/getActiveUser";
 import { id3ToId64 } from "$shared/steamid";
+import Log from "src/log";
 
 export default class GameMonitor {
     static logPath: string;
