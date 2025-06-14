@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { nameColors } from "$lib/consts";
     import Game from "$lib/ws/game.svelte";
     import PlayerView from "./PlayerView.svelte";
     import Ping from "@lucide/svelte/icons/chart-no-axes-column-increasing"
@@ -6,13 +7,13 @@
 
     let { id, name }: { id?: number, name: string } = $props();
 
-    let team = $derived(id ? Game.players.filter(p => p.team === id) : Game.players);
+    let team = $derived(id ? Game.players.filter(p => p.team === id) : Game.players.filter(p => p.team === 2 || p.team === 3));
 </script>
 
-<div>
-    <h2 class="w-full text-center text-5xl">{name}</h2>
-    <table>
-        <thead>
+<div class="w-full h-full flex flex-col items-center">
+    <h2 class="w-full text-center text-5xl pb-2" style={id ? `color: ${nameColors[id]}` : ""}>{name}</h2>
+    <table class="overflow-y-auto block" style={ id ? "width: 100%" : "width: min(100%, 900px)" }>
+        <thead class="sticky top-0 bg-background">
             <tr class="*:pr-1.5">
                 <th class="min-w-10"></th> 
                 <th class="w-full"></th> 

@@ -4,11 +4,11 @@
     import User from "@lucide/svelte/icons/square-user-round";
     import Skull from "@lucide/svelte/icons/skull";
     import Popups from "$lib/popups";
-    import { classIcons } from "$lib/consts";
+    import { classIcons, nameColors } from "$lib/consts";
     import Game from "$lib/ws/game.svelte";
 
     let { player }: { player: Player } = $props();
-    let color = $derived(player === Game.user ? "var(--color-amber-700)" : "");
+    let color = $derived(player === Game.user ? "var(--color-amber-900)" : "");
     let showHealth = $derived(Game.user?.team === 1 || player.team === Game.user?.team);
 </script>
 
@@ -36,7 +36,7 @@
         <ContextMenu.Root>
             <ContextMenu.Trigger>
                 <button class="flex-grow text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
-                onclick={() => Popups.openPlayerPopup?.(player)}>{player.name}</button>
+                onclick={() => Popups.openPlayerPopup?.(player)} style={`color: ${nameColors[player.team]}`}>{player.name}</button>
             </ContextMenu.Trigger>
             <ContextMenu.Content>
                 <ContextMenu.Sub>

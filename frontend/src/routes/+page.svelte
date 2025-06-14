@@ -12,8 +12,6 @@
     import Swords from "@lucide/svelte/icons/swords";
     import Message from "@lucide/svelte/icons/message-square-more";
     import Close from "@lucide/svelte/icons/chevron-last";
-    import Server from "@lucide/svelte/icons/server";
-    import ServerInfo from "./game/ServerInfo.svelte";
 
     Game.init();
 
@@ -51,7 +49,6 @@
     <div class="flex flex-col gap-2 pt-2">
         {@render button(Message, "chat")}
         {@render button(Swords, "killfeed")}
-        {@render button(Server, "server")}
     </div>
 {/snippet}
 
@@ -59,10 +56,9 @@
     {#if openPanel}
         <Resizable.PaneGroup direction="horizontal">
             <Resizable.Pane>
-                <div class="w-full h-full flex gap-2">
-                    <Teams />
+                <Teams>
                     {@render buttons()}
-                </div>
+                </Teams>
             </Resizable.Pane>
             <Resizable.Handle />
             <Resizable.Pane>
@@ -71,16 +67,14 @@
                         <Chat />
                     {:else if openPanel === "killfeed"}
                         <Killfeed />
-                    {:else if openPanel === "server"}
-                        <ServerInfo />
                     {/if}
                 </div>
             </Resizable.Pane>
         </Resizable.PaneGroup>
     {:else}
-        <div class="w-full h-full flex gap-2">
+        <div class="w-full h-full flex">
             <Teams />
-            <div class="w-px bg-accent"></div>
+            <div class="w-px bg-accent mr-2"></div>
             {@render buttons()}
         </div>
     {/if}
