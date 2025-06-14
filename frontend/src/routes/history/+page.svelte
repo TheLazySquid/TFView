@@ -56,7 +56,7 @@
                     </tr>
                 {/each}
                 <tr>
-                    <th colspan={5} class="border-t-2">
+                    <th colspan={6} class="border-t-2">
                         <InfiniteLoading on:infinite={infiniteHandler}>
                             <svelte:fragment slot="noResults">{@render historyEnd()}</svelte:fragment>
                             <svelte:fragment slot="noMore">{@render historyEnd()}</svelte:fragment>

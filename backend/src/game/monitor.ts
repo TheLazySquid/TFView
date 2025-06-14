@@ -290,13 +290,6 @@ export default class GameMonitor {
             }
         }
 
-        // If the person is the user add their current stats to history to be saved
-        const kills = parseInt(info.iScore), deaths = parseInt(info.iDeaths);
-        if(player.user && History.currentGame) {
-            History.currentGame.kills = kills;
-            History.currentGame.deaths = deaths;
-        }
-
         copy("ID3", info.iAccountID);
         copy("ID64", id3ToId64(info.iAccountID));
         copy("userId", info.iUserID);
@@ -304,13 +297,13 @@ export default class GameMonitor {
         copy("ping", parseInt(info.iPing));
         copy("team", parseInt(info.iTeam));
         copy("health", health);
-        copy("kills", kills);
-        copy("deaths", deaths);
+        copy("kills", parseInt(info.iScore));
+        copy("deaths", parseInt(info.iDeaths));
         if(info.bAlive !== undefined) copy("alive", info.bAlive === "true");
 
         // Update the k/d of the saved user if it changed
-        if(!player.user && History.currentGame && (diff.kills !== undefined || diff.deaths !== undefined)) {
-            
+        if(History.currentGame && (diff.kills !== undefined || diff.deaths !== undefined)) {
+            History.updatePlayer(player as Player);
         }
 
         if(!changed) return null;

@@ -155,9 +155,7 @@ export default class History {
                 });
                 Socket.send("history", Message.GameUpdated, {
                     rowid: this.currentGame.rowid,
-                    hostname, ip,
-                    kills: this.currentGame.kills,
-                    deaths: this.currentGame.deaths
+                    hostname, ip
                 });
                 
                 Log.info("Updated server with ip", ip, "hostname", hostname);
@@ -260,17 +258,28 @@ export default class History {
     }
 
     static updatePlayer(player: Player) {
-        if(!this.currentPlayers.has(player.ID3)) return;
-        let { rowid, info } = this.currentPlayers.get(player.ID3);
+        if(player.user) {
+            this.currentGame.kills = player.kills;
+            this.currentGame.deaths = player.deaths;
 
-        info.kills = player.kills;
-        info.deaths = player.deaths;
-
-        this.db.query(`UPDATE encounters SET kills = $kills, deaths = $deaths WHERE rowid = $rowid`).run({
-            $kills: info.kills,
-            $deaths: info.deaths,
-            $rowid: rowid
-        });
+            Socket.send("history", Message.GameUpdated, {
+                rowid: this.currentGame.rowid,
+                kills: this.currentGame.kills,
+                deaths: this.currentGame.deaths
+            });
+        } else {
+            if(!this.currentPlayers.has(player.ID3)) return;
+            let { rowid, info } = this.currentPlayers.get(player.ID3);
+    
+            info.kills = player.kills;
+            info.deaths = player.deaths;
+    
+            this.db.query(`UPDATE encounters SET kills = $kills, deaths = $deaths WHERE rowid = $rowid`).run({
+                $kills: info.kills,
+                $deaths: info.deaths,
+                $rowid: rowid
+            });
+        }
     }
 
     static onJoin(player: Player) {

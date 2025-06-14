@@ -5,6 +5,7 @@
     import Chat from "$lib/components/game/Chat.svelte";
     import Teams from "./game/Teams.svelte";
     import * as Resizable from "$lib/components/ui/resizable";
+    import * as Card from "$lib/components/ui/card";
     import PlayerPopup from "../lib/components/popups/PlayerPopup.svelte";
     import PastGamePopup from "../lib/components/popups/PastGamePopup.svelte";
     import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
@@ -52,7 +53,18 @@
     </div>
 {/snippet}
 
-<div class="w-full h-full">
+<div class="w-full h-full relative">
+    {#if !Game.currentServer}
+        <div class="absolute top-0 left-0 w-full h-full backdrop-blur-xs z-10 flex items-center justify-center"
+        style="background-color: rgba(0,0,0,0.5)">
+            <Card.Root class="w-[500px]">
+                <Card.Header>
+                    <Card.Title class="text-xl verdana">No game is currently active</Card.Title>
+                    <Card.Description>The game view will appear here once you join a game.</Card.Description>
+                </Card.Header>
+            </Card.Root>
+        </div>
+    {/if}
     {#if openPanel}
         <Resizable.PaneGroup direction="horizontal">
             <Resizable.Pane>
