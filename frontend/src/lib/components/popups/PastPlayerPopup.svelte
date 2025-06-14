@@ -12,7 +12,7 @@
     }
 </script>
 
-<Popup type="openPastPlayerPopup" {onOpen}>
+<Popup type="openPastPlayerPopup" style="max-width: min(90%, 750px)" {onOpen}>
     {#if id}
         <Dialog.Header class="text-2xl">{ name }</Dialog.Header>
         <h2>Past encounters:</h2>

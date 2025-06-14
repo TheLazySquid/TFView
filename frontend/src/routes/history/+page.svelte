@@ -26,40 +26,44 @@
 <PastGamePopup />
 <PastPlayerPopup />
 
-<div class="w-full flex justify-center">
-    <table class="table-fixed" style="width: min(1000px, 90%)">
-        <thead>
-            <tr class="*:sticky *:top-0 *:bg-background *:text-left">
-                <th>Time</th>
-                <th style="width: 15%">Duration</th>
-                <th>Map</th>
-                <th style="width: 30%">Server</th>
-                <th style="width: 10%"></th>
-            </tr>
-        </thead>
-        <tbody>
-            {#each History.pastGames as game}
-                <tr class="border-t-2 *:py-1">
-                    <td><Time date={game.start} /></td>
-                    <td><Time date={game.duration} duration={true} /></td>
-                    <td>{game.map}</td>
-                    <td>{game.hostname ?? "Unknown"}</td>
-                    <td>
-                        <button class="underline"
-                        onclick={() => Popups.openGamePopup?.(game.rowid)}>
-                            Details
-                        </button>
-                    </td>
+<div class="w-full h-full flex justify-center">
+    <div class="overflow-y-auto" style="width: min(1000px, 90%)">
+        <table class="w-full">
+            <thead>
+                <tr class="*:sticky *:top-0 *:bg-background *:text-left">
+                    <th>Time</th>
+                    <th style="width: 15%">Duration</th>
+                    <th>Map</th>
+                    <th style="width: 30%">Server</th>
+                    <th>K/D</th>
+                    <th style="width: 10%"></th>
                 </tr>
-            {/each}
-            <tr>
-                <th colspan={5} class="border-t-2">
-                    <InfiniteLoading on:infinite={infiniteHandler}>
-                        <svelte:fragment slot="noResults">{@render historyEnd()}</svelte:fragment>
-                        <svelte:fragment slot="noMore">{@render historyEnd()}</svelte:fragment>
-                    </InfiniteLoading>
-                </th>
-            </tr>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {#each History.pastGames as game}
+                    <tr class="border-t-2 *:py-1">
+                        <td class="whitespace-nowrap"><Time date={game.start} /></td>
+                        <td><Time date={game.duration} duration={true} /></td>
+                        <td>{game.map}</td>
+                        <td>{game.hostname ?? "Unknown"}</td>
+                        <td>{game.kills}/{game.deaths}</td>
+                        <td>
+                            <button class="underline"
+                            onclick={() => Popups.openGamePopup?.(game.rowid)}>
+                                Details
+                            </button>
+                        </td>
+                    </tr>
+                {/each}
+                <tr>
+                    <th colspan={5} class="border-t-2">
+                        <InfiniteLoading on:infinite={infiniteHandler}>
+                            <svelte:fragment slot="noResults">{@render historyEnd()}</svelte:fragment>
+                            <svelte:fragment slot="noMore">{@render historyEnd()}</svelte:fragment>
+                        </InfiniteLoading>
+                    </th>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>

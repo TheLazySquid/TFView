@@ -251,7 +251,7 @@ export default class GameMonitor {
     }
 
     static updatePlayer(player: Partial<Player>, info: G15Player) {
-        let diff = { userId: info.iUserID };
+        let diff: Partial<Player> & { userId: string } = { userId: info.iUserID };
         let changed = false;
         
         const copy = (key: string, value: any) => {
@@ -290,6 +290,13 @@ export default class GameMonitor {
             }
         }
 
+        // If the person is the user add their current stats to history to be saved
+        const kills = parseInt(info.iScore), deaths = parseInt(info.iDeaths);
+        if(player.user && History.currentGame) {
+            History.currentGame.kills = kills;
+            History.currentGame.deaths = deaths;
+        }
+
         copy("ID3", info.iAccountID);
         copy("ID64", id3ToId64(info.iAccountID));
         copy("userId", info.iUserID);
@@ -297,9 +304,14 @@ export default class GameMonitor {
         copy("ping", parseInt(info.iPing));
         copy("team", parseInt(info.iTeam));
         copy("health", health);
-        copy("kills", parseInt(info.iScore));
-        copy("deaths", parseInt(info.iDeaths));
+        copy("kills", kills);
+        copy("deaths", deaths);
         if(info.bAlive !== undefined) copy("alive", info.bAlive === "true");
+
+        // Update the k/d of the saved user if it changed
+        if(!player.user && History.currentGame && (diff.kills !== undefined || diff.deaths !== undefined)) {
+            
+        }
 
         if(!changed) return null;
         return diff;

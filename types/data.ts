@@ -17,8 +17,11 @@ export interface PastGamePlayer {
     id: string;
     name: string;
     time: number;
+    kills: number;
+    deaths: number;
 }
 
+// What's stored in the database
 export interface PastGame {
     start: number;
     duration: number;
@@ -26,8 +29,11 @@ export interface PastGame {
     hostname?: string;
     ip?: string;
     players: PastGamePlayer[];
+    kills: number;
+    deaths: number;
 }
 
+// What's sent to the client to be displayed on /history
 export interface PastGameEntry {
     start: number;
     duration: number;
@@ -35,6 +41,8 @@ export interface PastGameEntry {
     hostname?: string;
     ip?: string;
     rowid: number;
+    kills: number;
+    deaths: number;
 }
 
 export interface CurrentGame {
@@ -54,4 +62,6 @@ export interface PlayerEncounter {
     name: string;
     gameId: number;
     time: number;
+    kills: number;
+    deaths: number;
 }

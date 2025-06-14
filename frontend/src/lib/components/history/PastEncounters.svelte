@@ -25,13 +25,14 @@
     }
 </script>
 
-<table class="max-h-[400px] overflow-y-auto table-fixed w-full">
-    <thead>
-        <tr class="*:sticky *:top-0 *:bg-background *:text-left">
-            <th class="w-[30%]">Time</th>
-            <th class="w-[30%]">Name</th>
-            <th class="w-[30%]">Map</th>
-            <th class="w-[10%]"></th>
+<table class="max-h-[400px] overflow-y-autow-full">
+    <thead class="sticky top-0"> 
+        <tr class="*:text-left">
+            <th>Time</th>
+            <th>Name</th>
+            <th>Map</th>
+            <th>K/D</th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -40,6 +41,7 @@
                 <td><Time date={encounter.time} /></td>
                 <td>{encounter.name}</td>
                 <td>{encounter.map}</td>
+                <td>{encounter.kills}/{encounter.deaths}</td>
                 <td>
                     <button class="underline"
                     onclick={() => Popups.openGamePopup?.(encounter.gameId)}>

@@ -19,27 +19,37 @@ export function createFakeHistory(db: Database) {
             available.splice(availableIndex, 1);
 
             let time = start + random(0, 1e5);
-            players.push({
+            let player = {
                 id: playerIds[index],
                 name: playerNames[index],
-                time
-            });
-            db.query(`INSERT INTO encounters (playerId, map, name, gameId, time)
-                VALUES($playerId, $map, $name, $gameId, $time)`).all({
+                time,
+                deaths: random(0, 10),
+                kills: random(0, 10)
+            }
+            players.push(player);
+
+            db.query(`INSERT INTO encounters (playerId, map, name, gameId, time, kills, deaths)
+                VALUES($playerId, $map, $name, $gameId, $time, $kills, $deaths)`).all({
                 $playerId: playerIds[index],
                 $name: playerNames[index],
                 $map: map,
                 $gameId: i + 1,
-                $time: time
+                $time: time,
+                $kills: player.kills,
+                $deaths: player.deaths
             });
         }
 
-        db.query(`INSERT INTO games (map, start, duration, players)
-            VALUES($map, $start, $duration, $players)`).run({
+        db.query(`INSERT INTO games (map, hostname, ip, start, duration, players, kills, deaths)
+            VALUES($map, $hostname, $ip, $start, $duration, $players, $kills, $deaths)`).run({
             $map: map,
             $players: JSON.stringify(players),
             $start: start,
-            $duration: random(5e5, 5e6)
+            $duration: random(5e5, 5e6),
+            $hostname: "Some server " + Math.random().toString(36).slice(2),
+            $ip: `${random(1, 255)}.${random(1, 255)}.${random(1, 255)}.${random(1, 255)}:${random(1000, 65535)}`,
+            $kills: random(5, 50),
+            $deaths: random(5, 50)
         });
     }
 }

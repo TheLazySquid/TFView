@@ -18,12 +18,20 @@ export interface CurrentGame {
     startTime: number;
     players: PastGamePlayer[];
     rowid: number;
+    kills: number;
+    deaths: number;
     hostname?: string;
     ip?: string;
 }
 
+interface CurrentPlayer {
+    info: PastGamePlayer;
+    rowid: number;
+}
+
 export default class History {
     static currentGame: CurrentGame | null = null;
+    static currentPlayers = new Map<string, CurrentPlayer>();
     static gamesFile: Bun.BunFile;
     static pastGamesDir: string;
     static db: Database;
@@ -85,20 +93,27 @@ export default class History {
             ip TEXT,
             start INTEGER NOT NULL,
             duration INTEGER NOT NULL,
-            players TEXT NOT NULL
+            players TEXT NOT NULL,
+            kills INTEGER NOT NULL,
+            deaths INTEGER NOT NULL
         ); CREATE TABLE IF NOT EXISTS main.encounters (
             playerId TEXT NOT NULL,
             map TEXT NOT NULL,
             name TEXT NOT NULL,
             gameId INTEGER NOT NULL,
-            time INTEGER NOT NULL
+            time INTEGER NOT NULL,
+            kills INTEGER NOT NULL,
+            deaths INTEGER NOT NULL
         )`);
 
-        if(newDb) createFakeHistory(this.db);
+        if(newDb) {
+            Log.info("Generating fake history data");
+            createFakeHistory(this.db);
+        }
     }
 
     static getGames(offset: number): PastGameEntry[] {
-        return this.db.query<PastGameEntry, {}>(`SELECT start, duration, map, hostname, ip, rowid FROM games
+        return this.db.query<PastGameEntry, {}>(`SELECT start, duration, map, hostname, ip, kills, deaths, rowid FROM games
             ORDER BY start DESC LIMIT ${this.pageSize} OFFSET $offset`)
             .all({ $offset: offset });
     }
@@ -140,7 +155,9 @@ export default class History {
                 });
                 Socket.send("history", Message.GameUpdated, {
                     rowid: this.currentGame.rowid,
-                    hostname, ip
+                    hostname, ip,
+                    kills: this.currentGame.kills,
+                    deaths: this.currentGame.deaths
                 });
                 
                 Log.info("Updated server with ip", ip, "hostname", hostname);
@@ -153,17 +170,17 @@ export default class History {
             map, hostname, ip,
             startTime: Date.now(),
             players: [],
-            rowid: 0
+            rowid: 0, kills: 0, deaths: 0
         }
 
-        let val = this.db.query(`INSERT INTO games (map, hostname, ip, start, duration, players)
-            VALUES($map, $hostname, $ip, $start, $duration, $players)`).run({
+        let val = this.db.query(`INSERT INTO games (map, hostname, ip, start, duration, players, kills, deaths)
+            VALUES($map, $hostname, $ip, $start, $duration, $players, $kills, $deaths)`).run({
             $map: this.currentGame.map,
             $hostname: hostname,
             $ip: ip,
             $players: JSON.stringify(this.currentGame.players),
             $start: this.currentGame.startTime,
-            $duration: 0
+            $duration: 0, $kills: 0, $deaths: 0
         });
 
         this.currentGame.rowid = val.lastInsertRowid as number;
@@ -180,17 +197,21 @@ export default class History {
             duration: 0,
             map: this.currentGame.map,
             hostname, ip,
-            rowid: this.currentGame.rowid
+            rowid: this.currentGame.rowid,
+            kills: this.currentGame.kills,
+            deaths: this.currentGame.deaths
         });
     }
 
     static updateCurrentGame() {
         if(!this.currentGame) return;
 
-        this.db.query(`UPDATE games SET duration = $duration, players = $players
-            WHERE rowid = $rowid`).run({
+        this.db.query(`UPDATE games SET duration = $duration, players = $players,
+            kills = $kills, deaths = $deaths WHERE rowid = $rowid`).run({
             $players: JSON.stringify(this.currentGame.players),
             $duration: Date.now() - this.currentGame.startTime,
+            $kills: this.currentGame.kills,
+            $deaths: this.currentGame.deaths,
             $rowid: this.currentGame.rowid
         });
     }
@@ -207,20 +228,48 @@ export default class History {
     }
 
     static addPlayer(player: Player) {
+        if(this.currentGame.players.some(p => p.id === player.ID3)) return;
+
         const now = Date.now();
-        this.currentGame.players.push({
+        let playerInfo: PastGamePlayer = {
             id: player.ID3,
             name: player.name,
-            time: now
-        });
+            time: now,
+            kills: player.kills,
+            deaths: player.deaths
+        }
+        this.currentGame.players.push(playerInfo);
 
-        this.db.query(`INSERT INTO encounters (playerId, map, name, gameId, time)
-            VALUES($playerId, $map, $name, $gameId, $time)`).run({
+        // Don't record encounters with ourself
+        if(player.user) return;
+        let val = this.db.query(`INSERT INTO encounters (playerId, map, name, gameId, time, kills, deaths)
+            VALUES($playerId, $map, $name, $gameId, $time, $kills, $deaths)`).run({
             $playerId: player.ID3,
             $map: this.currentGame.map,
             $name: player.name,
             $gameId: this.currentGame.rowid,
-            $time: now
+            $time: now,
+            $kills: player.kills,
+            $deaths: player.deaths
+        });
+
+        this.currentPlayers.set(player.ID3, {
+            info: playerInfo,
+            rowid: val.lastInsertRowid as number
+        });
+    }
+
+    static updatePlayer(player: Player) {
+        if(!this.currentPlayers.has(player.ID3)) return;
+        let { rowid, info } = this.currentPlayers.get(player.ID3);
+
+        info.kills = player.kills;
+        info.deaths = player.deaths;
+
+        this.db.query(`UPDATE encounters SET kills = $kills, deaths = $deaths WHERE rowid = $rowid`).run({
+            $kills: info.kills,
+            $deaths: info.deaths,
+            $rowid: rowid
         });
     }
 
@@ -234,8 +283,6 @@ export default class History {
             return;
         }
 
-        if(this.currentGame.players.some(p => p.id === player.ID3)) return;
-
         this.addPlayer(player);
         this.updateCurrentGame();
     }
@@ -248,5 +295,6 @@ export default class History {
         
         Log.info(`Recorded game: ${this.currentGame.map}`);
         this.currentGame = null;
+        this.currentPlayers.clear();
     }
 }

@@ -28,7 +28,7 @@ export interface MessageTypes {
     [Message.KillfeedAdded]: KillfeedEntry;
     [Message.ChatAdded]: ChatMessage;
     [Message.GameAdded]: PastGameEntry;
-    [Message.GameUpdated]: { rowid: number, hostname: string, ip: string };
+    [Message.GameUpdated]: { rowid: number, hostname: string, ip: string, kills: number, deaths: number };
     [Message.InitialSettings]: SettingsType;
     [Message.SettingUpdate]: { key: keyof SettingsType, value: any };
     [Message.CurrentServer]: CurrentServerInfo | null;

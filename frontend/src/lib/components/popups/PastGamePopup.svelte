@@ -32,13 +32,26 @@
         <div>Duration: <Time date={game.duration} duration={true} /></div>
         <div>Server: {game.hostname ? `${game.hostname} (${game.ip})` : "Unknown"}</div>
         <h2>Players:</h2>
-        <div class="overflow-y-auto max-h-[400px] flex flex-col items-start">
-            {#each game.players as player}
-                <button class="underline"
-                onclick={() => Popups.openPastPlayerPopup?.(player.id, player.name)}>
-                    {player.name}
-                </button>
-            {/each}
-        </div>
+        <table class="overflow-y-auto max-h-[400px]">
+            <thead>
+                <tr class="*:text-left">
+                    <th>Player</th>
+                    <th>K/D</th>
+                </tr>
+            </thead>
+            <tbody class="sticky top-0">
+                {#each game.players as player}
+                    <tr>
+                        <td>
+                            <button class="underline"
+                            onclick={() => Popups.openPastPlayerPopup?.(player.id, player.name)}>
+                                {player.name}
+                            </button>
+                        </td>
+                        <td>{player.kills}/{player.deaths}</td>
+                    </tr>
+                {/each}
+            </tbody>
+        </table>
     {/if}
 </Popup>
