@@ -2,6 +2,7 @@ import type { ChatMessage, CurrentServerInfo, KillfeedEntry, Player } from "$typ
 import { Message } from "$types/messages";
 import { maxKillfeedSize } from "$shared/consts";
 import { PageState } from "./wsclient.svelte";
+import type { Tag } from "$types/data";
 
 export default new class Game extends PageState {
     type = "game";
@@ -12,6 +13,8 @@ export default new class Game extends PageState {
     // stored in reverse order for performance
     chat: ChatMessage[] = $state([]);
     currentServer: CurrentServerInfo | null = $state(null);
+    tags: Tag[] = $state.raw([]);
+    userColor: string | undefined = $state();
 
     setup() {
         this.ws.on(Message.InitialGame, (data) => {
@@ -63,6 +66,14 @@ export default new class Game extends PageState {
 
         this.ws.on(Message.CurrentServer, (server) => {
             this.currentServer = server;
+        });
+
+        this.ws.on(Message.Tags, (tags) => {
+            this.tags = tags;
+        });
+
+        this.ws.on(Message.UserColor, (color) => {
+            this.userColor = color;
         });
     }
 }

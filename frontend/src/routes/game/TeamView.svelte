@@ -5,14 +5,15 @@
     import Ping from "@lucide/svelte/icons/chart-no-axes-column-increasing"
     import HeartPulse from "@lucide/svelte/icons/heart-pulse";
 
-    let { id, name }: { id?: number, name: string } = $props();
+    let { ids = [2, 3], name }: { ids?: number[], name: string } = $props();
 
-    let team = $derived(id ? Game.players.filter(p => p.team === id) : Game.players.filter(p => p.team === 2 || p.team === 3));
+    // Nasty hack to get around some warnings
+    let playerIndexes = $derived(Game.players.map((p, i) => ({ p, i })).filter(({ p }) => ids.includes(p.team)).map(({ i }) => i));
 </script>
 
 <div class="w-full h-full flex flex-col items-center">
-    <h2 class="w-full text-center text-5xl pb-2" style={id ? `color: ${nameColors[id]}` : ""}>{name}</h2>
-    <table class="overflow-y-auto block" style={ id ? "width: 100%" : "width: min(100%, 900px)" }>
+    <h2 class="w-full text-center text-5xl pb-2" style={ids.length === 1 ? `color: ${nameColors[ids[0]]}` : ""}>{name}</h2>
+    <table class="overflow-y-auto block" style={ ids.length === 1 ? "width: 100%" : "width: min(100%, 900px)" }>
         <thead class="sticky top-0 bg-background">
             <tr class="*:pr-1.5">
                 <th class="min-w-10"></th> 
@@ -24,8 +25,8 @@
             </tr>
         </thead>
         <tbody class="[&>tr>td]:pr-1.5">
-            {#each team as player}
-                <PlayerView {player} />
+            {#each playerIndexes as index}
+                <PlayerView {index} />
             {/each}
         </tbody>
     </table>

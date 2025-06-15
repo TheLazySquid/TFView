@@ -29,11 +29,11 @@
         {#if split}
             <Resizable.PaneGroup direction="horizontal">
                 <Resizable.Pane>
-                    <TeamView id={2} name="Red" />
+                    <TeamView ids={[2]} name="Red" />
                 </Resizable.Pane>
                 <Resizable.Handle />
                 <Resizable.Pane>
-                    <TeamView id={3} name="Blue" />
+                    <TeamView ids={[3]} name="Blue" />
                 </Resizable.Pane>
             </Resizable.PaneGroup>
         {:else}

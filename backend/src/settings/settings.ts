@@ -21,6 +21,11 @@ export default class Settings {
             reply(Message.InitialSettings, this.config);
         });
 
+        Socket.onConnect("game", (reply) => {
+            reply(Message.Tags, this.config.tags);
+            reply(Message.UserColor, this.config.userColor);
+        });
+
         // I'd love to do an actual directory picker when picking the steam/tf directories
         // But for some reason there's only like two packages with 0 downloads that do it
         // And both of them suck

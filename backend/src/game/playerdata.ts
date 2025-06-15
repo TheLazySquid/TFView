@@ -75,9 +75,9 @@ export default class PlayerData {
 
 				for(let i = 0; i < summaries.length; i++) {
 					if(summaries[i].failedQueries >= 3) {
+						Log.warning(`Failed to get player summary for ${summaries[i].id3} after 3 attempts`);
 						summaries.splice(i, 1);
 						i--;
-						Log.warning(`Failed to get player summary for ${summaries[i].id3} after 3 attempts`);
 					} else {
 						summaries[i].failedQueries++;
 					}

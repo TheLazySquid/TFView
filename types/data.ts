@@ -11,6 +11,7 @@ export interface SettingsType {
     rconPassword: string;
     steamApiKey?: string;
     tags: Tag[];
+    userColor?: string;
 }
 
 export interface PastGamePlayer {

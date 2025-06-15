@@ -11,9 +11,17 @@
     import Game from "$lib/ws/game.svelte";
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
+    import Check from "@lucide/svelte/icons/check";
 
-    let { player }: { player: Player } = $props();
-    let color = $derived(player === Game.user ? "var(--color-amber-900)" : "");
+    let { index }: { index: number } = $props();
+    let player = $derived(Game.players[index]);
+    let color = $derived.by(() => {
+        if(player.ID3 === Game.user?.ID3) return Game.userColor;
+        for(let tag of Game.tags) {
+            if(player.tags[tag.id]) return tag.color;
+        }
+        return "";
+    });
     let showHealth = $derived(Game.user?.team === 1 || player.team === Game.user?.team);
 
     const setNickname = (player: Player) => {
@@ -50,7 +58,16 @@
             },
             defaultValue: player.note,
             textarea: true
-        })
+        });
+    }
+
+    const toggleTag = (id: string) => {
+        player.tags[id] = !player.tags[id];
+        
+        WS.send(Recieves.SetTags, {
+            id: player.ID3,
+            tags: $state.snapshot(player.tags)
+        });
     }
 </script>
 
@@ -134,6 +151,24 @@
                 <ContextMenu.Item onclick={() => editNote(player)}>
                     Edit Note
                 </ContextMenu.Item>
+                <ContextMenu.Sub>
+                    <ContextMenu.SubTrigger>
+                        Tags
+                    </ContextMenu.SubTrigger>
+                    <ContextMenu.SubContent>
+                        {#each Game.tags as tag}
+                            <!-- I know there's a built in checkbox but it's causing problems -->
+                            <ContextMenu.Item onclick={() => toggleTag(tag.id)} closeOnSelect={false}>
+                                <div class="w-5">
+                                    {#if player.tags[tag.id]}
+                                        <Check />
+                                    {/if}
+                                </div>
+                                {tag.name}
+                            </ContextMenu.Item>
+                        {/each}
+                    </ContextMenu.SubContent>
+                </ContextMenu.Sub>
             </ContextMenu.Content>
         </ContextMenu.Root>
     </td>

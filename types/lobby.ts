@@ -53,7 +53,7 @@ export interface Player {
     user?: boolean;
 
     // user-generated
-    tags: string[];
+    tags: Record<string, boolean>;
     nickname?: string | null;
     note: string;
 }

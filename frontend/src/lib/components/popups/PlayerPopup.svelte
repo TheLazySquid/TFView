@@ -2,12 +2,16 @@
     import type { Player } from "$types/lobby";
     import * as Dialog from "$lib/components/ui/dialog";
     import * as Tabs from "$lib/components/ui/tabs";
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
     import PastEncounters from "../history/PastEncounters.svelte";
     import Chat from "../game/Chat.svelte";
     import InfoIcon from "@lucide/svelte/icons/user";
     import HistoryIcon from "@lucide/svelte/icons/folder-clock";
     import ChatIcon from "@lucide/svelte/icons/message-square-more";
     import KillfeedIcon from "@lucide/svelte/icons/swords";
+    import Tag from "@lucide/svelte/icons/tag";
+    import CircleX from "@lucide/svelte/icons/circle-x";
+    import CirclePlus from "@lucide/svelte/icons/circle-plus";
     import Killfeed from "../game/Killfeed.svelte";
     import Popup from "./Popup.svelte";
     import Game from "$lib/ws/game.svelte";
@@ -35,6 +39,18 @@
     }
 
     const sendNote = throttle(sendNoteFn, 200);
+
+    let hasTags = $derived(Game.tags.filter((t) => player!?.tags[t.id]));
+    let missingTags = $derived(Game.tags.filter((t) => !player!?.tags[t.id]));
+
+    const saveTags = () => {
+        if(!player) return;
+
+        WS.send(Recieves.SetTags, {
+            id: player.ID3,
+            tags: $state.snapshot(player.tags)
+        });
+    }
 </script>
 
 <Popup type="openPlayerPopup" {onOpen} class="min-h-[450px] flex flex-col *:nth-[2]:flex-grow"
@@ -58,6 +74,38 @@ style="max-width: min(700px, 85%);">
                 <div>Note:</div>
                 <textarea class="resize-y p-1 h-[150px] w-full outline not-focus:outline-zinc-600"
                 bind:value={player.note} onchange={sendNote}></textarea>
+                <div class="flex items-center gap-1 pt-2">
+                    <div class="-mt-1">Tags:</div>
+                    {#if player.user}
+                        <button class="flex items-center text-sm rounded-full px-1.5 bg-accent gap-1">
+                            <Tag size={12} />
+                            <div class="-mt-0.5">You</div>
+                        </button>
+                    {/if}
+                    {#each hasTags as tag}
+                        <button class="flex items-center text-sm rounded-full px-1.5 bg-accent gap-1"
+                        onclick={() => { player!.tags[tag.id] = false; saveTags() }}>
+                            <Tag size={12} color={tag.color} />
+                            <div class="-mt-0.5">{tag.name}</div>
+                            <CircleX size={12} />
+                        </button>
+                    {/each}
+                    {#if missingTags.length > 0}
+                        <DropdownMenu.Root>
+                            <DropdownMenu.Trigger>
+                                <CirclePlus size={16} />
+                            </DropdownMenu.Trigger>
+                            <DropdownMenu.Content>
+                                {#each missingTags as tag}
+                                    <DropdownMenu.Item onclick={() => { player!.tags[tag.id] = true; saveTags() }}>
+                                        <Tag size={16} color={tag.color} />
+                                        {tag.name}
+                                    </DropdownMenu.Item>
+                                {/each}
+                            </DropdownMenu.Content>
+                        </DropdownMenu.Root>
+                    {/if}
+                </div>
             </Tabs.Content>
             <Tabs.Content value="encounters">
                 <!-- Required for infinite loading for some reason -->

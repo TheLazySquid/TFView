@@ -3,6 +3,7 @@
 	import GripVertical from "@lucide/svelte/icons/grip-vertical";
     import Trash from "@lucide/svelte/icons/trash-2";
 	import ColorPicker from "svelte-awesome-color-picker";
+	import { watch } from "runed";
 	
 	interface Props {
 		tag: Tag;
@@ -24,16 +25,7 @@
 	}
 
 	// Update when the color changes (onInput sucks)
-	let initial = true;
-	$effect(() => {
-		if(initial) {
-			initial = false;
-			return;
-		}
-
-		tag.color;
-		onupdate();
-	});
+	watch(() => tag.color, onupdate, { lazy: true });
 </script>
 
 <div class="picker">

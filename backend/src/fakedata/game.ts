@@ -29,7 +29,7 @@ export const fakeLobby: Lobby = {
             deaths: 0,
             class: 1,
             user: true,
-            tags: [],
+            tags: {},
             note: ""
         },
         {
@@ -43,7 +43,7 @@ export const fakeLobby: Lobby = {
             team: 2,
             kills: 1,
             deaths: 5,
-            tags: [],
+            tags: {},
             nickname: "Some Guy",
             note: ""
         },
@@ -58,7 +58,7 @@ export const fakeLobby: Lobby = {
             team: 3,
             kills: 5,
             deaths: 2,
-            tags: [],
+            tags: {},
             note: ""
         },
         {
@@ -72,7 +72,7 @@ export const fakeLobby: Lobby = {
             team: 1,
             kills: 0,
             deaths: 0,
-            tags: [],
+            tags: {},
             note: ""
         }
     ],

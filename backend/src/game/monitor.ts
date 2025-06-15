@@ -61,6 +61,20 @@ export default class GameMonitor {
             updatePlayerData(ws, id, "note", note);
         });
 
+        Socket.on(Recieves.SetTags, ({ id, tags }, { ws }) => {
+            let activeTags = Object.entries(tags).filter(([_, e]) => e).map(([t]) => t);
+            if(!fakeData) History.setPlayerUserData(id, "tags", JSON.stringify(activeTags));
+
+            let player = this.lobby.players.find(p => p.ID3 === id);
+            if(!player) return;
+            player.tags = tags;
+
+            Socket.sendOthers(ws, "game", Message.PlayerUpdate, {
+                userId: player.userId,
+                tags
+            });
+        });
+
         if(fakeData) {
             this.lobby = fakeLobby;
 
@@ -223,7 +237,7 @@ export default class GameMonitor {
             ids.add(id);
             if(id === "0" || id === undefined || !playerInfo.iAccountID || playerInfo.szName === undefined) continue;
             
-            let player: Partial<Player> = { kills: 0, deaths: 0 };
+            let player: Partial<Player> = { kills: 0, deaths: 0, tags: {} };
             if(playerInfo.iAccountID === this.userAccountID3) player.user = true;
             if(this.playerMap.has(id)) player = this.playerMap.get(id);
 
@@ -236,7 +250,10 @@ export default class GameMonitor {
                 // Get any stored user-generated data
                 const playerData = History.getPlayerUserData(player.ID3);
                 if(playerData) {
-                    if(playerData.tags) player.tags = JSON.parse(playerData.tags);
+                    if(playerData.tags) {
+                        let tags = JSON.parse(playerData.tags);
+                        for(let tag of tags) player.tags[tag] = true;
+                    }
                     if(playerData.nickname) player.nickname = playerData.nickname;
                     if(playerData.note) player.note = playerData.note;
                 }
