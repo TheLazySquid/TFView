@@ -4,8 +4,8 @@ import EventEmitter from "node:events";
 import { join } from "node:path";
 import Log from "./log";
 
-type Topic = "game" | "history" | "settings" | "global" | "logs";
-type WS = Bun.ServerWebSocket<{ topic: Topic }>;
+export type Topic = "game" | "history" | "settings" | "global" | "logs";
+export type WS = Bun.ServerWebSocket<{ topic: Topic }>;
 
 export default class Socket {
     static topics: string[] = ["game", "history", "settings"];

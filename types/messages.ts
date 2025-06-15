@@ -44,7 +44,8 @@ export enum Recieves {
     GetGame,
     GetEncounters,
     UpdateSetting,
-    SetNickname
+    SetNickname,
+    SetNote
 }
 
 export interface RecievesTypes {
@@ -55,6 +56,7 @@ export interface RecievesTypes {
     [Recieves.GetEncounters]: Recieved<{ id: string, offset: number }, PlayerEncounter[]>;
     [Recieves.UpdateSetting]: Recieved<{ key: keyof SettingsType, value: any }>;
     [Recieves.SetNickname]: Recieved<{ id: string, nickname: string | null }>;
+    [Recieves.SetNote]: Recieved<{ id: string, note: string }>;
 }
 
 export type RecievesKey<C extends keyof RecievesTypes, K extends keyof Recieved<any, any>> =

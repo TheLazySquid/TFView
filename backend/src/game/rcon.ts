@@ -14,7 +14,8 @@ export default class Rcon {
         
         this.server = new RconServer({
             host: "127.0.0.1",
-            port: Settings.get("rconPort")
+            port: Settings.get("rconPort"),
+            encoding: "utf8"
         });
 
         this.connect();

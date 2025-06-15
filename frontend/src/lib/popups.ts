@@ -3,6 +3,7 @@ import type { Player } from "$types/lobby";
 export interface InputOptions {
     title: string;
     defaultValue?: string;
+    textarea?: boolean;
     callback: (value: string) => void;
 }
 

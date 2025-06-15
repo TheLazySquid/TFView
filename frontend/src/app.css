@@ -57,7 +57,7 @@
         @apply cursor-pointer;
     }
 
-    input:focus {
+    input:focus, textarea:focus {
         outline: 1px solid var(--ring);
     }
 }

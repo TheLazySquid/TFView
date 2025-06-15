@@ -25,7 +25,7 @@
     }
 </script>
 
-<table class="max-h-[400px] overflow-y-autow-full">
+<table class="max-h-[400px] overflow-y-auto w-full">
     <thead class="sticky top-0"> 
         <tr class="*:text-left">
             <th>Time</th>

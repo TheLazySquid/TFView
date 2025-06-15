@@ -1,7 +1,7 @@
 import type { ChatMessage, G15Player, KillfeedEntry, Lobby, Player, TF2Class } from "$types/lobby";
 import type { PlayerEncounter } from "$types/data";
 import { Recieves, Message } from "$types/messages";
-import Socket from "../socket";
+import Socket, { type WS } from "../socket";
 import Rcon from "./rcon";
 import { fakeData } from "src/consts";
 import LogParser from "src/logParser";
@@ -40,17 +40,25 @@ export default class GameMonitor {
             else Rcon.run(`say_team ${msg}`);
         });
 
-        Socket.on(Recieves.SetNickname, ({ id, nickname }, { ws }) => {
-            if(!fakeData) History.setPlayerUserData(id, "nickname", nickname);
-            
+        const updatePlayerData = (ws: WS, id: string, key: "nickname" | "note", value: string) => {
+            if(!fakeData) History.setPlayerUserData(id, key, value);
+
             let player = this.lobby.players.find(p => p.ID3 === id);
             if(!player) return;
-            player.nickname = nickname;
+            player[key] = value;
 
             Socket.sendOthers(ws, "game", Message.PlayerUpdate, {
                 userId: player.userId,
-                nickname
+                [key]: value
             });
+        }
+
+        Socket.on(Recieves.SetNickname, ({ id, nickname }, { ws }) => {
+            updatePlayerData(ws, id, "nickname", nickname);
+        });
+
+        Socket.on(Recieves.SetNote, ({ id, note }, { ws }) => {            
+            updatePlayerData(ws, id, "note", note);
         });
 
         if(fakeData) {

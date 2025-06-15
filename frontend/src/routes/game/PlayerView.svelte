@@ -5,6 +5,7 @@
     import User from "@lucide/svelte/icons/square-user-round";
     import Skull from "@lucide/svelte/icons/skull";
     import UserPen from "@lucide/svelte/icons/user-pen";
+    import Notepad from "@lucide/svelte/icons/notepad-text";
     import Popups from "$lib/popups";
     import { classIcons, nameColors } from "$lib/consts";
     import Game from "$lib/ws/game.svelte";
@@ -35,6 +36,21 @@
             id: player.ID3,
             nickname: null
         });
+    }
+
+    const editNote = (player: Player) => {
+        Popups.openInputPopup?.({
+            title: `Edit note for ${player.name}`,
+            callback: (note) => {
+                player.note = note;
+                WS.send(Recieves.SetNote, {
+                    id: player.ID3,
+                    note
+                });
+            },
+            defaultValue: player.note,
+            textarea: true
+        })
     }
 </script>
 
@@ -75,6 +91,14 @@
                             </Tooltip.Root>
                         </Tooltip.Provider>
                     {/if}
+                    {#if player.note}
+                        <Tooltip.Provider>
+                            <Tooltip.Root>
+                                <Tooltip.Trigger class="cursor-pointer" onclick={() => editNote(player)}><Notepad /></Tooltip.Trigger>
+                                <Tooltip.Content class="text-white">Player has note saved</Tooltip.Content>
+                            </Tooltip.Root>
+                        </Tooltip.Provider>
+                    {/if}
                 </div>
             </ContextMenu.Trigger>
             <ContextMenu.Content>
@@ -107,6 +131,9 @@
                         Remove Nickname
                     </ContextMenu.Item>
                 {/if}
+                <ContextMenu.Item onclick={() => editNote(player)}>
+                    Edit Note
+                </ContextMenu.Item>
             </ContextMenu.Content>
         </ContextMenu.Root>
     </td>

@@ -11,6 +11,9 @@
     import Killfeed from "../game/Killfeed.svelte";
     import Popup from "./Popup.svelte";
     import Game from "$lib/ws/game.svelte";
+    import throttle from "throttleit";
+    import WS from "$lib/ws/wsclient.svelte";
+    import { Recieves } from "$types/messages";
 
     let player: Player | null = $state.raw(null);
 
@@ -21,6 +24,17 @@
     const teams = ["Unassigned", "Spectator", "Red", "Blue"];
     let tab = $state("info");
     let showHealth = $derived(Game.user?.team === 1 || player!?.team === Game.user?.team);
+    
+    const sendNoteFn = () => {
+        if(!player) return;
+
+        WS.send(Recieves.SetNote, {
+            id: player.ID3,
+            note: player.note
+        });
+    }
+
+    const sendNote = throttle(sendNoteFn, 200);
 </script>
 
 <Popup type="openPlayerPopup" {onOpen} class="min-h-[450px] flex flex-col *:nth-[2]:flex-grow"
@@ -41,6 +55,9 @@ style="max-width: min(700px, 85%);">
                 {#if showHealth}
                     <div>Health: {player.health}</div>
                 {/if}
+                <div>Note:</div>
+                <textarea class="resize-y p-1 h-[150px] w-full outline not-focus:outline-zinc-600"
+                bind:value={player.note} onchange={sendNote}></textarea>
             </Tabs.Content>
             <Tabs.Content value="encounters">
                 <!-- Required for infinite loading for some reason -->
