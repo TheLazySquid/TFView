@@ -13,6 +13,7 @@
     import Swords from "@lucide/svelte/icons/swords";
     import Message from "@lucide/svelte/icons/message-square-more";
     import Close from "@lucide/svelte/icons/chevron-last";
+    import InputPopup from "$lib/components/popups/InputPopup.svelte";
 
     Game.init();
 
@@ -34,6 +35,7 @@
 <PastGamePopup />
 <PastPlayerPopup />
 <ProfilePicturePopup />
+<InputPopup />
 
 {#snippet button(Icon: Component, type: string)}
     <button class="bg-accent py-3 px-1 rounded-l-md"

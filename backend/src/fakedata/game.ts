@@ -7,7 +7,9 @@ export const fakeCurrentGame: CurrentGame = {
     rowid: 0,
     startTime: Date.now() - 900000,
     hostname: "Valve Matchmaking Server (Chicago srcds1020-ord1 #101)",
-    ip: "169.254.116.201:5472"
+    ip: "169.254.116.201:5472",
+    kills: 5,
+    deaths: 2
 }
 
 export const fakeLobby: Lobby = {
@@ -26,7 +28,9 @@ export const fakeLobby: Lobby = {
             kills: 9,
             deaths: 0,
             class: 1,
-            user: true
+            user: true,
+            tags: [],
+            note: ""
         },
         {
             name: "Screamin' Eagles",
@@ -38,7 +42,10 @@ export const fakeLobby: Lobby = {
             ping: 161,
             team: 2,
             kills: 1,
-            deaths: 5
+            deaths: 5,
+            tags: [],
+            nickname: "Some Guy",
+            note: ""
         },
         {
             name: "Still Alive",
@@ -50,7 +57,9 @@ export const fakeLobby: Lobby = {
             ping: 39,
             team: 3,
             kills: 5,
-            deaths: 2
+            deaths: 2,
+            tags: [],
+            note: ""
         },
         {
             name: "Mentlegen",
@@ -62,7 +71,9 @@ export const fakeLobby: Lobby = {
             ping: 7,
             team: 1,
             kills: 0,
-            deaths: 0
+            deaths: 0,
+            tags: [],
+            note: ""
         }
     ],
     killfeed: [

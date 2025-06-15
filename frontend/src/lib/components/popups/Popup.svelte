@@ -15,24 +15,21 @@
     let { type, onOpen, children, class: className = "", style = "" }: Props = $props();
     let modalOpen = $state(false);
 
-    const baseZIndex = 50;
-    let zIndex = $state(baseZIndex + Popups.popupsOpen);
-
     Popups[type] = (...args: any) => {
-        Popups.popupsOpen++;
-        zIndex = baseZIndex + Popups.popupsOpen;
+        Popups.closePopup?.();
+
         modalOpen = true;
         onOpen(...args);
-    }
 
-    const onOpenChange = (open: boolean) => {
-        if(open) return;
-        Popups.popupsOpen--;
+        Popups.closePopup = () => {
+            modalOpen = false;
+            Popups.closePopup = undefined;
+        }
     }
 </script>
 
-<Dialog.Root bind:open={modalOpen} {onOpenChange}>
-    <Dialog.Content style="z-index: {zIndex}; {style}" class={className}>
+<Dialog.Root bind:open={modalOpen}>
+    <Dialog.Content style="z-index: 50; {style}" class={className}>
         {@render children()}
     </Dialog.Content>
 </Dialog.Root>

@@ -51,6 +51,11 @@ export interface Player {
 
     // Gotten from loginusers.vdf
     user?: boolean;
+
+    // user-generated
+    tags: string[];
+    nickname?: string | null;
+    note: string;
 }
 
 export interface KillfeedEntry {

@@ -40,6 +40,19 @@ export default class GameMonitor {
             else Rcon.run(`say_team ${msg}`);
         });
 
+        Socket.on(Recieves.SetNickname, ({ id, nickname }, { ws }) => {
+            if(!fakeData) History.setPlayerUserData(id, "nickname", nickname);
+            
+            let player = this.lobby.players.find(p => p.ID3 === id);
+            if(!player) return;
+            player.nickname = nickname;
+
+            Socket.sendOthers(ws, "game", Message.PlayerUpdate, {
+                userId: player.userId,
+                nickname
+            });
+        });
+
         if(fakeData) {
             this.lobby = fakeLobby;
 
@@ -182,7 +195,7 @@ export default class GameMonitor {
         });
     }
 
-    static g15Regex = /m_(.+)\[(\d+)\] .+ \((.+)\)(?:\n|$)/g;
+    static g15Regex = /m_(.+)\[(\d+)\] \S+ \((.+)\)(?:\n|$)/g;
     static parseG15(text: string) {
         let info: Partial<G15Player>[] = [];
         for(let i = 0; i <= 101; i++) info.push({});
@@ -212,6 +225,14 @@ export default class GameMonitor {
             if(this.playerMap.has(id)) {
                 if(diff) Socket.send("game", Message.PlayerUpdate, diff);
             } else {
+                // Get any stored user-generated data
+                const playerData = History.getPlayerUserData(player.ID3);
+                if(playerData) {
+                    if(playerData.tags) player.tags = JSON.parse(playerData.tags);
+                    if(playerData.nickname) player.nickname = playerData.nickname;
+                    if(playerData.note) player.note = playerData.note;
+                }
+
                 // track the player in the game history
                 History.onJoin(player as Player);
 

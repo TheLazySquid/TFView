@@ -1,13 +1,22 @@
 import type { Player } from "$types/lobby";
 
+export interface InputOptions {
+    title: string;
+    defaultValue?: string;
+    callback: (value: string) => void;
+}
+
 export interface PopupsType {
     openPlayerPopup: (player: Player) => void;
     openGamePopup: (rowid: number) => void;
     openPastPlayerPopup: (id: string, name: string) => void;
     openProfilePicturePopup: (avatarHash: string, name: string) => void;
+    openInputPopup: (options: InputOptions) => void;
 }
 
-let Popups: Partial<PopupsType> & { popupsOpen: number } = {
-    popupsOpen: 0
-};
+export interface PopupsMethods {
+    closePopup?: () => void;
+}
+
+let Popups: Partial<PopupsType & PopupsMethods> = {};
 export default Popups;

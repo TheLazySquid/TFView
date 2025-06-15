@@ -1,4 +1,4 @@
-import type { Stored, PastGame, PastGameEntry, PlayerEncounter, PastGamePlayer } from "$types/data";
+import type { Stored, PastGame, PastGameEntry, PlayerEncounter, PastGamePlayer, StoredPlayer, StoredPlayerKey } from "$types/data";
 import type { Player } from "$types/lobby";
 import { Recieves, Message } from "$types/messages";
 import { dataPath, fakeData } from "src/consts";
@@ -104,12 +104,32 @@ export default class History {
             time INTEGER NOT NULL,
             kills INTEGER NOT NULL,
             deaths INTEGER NOT NULL
+        ); CREATE TABLE IF NOT EXISTS main.players (
+            id TEXT NOT NULL PRIMARY KEY,
+            tags TEXT,
+            nickname TEXT,
+            note TEXT
         )`);
 
         if(newDb) {
             Log.info("Generating fake history data");
             createFakeHistory(this.db);
         }
+    }
+
+    static getPlayerUserData(id: string) {
+        return this.db.query<StoredPlayer | null, {}>(`SELECT * FROM players WHERE id = $id`).get({ $id: id });
+    }
+
+    static setPlayerUserData(id: string, key: StoredPlayerKey, value: string) {
+        if(!this.getPlayerUserData(id)) {
+            this.db.query(`INSERT INTO players (id) VALUES($id)`).run({ $id: id });
+        }
+
+        this.db.query(`UPDATE players SET ${key} = $value WHERE id = $id`).run({
+            $value: value,
+            $id: id
+        });
     }
 
     static getGames(offset: number): PastGameEntry[] {

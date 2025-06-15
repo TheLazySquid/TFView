@@ -1,15 +1,41 @@
 <script lang="ts">
     import type { Player } from "$types/lobby";
     import * as ContextMenu from "$lib/components/ui/context-menu";
+    import * as Tooltip from "$lib/components/ui/tooltip";
     import User from "@lucide/svelte/icons/square-user-round";
     import Skull from "@lucide/svelte/icons/skull";
+    import UserPen from "@lucide/svelte/icons/user-pen";
     import Popups from "$lib/popups";
     import { classIcons, nameColors } from "$lib/consts";
     import Game from "$lib/ws/game.svelte";
+    import WS from "$lib/ws/wsclient.svelte";
+    import { Recieves } from "$types/messages";
 
     let { player }: { player: Player } = $props();
     let color = $derived(player === Game.user ? "var(--color-amber-900)" : "");
     let showHealth = $derived(Game.user?.team === 1 || player.team === Game.user?.team);
+
+    const setNickname = (player: Player) => {
+        Popups.openInputPopup?.({
+            title: `Enter nickname for ${player.name}`,
+            callback: (nickname) => {
+                player.nickname = nickname;
+                WS.send(Recieves.SetNickname, {
+                    id: player.ID3,
+                    nickname
+                });
+            },
+            defaultValue: player.nickname || player.name
+        });
+    }
+
+    const removeNickname = (player: Player) => {
+        player.nickname = null;
+        WS.send(Recieves.SetNickname, {
+            id: player.ID3,
+            nickname: null
+        });
+    }
 </script>
 
 {#snippet link(text: string, url: string)}
@@ -35,8 +61,21 @@
     <td>
         <ContextMenu.Root>
             <ContextMenu.Trigger>
-                <button class="flex-grow text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
-                onclick={() => Popups.openPlayerPopup?.(player)} style={`color: ${nameColors[player.team]}`}>{player.name}</button>
+                <div class="flex items-center">
+                    <button class="flex-grow text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
+                    onclick={() => Popups.openPlayerPopup?.(player)} style={`color: ${nameColors[player.team]}`}
+                    class:italic={player.nickname}>
+                        {player.nickname ? player.nickname : player.name}
+                    </button>
+                    {#if player.nickname}
+                        <Tooltip.Provider>
+                            <Tooltip.Root>
+                                <Tooltip.Trigger><UserPen /></Tooltip.Trigger>
+                                <Tooltip.Content class="text-white">Nickname applied, real name is {player.name}</Tooltip.Content>
+                            </Tooltip.Root>
+                        </Tooltip.Provider>
+                    {/if}
+                </div>
             </ContextMenu.Trigger>
             <ContextMenu.Content>
                 <ContextMenu.Sub>
@@ -60,6 +99,14 @@
                         {@render link("Ozfortress", `https://ozfortress.com/users/steam_id/${player.ID64}`)}
                     </ContextMenu.SubContent>
                 </ContextMenu.Sub>
+                <ContextMenu.Item onclick={() => setNickname(player)}>
+                    Set Nickname
+                </ContextMenu.Item>
+                {#if player.nickname}
+                    <ContextMenu.Item onclick={() => removeNickname(player)}>
+                        Remove Nickname
+                    </ContextMenu.Item>
+                {/if}
             </ContextMenu.Content>
         </ContextMenu.Root>
     </td>

@@ -65,3 +65,12 @@ export interface PlayerEncounter {
     kills: number;
     deaths: number;
 }
+
+export interface StoredPlayer {
+    id: string;
+    tags?: string;
+    nickname?: string;
+    note?: string;
+}
+
+export type StoredPlayerKey = keyof Omit<StoredPlayer, 'id'>;
