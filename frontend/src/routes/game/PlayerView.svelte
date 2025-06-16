@@ -2,7 +2,6 @@
     import type { Player } from "$types/lobby";
     import * as ContextMenu from "$lib/components/ui/context-menu";
     import * as Tooltip from "$lib/components/ui/tooltip";
-    import User from "@lucide/svelte/icons/square-user-round";
     import Skull from "@lucide/svelte/icons/skull";
     import UserPen from "@lucide/svelte/icons/user-pen";
     import Notepad from "@lucide/svelte/icons/notepad-text";
@@ -12,6 +11,7 @@
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
     import Check from "@lucide/svelte/icons/check";
+    import Avatar from "$lib/components/player/Avatar.svelte";
 
     let { index }: { index: number } = $props();
     let player = $derived(Game.players[index]);
@@ -81,15 +81,7 @@
 
 <tr style="background-color: {color}">
     <td>
-        {#if player.avatarHash}
-            <button onclick={() => Popups.openProfilePicturePopup?.(player.avatarHash!, player.name)}
-            class="contents">
-                <img src="https://avatars.steamstatic.com/{player.avatarHash}_medium.jpg"
-                class="w-8 h-8" alt="Avatar" />
-            </button>
-        {:else}
-            <User size={32} />
-        {/if}
+        <Avatar avatarHash={player.avatarHash} name={player.name} />
     </td>
     <td>
         <ContextMenu.Root>

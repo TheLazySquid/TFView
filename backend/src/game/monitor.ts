@@ -272,10 +272,13 @@ export default class GameMonitor {
                     .then((summary) => {
                         player.avatarHash = summary.avatarHash;
                         player.createdTimestamp = summary.createdTimestamp;
+                        
                         Socket.send("game", Message.PlayerUpdate, {
                             userId: player.userId,
                             ...summary
                         });
+
+                        History.saveAvatar(player.ID3, summary.avatarHash);
                     })
                     .catch();
             }

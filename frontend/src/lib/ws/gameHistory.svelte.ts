@@ -2,8 +2,8 @@ import type { PastGameEntry } from "$types/data";
 import { Message } from "$types/messages";
 import { PageState } from "./wsclient.svelte";
 
-export default new class History extends PageState {
-    type = "history";
+export default new class GameHistory extends PageState {
+    type = "gamehistory";
     pastGames: PastGameEntry[] = $state([]);
     totalGames: number | undefined = $state();
 

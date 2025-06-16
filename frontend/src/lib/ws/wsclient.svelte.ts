@@ -1,5 +1,6 @@
-import type { Message, MessageTypes, RecievesKey, RecievesTypes } from "$types/messages";
+import { Message, type MessageTypes, type RecievesKey, type RecievesTypes } from "$types/messages";
 import { networkPort } from "$shared/consts";
+import type { Tag } from "$types/data";
 
 type Status = "idle" | "connecting" | "connected" | "disconnected";
 
@@ -98,6 +99,17 @@ export abstract class PageState {
     }
 
     abstract setup(): void;
+}
+
+export abstract class PageStateWithTags extends PageState {
+    tags: Tag[] = $state.raw([]);
+    
+    init() {
+        super.init();
+        WS.on(Message.Tags, (tags) => {
+            this.tags = tags;
+        });
+    }
 }
 
 export default WS;

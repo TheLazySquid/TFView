@@ -69,9 +69,10 @@ export interface PlayerEncounter {
 
 export interface StoredPlayer {
     id: string;
+    lastName: string;
+    lastSeen: number;
+    avatarHash?: string;
     tags?: string;
     nickname?: string;
     note?: string;
 }
-
-export type StoredPlayerKey = keyof Omit<StoredPlayer, 'id'>;

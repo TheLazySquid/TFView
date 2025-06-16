@@ -4,6 +4,8 @@ import { mapNames, playerIds, playerNames, random } from "./util";
 
 export function createFakeHistory(db: Database) {
     let start = Date.now() - 1e6;
+    let recorded: boolean[] = [];
+
     for(let i = 0; i < 60; i++) {
         start -= random(1e6, 1e7);
 
@@ -17,8 +19,18 @@ export function createFakeHistory(db: Database) {
             let availableIndex = random(0, available.length - 1);
             let index = available[availableIndex];
             available.splice(availableIndex, 1);
-
             let time = start + random(0, 1e5);
+
+            if(!recorded[index]) {
+                recorded[index] = true;
+                db.query(`INSERT INTO players (id, lastName, lastSeen)
+                    VALUES($id, $lastName, $lastSeen)`).run({
+                    $id: playerIds[index],
+                    $lastName: playerNames[index],
+                    $lastSeen: time
+                });
+            }
+
             let player = {
                 id: playerIds[index],
                 name: playerNames[index],

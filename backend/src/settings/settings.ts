@@ -26,6 +26,10 @@ export default class Settings {
             reply(Message.UserColor, this.config.userColor);
         });
 
+        Socket.onConnect("playerhistory", (reply) => {
+            reply(Message.Tags, this.config.tags);
+        });
+
         // I'd love to do an actual directory picker when picking the steam/tf directories
         // But for some reason there's only like two packages with 0 downloads that do it
         // And both of them suck

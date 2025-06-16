@@ -1,6 +1,6 @@
 <script lang="ts">
     import Time from "$lib/components/Time.svelte";
-    import History from "$lib/ws/history.svelte";
+    import GameHistory from "$lib/ws/gameHistory.svelte";
     import { Recieves } from "$types/messages";
     import InfiniteLoading, { type InfiniteEvent } from "svelte-infinite-loading";
     import Popups from "$lib/popups";
@@ -8,13 +8,13 @@
     import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
     import WS from "$lib/ws/wsclient.svelte";
 
-    History.init();
+    GameHistory.init();
 
     async function infiniteHandler(e: InfiniteEvent) {
-        let games = await WS.sendAndRecieve(Recieves.GetGames, History.pastGames.length);
-        if(games.total !== undefined) History.totalGames = games.total;
+        let games = await WS.sendAndRecieve(Recieves.GetGames, GameHistory.pastGames.length);
+        if(games.total !== undefined) GameHistory.totalGames = games.total;
 
-        History.pastGames.push(...games.games);
+        GameHistory.pastGames.push(...games.games);
         if(games.games.length === 0) e.detail.complete();
         else e.detail.loaded();
     }
@@ -29,12 +29,12 @@
 
 <div class="w-full h-full flex justify-center">
     <div class="overflow-y-auto" style="width: min(1000px, 90%)">
-        {#if History.totalGames}
-            <div>Total games recorded: {History.totalGames}</div>
+        {#if GameHistory.totalGames !== undefined}
+            <div>Total games recorded: {GameHistory.totalGames}</div>
         {/if}
         <table class="w-full">
-            <thead>
-                <tr class="*:sticky *:top-0 *:bg-background *:text-left">
+            <thead class="sticky top-0 bg-background">
+                <tr class="*:text-left">
                     <th>Time</th>
                     <th style="width: 15%">Duration</th>
                     <th>Map</th>
@@ -44,7 +44,7 @@
                 </tr>
             </thead>
             <tbody>
-                {#each History.pastGames as game}
+                {#each GameHistory.pastGames as game}
                     <tr class="border-t-2 *:py-1">
                         <td class="whitespace-nowrap"><Time date={game.start} /></td>
                         <td><Time date={game.duration} duration={true} /></td>

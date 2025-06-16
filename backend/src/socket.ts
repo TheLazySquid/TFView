@@ -4,11 +4,11 @@ import EventEmitter from "node:events";
 import { join } from "node:path";
 import Log from "./log";
 
-export type Topic = "game" | "history" | "settings" | "global" | "logs";
+export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "global" | "logs";
 export type WS = Bun.ServerWebSocket<{ topic: Topic }>;
 
 export default class Socket {
-    static topics: string[] = ["game", "history", "settings"];
+    static topics: string[] = ["game", "playerhistory", "gamehistory", "settings"];
     static events = new EventEmitter();
     static staticPath = join(__dirname, "..", "static");
     static server: Bun.Server;

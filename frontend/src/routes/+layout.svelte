@@ -8,7 +8,8 @@
 	import { WifiFade } from 'svelte-svg-spinners';
 	import * as AlertDialog from "$lib/components/ui/alert-dialog";
 	import Game from "@lucide/svelte/icons/gamepad-2";
-	import FolderClock from "@lucide/svelte/icons/folder-clock";
+	import FolderSearch from "@lucide/svelte/icons/folder-search";
+	import UserSearch from "@lucide/svelte/icons/user-search";
 	import Settings from "@lucide/svelte/icons/settings";
     import { Message } from '$types/messages';
     import { toast } from 'svelte-sonner';
@@ -17,7 +18,8 @@
 
 	const links = [
 		{ Icon: Game, href: "/" },
-		{ Icon: FolderClock, href: "/history" },
+		{ Icon: UserSearch, href: "/playerHistory" },
+		{ Icon: FolderSearch, href: "/gameHistory" },
 		{ Icon: Settings, href: "/settings" }
 	]
 
