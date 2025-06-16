@@ -12,9 +12,10 @@
 
     async function infiniteHandler(e: InfiniteEvent) {
         let games = await WS.sendAndRecieve(Recieves.GetGames, History.pastGames.length);
+        if(games.total !== undefined) History.totalGames = games.total;
 
-        History.pastGames.push(...games);
-        if(games.length === 0) e.detail.complete();
+        History.pastGames.push(...games.games);
+        if(games.games.length === 0) e.detail.complete();
         else e.detail.loaded();
     }
 </script>
@@ -28,6 +29,9 @@
 
 <div class="w-full h-full flex justify-center">
     <div class="overflow-y-auto" style="width: min(1000px, 90%)">
+        {#if History.totalGames}
+            <div>Total games recorded: {History.totalGames}</div>
+        {/if}
         <table class="w-full">
             <thead>
                 <tr class="*:sticky *:top-0 *:bg-background *:text-left">

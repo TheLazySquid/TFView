@@ -32,14 +32,14 @@
         <div>Duration: <Time date={game.duration} duration={true} /></div>
         <div>Server: {game.hostname ? `${game.hostname} (${game.ip})` : "Unknown"}</div>
         <h2>Players:</h2>
-        <table class="overflow-y-auto max-h-[400px]">
-            <thead>
+        <table class="overflow-y-auto max-h-[400px] block">
+            <thead class="sticky top-0 bg-background">
                 <tr class="*:text-left">
                     <th>Player</th>
                     <th>K/D</th>
                 </tr>
             </thead>
-            <tbody class="sticky top-0">
+            <tbody>
                 {#each game.players as player}
                     <tr>
                         <td>

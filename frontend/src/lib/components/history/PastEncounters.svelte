@@ -6,27 +6,32 @@
     import Popups from "$lib/popups";
     import InfiniteLoading from "svelte-infinite-loading";
     import WS from "$lib/ws/wsclient.svelte";
+    import { watch } from "runed";
 
     let { id }: { id: string } = $props();
     let encounters: PlayerEncounter[] = $state([]);
+    let total: number | undefined = $state();
 
-    $effect(() => {
-        id;
+    watch(() => id, () => {
         encounters = [];
+        total = undefined;
     });
 
     async function onInfinite({ detail: { complete, loaded }}: InfiniteEvent) {
-        let newEncounters = await WS.sendAndRecieve(Recieves.GetEncounters,
-            { id, offset: encounters.length });
-        encounters.push(...newEncounters);
-
-        if(newEncounters.length === 0) complete();
+        let newEncounters = await WS.sendAndRecieve(Recieves.GetEncounters, { id, offset: encounters.length });
+        if(newEncounters.total !== undefined) total = newEncounters.total;
+            
+        encounters.push(...newEncounters.encounters);
+        if(newEncounters.encounters.length === 0) complete();
         else loaded();
     }
 </script>
 
+{#if total !== undefined}
+    <div>{total} encounters recorded</div>
+{/if}
 <table class="max-h-[400px] overflow-y-auto w-full">
-    <thead class="sticky top-0"> 
+    <thead class="sticky top-0">
         <tr class="*:text-left">
             <th>Time</th>
             <th>Name</th>

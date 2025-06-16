@@ -5,10 +5,12 @@ import { PageState } from "./wsclient.svelte";
 export default new class History extends PageState {
     type = "history";
     pastGames: PastGameEntry[] = $state([]);
+    totalGames: number | undefined = $state();
 
     setup() {
         this.ws.on(Message.GameAdded, (game) => {
             this.pastGames.unshift(game);
+            if(this.totalGames) this.totalGames++;
         });
 
         this.ws.on(Message.GameUpdated, ({ rowid, ...changes }) => {

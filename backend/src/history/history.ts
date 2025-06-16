@@ -41,7 +41,13 @@ export default class History {
 
     static init() {
         Socket.on(Recieves.GetGames, (offset, { reply }) => {
-            reply(this.getGames(offset));
+            let games = this.getGames(offset);
+            if(offset === 0) {
+                let count = this.countGames();
+                reply({ games, total: count });
+            } else {
+                reply({ games });
+            }
         });
 
         Socket.on(Recieves.GetGame, (rowid, { reply }) => {
@@ -49,7 +55,13 @@ export default class History {
         });
 
         Socket.on(Recieves.GetEncounters, ({ id, offset }, { reply }) => {
-            reply(this.getEncounters(id, offset));
+            let encounters = this.getEncounters(id, offset);
+            if(offset === 0) {
+                let count = this.countEncounters(id);
+                reply({ encounters, total: count });
+            } else {
+                reply({ encounters });
+            }
         })
         
         Socket.onConnect("game", (send) => {
@@ -131,6 +143,11 @@ export default class History {
             $id: id
         });
     }
+    
+    static countGames(): number {
+        let val = this.db.query<{ "COUNT(1)": number }, []>(`SELECT COUNT(1) FROM games`).get();
+        return val["COUNT(1)"];
+    }
 
     static getGames(offset: number): PastGameEntry[] {
         return this.db.query<PastGameEntry, {}>(`SELECT start, duration, map, hostname, ip, kills, deaths, rowid FROM games
@@ -142,6 +159,12 @@ export default class History {
         let game = this.db.query<Stored<PastGame>, {}>(`SELECT * FROM games WHERE rowid = $rowid`)
             .get({ $rowid: id });
         return { ...game, players: JSON.parse(game.players) }
+    }
+
+    static countEncounters(id: string): number {
+        let val = this.db.query<{ "COUNT(1)": number }, {}>(`SELECT COUNT(1) FROM encounters
+            WHERE playerId = $id`).get({ $id: id });
+        return val["COUNT(1)"];
     }
 
     static getEncounters(id: string, offset: number): PlayerEncounter[] {
@@ -294,6 +317,7 @@ export default class History {
             info.kills = player.kills;
             info.deaths = player.deaths;
     
+            // console.log("Updating", player.name, player)
             this.db.query(`UPDATE encounters SET kills = $kills, deaths = $deaths WHERE rowid = $rowid`).run({
                 $kills: info.kills,
                 $deaths: info.deaths,

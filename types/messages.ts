@@ -56,9 +56,9 @@ export enum Recieves {
 export interface RecievesTypes {
     [Recieves.Chat]: Recieved<string>;
     [Recieves.ChatTeam]: Recieved<string>;
-    [Recieves.GetGames]: Recieved<number, PastGameEntry[]>;
+    [Recieves.GetGames]: Recieved<number, { total?: number, games: PastGameEntry[] }>;
     [Recieves.GetGame]: Recieved<number, PastGame>;
-    [Recieves.GetEncounters]: Recieved<{ id: string, offset: number }, PlayerEncounter[]>;
+    [Recieves.GetEncounters]: Recieved<{ id: string, offset: number }, { total?: number, encounters: PlayerEncounter[] }>;
     [Recieves.UpdateSetting]: Recieved<{ key: keyof SettingsType, value: any }>;
     [Recieves.SetNickname]: Recieved<{ id: string, nickname: string | null }>;
     [Recieves.SetNote]: Recieved<{ id: string, note: string }>;
