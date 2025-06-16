@@ -2,6 +2,8 @@ import type { SettingsType, PastGame, PastGameEntry, PlayerEncounter, Tag, Store
 import type { ChatMessage, CurrentServerInfo, KillfeedEntry, Lobby, Player } from "./lobby";
 
 // Sending messages from the backend
+export type SentMessage<Channel, Data> = { channel: Channel, data: Data };
+
 export enum Message {
     Warning,
     Error,
@@ -20,26 +22,25 @@ export enum Message {
     UserColor
 }
 
-export interface MessageTypes {
-    [Message.Warning]: string;
-    [Message.Error]: string;
-    [Message.InitialGame]: Lobby;
-    [Message.PlayerJoin]: Player;
-    [Message.PlayerLeave]: string;
-    [Message.PlayerUpdate]: Partial<Player> & { userId: string };
-    [Message.KillfeedAdded]: KillfeedEntry;
-    [Message.ChatAdded]: ChatMessage;
-    [Message.GameAdded]: PastGameEntry;
-    [Message.GameUpdated]: Partial<PastGameEntry> & { rowid: number };
-    [Message.InitialSettings]: SettingsType;
-    [Message.SettingUpdate]: { key: keyof SettingsType, value: any };
-    [Message.CurrentServer]: CurrentServerInfo | null;
-    [Message.Tags]: Tag[];
-    [Message.UserColor]: string | undefined;
-}
+export type MessageTypes =
+    | SentMessage<Message.Warning, string>
+    | SentMessage<Message.Error, string>
+    | SentMessage<Message.InitialGame, Lobby>
+    | SentMessage<Message.PlayerJoin, Player>
+    | SentMessage<Message.PlayerLeave, string>
+    | SentMessage<Message.PlayerUpdate, Partial<Player> & { userId: string }>
+    | SentMessage<Message.KillfeedAdded, KillfeedEntry>
+    | SentMessage<Message.ChatAdded, ChatMessage>
+    | SentMessage<Message.InitialSettings, SettingsType>
+    | SentMessage<Message.SettingUpdate, { key: keyof SettingsType, value: any }>
+    | SentMessage<Message.CurrentServer, CurrentServerInfo | null>
+    | SentMessage<Message.Tags, Tag[]>
+    | SentMessage<Message.UserColor, string | undefined>
+    | SentMessage<`list-${string}-addStart`, any>
+    | SentMessage<`list-${string}-update`, { id: string, update: any }>
 
 // Recieving messages
-export type Recieved<Send, Reply = void> = { send: Send, reply: Reply };
+export type RecievedMessage<Channel, Data, Reply = void> = { channel: Channel, data: Data, replyType: Reply };
 
 export enum Recieves {
     Chat,
@@ -54,18 +55,15 @@ export enum Recieves {
     GetPlayers
 }
 
-export interface RecievesTypes {
-    [Recieves.Chat]: Recieved<string>;
-    [Recieves.ChatTeam]: Recieved<string>;
-    [Recieves.GetGames]: Recieved<number, { total?: number, games: PastGameEntry[] }>;
-    [Recieves.GetGame]: Recieved<number, PastGame>;
-    [Recieves.GetEncounters]: Recieved<{ id: string, offset: number }, { total?: number, encounters: PlayerEncounter[] }>;
-    [Recieves.UpdateSetting]: Recieved<{ key: keyof SettingsType, value: any }>;
-    [Recieves.SetNickname]: Recieved<{ id: string, nickname: string | null }>;
-    [Recieves.SetNote]: Recieved<{ id: string, note: string }>;
-    [Recieves.SetTags]: Recieved<{ id: string, tags: Record<string, boolean> }>;
-    [Recieves.GetPlayers]: Recieved<number, { total?: number, players: StoredPlayer[] }>;
-}
-
-export type RecievesKey<C extends keyof RecievesTypes, K extends keyof Recieved<any, any>> =
-    RecievesTypes[C] extends Recieved<any, any> ? RecievesTypes[C][K] : never;
+export type RecievesTypes = 
+    | RecievedMessage<Recieves.Chat, string, void>
+    | RecievedMessage<Recieves.ChatTeam, string, void>
+    | RecievedMessage<Recieves.GetGames, number, { total?: number, games: PastGameEntry[] }>
+    | RecievedMessage<Recieves.GetGame, number, PastGame>
+    | RecievedMessage<Recieves.GetEncounters, { id: string, offset: number }, { total?: number, encounters: PlayerEncounter[] }>
+    | RecievedMessage<Recieves.UpdateSetting, { key: keyof SettingsType, value: any }, void>
+    | RecievedMessage<Recieves.SetNickname, { id: string, nickname: string | null }, void>
+    | RecievedMessage<Recieves.SetNote, { id: string, note: string }, void>
+    | RecievedMessage<Recieves.SetTags, { id: string, tags: Record<string, boolean> }, void>
+    | RecievedMessage<Recieves.GetPlayers, number, { total?: number, players: StoredPlayer[] }>
+    | RecievedMessage<`list-${string}`, number, { total?: number, items: any[] }>

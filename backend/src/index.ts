@@ -5,7 +5,7 @@ import PlayerData from "./game/playerdata";
 import Rcon from "./game/rcon";
 import History from "./history/history";
 import LogParser from "./logParser";
-import Socket from "./socket";
+import Server from "./net/server";
 import Log from "./log";
 
 if(fakeData) {
@@ -21,4 +21,4 @@ PlayerData.init();
 History.init();
 GameMonitor.init();
 
-Socket.init();
+Server.init();

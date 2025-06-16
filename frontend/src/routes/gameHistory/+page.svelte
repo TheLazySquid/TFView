@@ -1,23 +1,12 @@
 <script lang="ts">
     import Time from "$lib/components/Time.svelte";
     import GameHistory from "$lib/ws/gameHistory.svelte";
-    import { Recieves } from "$types/messages";
-    import InfiniteLoading, { type InfiniteEvent } from "svelte-infinite-loading";
+    import InfiniteLoading from "svelte-infinite-loading";
     import Popups from "$lib/popups";
     import PastGamePopup from "$lib/components/popups/PastGamePopup.svelte";
     import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
-    import WS from "$lib/ws/wsclient.svelte";
 
     GameHistory.init();
-
-    async function infiniteHandler(e: InfiniteEvent) {
-        let games = await WS.sendAndRecieve(Recieves.GetGames, GameHistory.pastGames.length);
-        if(games.total !== undefined) GameHistory.totalGames = games.total;
-
-        GameHistory.pastGames.push(...games.games);
-        if(games.games.length === 0) e.detail.complete();
-        else e.detail.loaded();
-    }
 </script>
 
 {#snippet historyEnd()}
@@ -29,8 +18,8 @@
 
 <div class="w-full h-full flex justify-center">
     <div class="overflow-y-auto" style="width: min(1000px, 90%)">
-        {#if GameHistory.totalGames !== undefined}
-            <div>Total games recorded: {GameHistory.totalGames}</div>
+        {#if GameHistory.games.total !== undefined}
+            <div>Total games recorded: {GameHistory.games.total}</div>
         {/if}
         <table class="w-full">
             <thead class="sticky top-0 bg-background">
@@ -44,7 +33,7 @@
                 </tr>
             </thead>
             <tbody>
-                {#each GameHistory.pastGames as game}
+                {#each GameHistory.games.items as game}
                     <tr class="border-t-2 *:py-1">
                         <td class="whitespace-nowrap"><Time date={game.start} /></td>
                         <td><Time date={game.duration} duration={true} /></td>
@@ -61,7 +50,7 @@
                 {/each}
                 <tr>
                     <th colspan={6} class="border-t-2">
-                        <InfiniteLoading on:infinite={infiniteHandler}>
+                        <InfiniteLoading on:infinite={GameHistory.games.infiniteHandler}>
                             <svelte:fragment slot="noResults">{@render historyEnd()}</svelte:fragment>
                             <svelte:fragment slot="noMore">{@render historyEnd()}</svelte:fragment>
                         </InfiniteLoading>

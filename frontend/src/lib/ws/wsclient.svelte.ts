@@ -1,4 +1,4 @@
-import { Message, type MessageTypes, type RecievesKey, type RecievesTypes } from "$types/messages";
+import { Message, type MessageTypes, type RecievedMessage, type RecievesTypes, type SentMessage } from "$types/messages";
 import { networkPort } from "$shared/consts";
 import type { Tag } from "$types/data";
 
@@ -12,12 +12,17 @@ class WSClient {
     listeners = new Map<any, (data: any) => void>();
     replies = new Map<string, (data: any) => void>();
     status: Status = $state("idle");
+    switchCallbacks = new Map<string, () => void>();
 
     init(route: string) {
         this.route = route;
         
         if(this.ws) {
             this.ws.send(JSON.stringify({ navigate: route }));
+
+            for(let callback of this.switchCallbacks.values()) {
+                callback();
+            }
         } else {
             this.status = "connecting";
             this.connectSocket();
@@ -63,17 +68,22 @@ class WSClient {
         });
     }
 
-    on<C extends Message>(type: C, callback: (data: MessageTypes[C]) => void) {
-        this.listeners.set(type, callback);
+    onSwitch(id: string, callback: () => void) {
+        this.switchCallbacks.set(id, callback);
     }
 
-    send<C extends keyof RecievesTypes>(channel: C, data: RecievesKey<C, "send">) {
+    on<C extends MessageTypes["channel"]>(channel: C, callback: (data: Extract<MessageTypes, SentMessage<C, any>>["data"]) => void) {
+        this.listeners.set(channel, callback);
+    }
+
+    send<C extends RecievesTypes["channel"]>(channel: C, data: Extract<RecievesTypes, RecievedMessage<C, any, any>>["data"]) {
         if(!this.ws || this.ws.readyState === 3) return;
         this.ws.send(JSON.stringify({ channel, data }));
     }
 
-    sendAndRecieve<C extends keyof RecievesTypes>(channel: C, data: RecievesKey<C, "send">) {
-        return new Promise<RecievesKey<C, "reply">>(async (res, rej) => {
+    sendAndRecieve<C extends RecievesTypes["channel"]>(channel: C, data: Extract<RecievesTypes, RecievedMessage<C, any, any>>["data"]):
+        Promise<Extract<RecievesTypes, RecievedMessage<C, any, any>>["replyType"]> {
+        return new Promise(async (res, rej) => {
             if(!this.ws || this.ws.readyState === 3) return rej();
 
             if(this.ws.readyState === 0) {
@@ -95,10 +105,10 @@ export abstract class PageState {
 
     init() {
         WS.init(this.type);
-        this.setup();
+        this.setup?.();
     }
 
-    abstract setup(): void;
+    setup?(): void;
 }
 
 export abstract class PageStateWithTags extends PageState {

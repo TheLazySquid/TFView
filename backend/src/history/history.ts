@@ -1,17 +1,16 @@
 import type { Stored, PastGame, PastGameEntry, PlayerEncounter, PastGamePlayer, StoredPlayer } from "$types/data";
 import type { Player } from "$types/lobby";
 import { Recieves, Message } from "$types/messages";
-import { dataPath, fakeData } from "src/consts";
+import { fakeData } from "src/consts";
 import LogParser from "src/logParser";
-import Socket from "src/socket";
-import { join } from "node:path";
+import Server from "src/net/server";
 import { Database } from "bun:sqlite";
-import fs from "fs";
-import { createFakeHistory } from "src/fakedata/history";
 import EventEmitter from "node:events";
 import Log from "src/log";
 import Rcon from "src/game/rcon";
 import { fakeCurrentGame } from "src/fakedata/game";
+import { createDatabase } from "./database";
+import { InfiniteList } from "src/net/infiniteList";
 
 export interface CurrentGame {
     map: string;
@@ -38,23 +37,29 @@ export default class History {
     static pageSize = 50;
     static events = new EventEmitter();
     static updateInterval = 10000;
+    static pastGames: InfiniteList<PastGameEntry>;
+    static pastPlayers: InfiniteList<StoredPlayer>;
 
     static init() {
-        Socket.on(Recieves.GetGames, (offset, { reply }) => {
-            let games = this.getGames(offset);
-            if(offset === 0) {
-                let count = this.countGames();
-                reply({ games, total: count });
-            } else {
-                reply({ games });
-            }
+        this.pastGames = new InfiniteList({
+            topic: "gamehistory",
+            listId: "pastgames",
+            getBatch: (offset) => this.getGames(offset),
+            getTotal: () => this.countGames()
         });
 
-        Socket.on(Recieves.GetGame, (rowid, { reply }) => {
+        this.pastPlayers = new InfiniteList({
+            topic: "playerhistory",
+            listId: "pastplayers",
+            getBatch: (offset) => this.getPlayers(offset),
+            getTotal: () => this.countPlayers()
+        });
+
+        Server.on(Recieves.GetGame, (rowid, { reply }) => {
             reply(this.getGame(rowid));
         });
 
-        Socket.on(Recieves.GetEncounters, ({ id, offset }, { reply }) => {
+        Server.on(Recieves.GetEncounters, ({ id, offset }, { reply }) => {
             let encounters = this.getEncounters(id, offset);
             if(offset === 0) {
                 let count = this.countEncounters(id);
@@ -64,22 +69,12 @@ export default class History {
             }
         });
         
-        Socket.onConnect("game", (send) => {
+        Server.onConnect("game", (send) => {
             if(!this.currentGame) return;
             send(Message.CurrentServer, this.getCurrentServer());
         });
 
-        Socket.on(Recieves.GetPlayers, (offset, { reply }) => {
-            let players = this.getPlayers(offset);
-            if(offset === 0) {
-                let count = this.countPlayers();
-                reply({ players, total: count });
-            } else {
-                reply({ players });
-            }
-        });
-
-        this.setupDb();
+        this.db = createDatabase();
 
         if(fakeData) {
             this.currentGame = fakeCurrentGame;
@@ -102,46 +97,6 @@ export default class History {
         }
     }
 
-    static setupDb() {
-        let newDb = false;
-        const dbPath = join(dataPath, fakeData ? "testhistory.sqlite" : "history.sqlite");
-        if(fakeData && !fs.existsSync(dbPath)) newDb = true;
-
-        this.db = new Database(dbPath);
-
-        this.db.run(`CREATE TABLE IF NOT EXISTS main.games (
-            map TEXT NOT NULL,
-            hostname TEXT,
-            ip TEXT,
-            start INTEGER NOT NULL,
-            duration INTEGER NOT NULL,
-            players TEXT NOT NULL,
-            kills INTEGER NOT NULL,
-            deaths INTEGER NOT NULL
-        ); CREATE TABLE IF NOT EXISTS main.encounters (
-            playerId TEXT NOT NULL,
-            map TEXT NOT NULL,
-            name TEXT NOT NULL,
-            gameId INTEGER NOT NULL,
-            time INTEGER NOT NULL,
-            kills INTEGER NOT NULL,
-            deaths INTEGER NOT NULL
-        ); CREATE TABLE IF NOT EXISTS main.players (
-            id TEXT NOT NULL PRIMARY KEY,
-            lastName TEXT NOT NULL,
-            lastSeen INTEGER NOT NULL,
-            avatarHash TEXT,
-            tags TEXT,
-            nickname TEXT,
-            note TEXT
-        )`);
-
-        if(newDb) {
-            Log.info("Generating fake history data");
-            createFakeHistory(this.db);
-        }
-    }
-
     static getPlayerUserData(id: string) {
         return this.db.query<StoredPlayer | null, {}>(`SELECT * FROM players WHERE id = $id`).get({ $id: id });
     }
@@ -156,6 +111,8 @@ export default class History {
             $value: value,
             $id: id
         });
+
+        this.pastPlayers.update(id, { [key]: value });
     }
 
     static saveAvatar(id: string, avatarHash: string) {
@@ -164,6 +121,8 @@ export default class History {
                 $id: id,
                 $avatarHash: avatarHash
             });
+
+            this.pastPlayers.update(id, { avatarHash });
         } catch {
             Log.error("Tried to save the avatar of a player that doesn't exist");
         }
@@ -206,7 +165,7 @@ export default class History {
     static getPlayers(offset: number): StoredPlayer[] {
         return this.db.query<StoredPlayer, {}>(`SELECT * FROM players
             ORDER BY lastSeen DESC LIMIT ${this.pageSize} OFFSET $offset`)
-            .all({ $offset: offset }).map(p => ({...p, tags: '["fijasdijojiosad"]'}))
+            .all({ $offset: offset });
     }
 
     static mapChangeRegex = /(?:\n|^)Team Fortress\r?\nMap: (.+)/g;
@@ -232,11 +191,8 @@ export default class History {
                     $ip: ip,
                     $rowid: this.currentGame.rowid
                 });
-                Socket.send("gamehistory", Message.GameUpdated, {
-                    rowid: this.currentGame.rowid,
-                    hostname, ip
-                });
-                
+  
+                this.pastGames.update(this.currentGame.rowid, { hostname, ip });              
                 Log.info("Updated server with ip", ip, "hostname", hostname);
             }
         });
@@ -268,8 +224,8 @@ export default class History {
         if(hostname) Log.info("Game started:", map, hostname, ip);
         else Log.info("Game started:", map, "(hostname pending)");
 
-        Socket.send("game", Message.CurrentServer, this.getCurrentServer());
-        Socket.send("gamehistory", Message.GameAdded, {
+        Server.send("game", Message.CurrentServer, this.getCurrentServer());
+        this.pastGames.addStart({
             start: this.currentGame.startTime,
             duration: 0,
             map: this.currentGame.map,
@@ -336,11 +292,15 @@ export default class History {
         });
 
         if(this.getPlayerUserData(player.ID3)) {
-            this.db.query(`UPDATE players SET lastSeen = $lastSeen WHERE id = $id`)
-                .run({ $lastSeen: now, $id: player.ID3 })
+            this.db.query(`UPDATE players SET lastSeen = $lastSeen, lastName = $lastName WHERE id = $id`)
+                .run({ $lastSeen: now, $lastName: player.name, $id: player.ID3 });
+
+            this.pastPlayers.update(player.ID3, { lastSeen: now, lastName: player.name });
         } else {
             this.db.query(`INSERT INTO players (id, lastSeen, lastName) VALUES($id, $lastSeen, $lastName)`)
                 .run({ $lastSeen: now, $id: player.ID3, $lastName: player.name });
+
+            this.pastPlayers.addStart({ id: player.ID3, lastName: player.name, lastSeen: now });
         }
     }
 
@@ -349,8 +309,7 @@ export default class History {
             this.currentGame.kills = player.kills;
             this.currentGame.deaths = player.deaths;
 
-            Socket.send("gamehistory", Message.GameUpdated, {
-                rowid: this.currentGame.rowid,
+            this.pastGames.update(this.currentGame.rowid, {
                 kills: this.currentGame.kills,
                 deaths: this.currentGame.deaths
             });
@@ -387,7 +346,7 @@ export default class History {
     static onGameEnd() {
         if(!this.currentGame || fakeData) return;
 
-        Socket.send("game", Message.CurrentServer, null);
+        Server.send("game", Message.CurrentServer, null);
         this.updateCurrentGame();
         
         Log.info(`Recorded game: ${this.currentGame.map}`);

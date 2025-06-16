@@ -1,13 +1,13 @@
 import { networkPort } from "$shared/consts";
-import type { Message, MessageTypes, RecievesKey, RecievesTypes } from "$types/messages";
+import type { MessageTypes, RecievesTypes, SentMessage } from "$types/messages";
 import EventEmitter from "node:events";
 import { join } from "node:path";
-import Log from "./log";
+import Log from "../log";
 
-export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "global" | "logs";
+export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "global";
 export type WS = Bun.ServerWebSocket<{ topic: Topic }>;
 
-export default class Socket {
+export default class Server {
     static topics: string[] = ["game", "playerhistory", "gamehistory", "settings"];
     static events = new EventEmitter();
     static staticPath = join(__dirname, "..", "static");
@@ -60,7 +60,7 @@ export default class Socket {
                         ws.data.topic = data.navigate;
                         ws.subscribe(data.navigate);
 
-                        this.events.emit(`${data.navigate}-connect`, (channel: Message, data: any) => {
+                        this.events.emit(`${data.navigate}-connect`, (channel: any, data: any) => {
                             ws.send(JSON.stringify({ channel, data }));
                         });
 
@@ -86,7 +86,7 @@ export default class Socket {
                     ws.subscribe(ws.data.topic);
                     ws.subscribe("global");
 
-                    this.events.emit(`${ws.data.topic}-connect`, (channel: Message, data: any) => {
+                    this.events.emit(`${ws.data.topic}-connect`, (channel: any, data: any) => {
                         ws.send(JSON.stringify({ channel, data }));
                     });
                 }
@@ -95,23 +95,24 @@ export default class Socket {
         });
     }
 
-    static onConnect<C extends Message>(topic: Topic, callback: (send: (channel: C, data: MessageTypes[C]) => void) => void) {
+    static onConnect<C extends MessageTypes["channel"]>(topic: Topic, callback: (send: (channel: C, data:
+        Extract<MessageTypes, SentMessage<C, any>>["data"]) => void) => void) {
         this.events.on(`${topic}-connect`, callback);
     }
 
     // I sincerely apologize for this type
-    static on<C extends keyof RecievesTypes>(channel: C, callback: (data: RecievesKey<C, "send">, action: {
-        reply: (response: RecievesKey<C, "reply">) => void,
+    static on<C extends RecievesTypes["channel"]>(channel: C, callback: (data: Extract<RecievesTypes, SentMessage<C, any>>["data"], action: {
+        reply: (response: Extract<RecievesTypes, SentMessage<C, any>>["replyType"]) => void,
         ws: WS
     }) => void) {
         this.events.on(channel.toString(), callback);
     }
 
-    static send<C extends Message>(topic: Topic, channel: C, data: MessageTypes[C]) {
+    static send<C extends MessageTypes["channel"]>(topic: Topic, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {
         this.server.publish(topic, JSON.stringify({ channel, data }));
     }
 
-    static sendOthers<C extends Message>(ws: WS, topic: Topic, channel: C, data: MessageTypes[C]) {
+    static sendOthers<C extends MessageTypes["channel"]>(ws: WS, topic: Topic, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {
         ws.publish(topic, JSON.stringify({ channel, data }));
     }
 }

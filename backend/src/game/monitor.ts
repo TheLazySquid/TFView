@@ -1,7 +1,7 @@
 import type { ChatMessage, G15Player, KillfeedEntry, Lobby, Player, TF2Class } from "$types/lobby";
 import type { PlayerEncounter } from "$types/data";
 import { Recieves, Message } from "$types/messages";
-import Socket, { type WS } from "../socket";
+import Server, { type WS } from "../net/server";
 import Rcon from "./rcon";
 import { fakeData } from "src/consts";
 import LogParser from "src/logParser";
@@ -26,16 +26,16 @@ export default class GameMonitor {
     static readStart = 0;
 
     static init() {
-        Socket.onConnect("game", (respond) => {
+        Server.onConnect("game", (respond) => {
             respond(Message.InitialGame, this.lobby);
         });
 
-        Socket.on(Recieves.Chat, (msg) => {
+        Server.on(Recieves.Chat, (msg) => {
             if(fakeData) this.addFakeMessage(msg, false);
             else Rcon.run(`say ${msg}`);
         });
 
-        Socket.on(Recieves.ChatTeam, (msg) => {
+        Server.on(Recieves.ChatTeam, (msg) => {
             if(fakeData) this.addFakeMessage(msg, true);
             else Rcon.run(`say_team ${msg}`);
         });
@@ -47,21 +47,21 @@ export default class GameMonitor {
             if(!player) return;
             player[key] = value;
 
-            Socket.sendOthers(ws, "game", Message.PlayerUpdate, {
+            Server.sendOthers(ws, "game", Message.PlayerUpdate, {
                 userId: player.userId,
                 [key]: value
             });
         }
 
-        Socket.on(Recieves.SetNickname, ({ id, nickname }, { ws }) => {
+        Server.on(Recieves.SetNickname, ({ id, nickname }, { ws }) => {
             updatePlayerData(ws, id, "nickname", nickname);
         });
 
-        Socket.on(Recieves.SetNote, ({ id, note }, { ws }) => {            
+        Server.on(Recieves.SetNote, ({ id, note }, { ws }) => {            
             updatePlayerData(ws, id, "note", note);
         });
 
-        Socket.on(Recieves.SetTags, ({ id, tags }, { ws }) => {
+        Server.on(Recieves.SetTags, ({ id, tags }, { ws }) => {
             let activeTags = Object.entries(tags).filter(([_, e]) => e).map(([t]) => t);
             if(!fakeData) History.setPlayerUserData(id, "tags", JSON.stringify(activeTags));
 
@@ -69,7 +69,7 @@ export default class GameMonitor {
             if(!player) return;
             player.tags = tags;
 
-            Socket.sendOthers(ws, "game", Message.PlayerUpdate, {
+            Server.sendOthers(ws, "game", Message.PlayerUpdate, {
                 userId: player.userId,
                 tags
             });
@@ -163,7 +163,7 @@ export default class GameMonitor {
 
             this.lobby.killfeed.push(entry);
             if(this.lobby.killfeed.length > maxKillfeedSize) this.lobby.killfeed.shift();
-            Socket.send("game", Message.KillfeedAdded, entry);
+            Server.send("game", Message.KillfeedAdded, entry);
 
             // See if we can guess the player's class
             const classes = killClasses[match[3]];
@@ -178,7 +178,7 @@ export default class GameMonitor {
                         this.potentialClasses.delete(killer.userId);
                     }
 
-                    Socket.send("game", Message.PlayerUpdate, { userId: killer.userId, class: classes[0] });
+                    Server.send("game", Message.PlayerUpdate, { userId: killer.userId, class: classes[0] });
                 } else if(options) {
                     let possibilities: TF2Class[] = [];
 
@@ -191,7 +191,7 @@ export default class GameMonitor {
                     else if(possibilities.length === 1) {
                         killer.class = possibilities[0];
 
-                        Socket.send("game", Message.PlayerUpdate, { userId: killer.userId, class: possibilities[0] });
+                        Server.send("game", Message.PlayerUpdate, { userId: killer.userId, class: possibilities[0] });
                     }
                 }
             }
@@ -213,7 +213,7 @@ export default class GameMonitor {
             }
 
             this.lobby.chat.push(message);
-            Socket.send("game", Message.ChatAdded, message);
+            Server.send("game", Message.ChatAdded, message);
         });
     }
 
@@ -245,7 +245,7 @@ export default class GameMonitor {
 
             // dispatch the changes
             if(this.playerMap.has(id)) {
-                if(diff) Socket.send("game", Message.PlayerUpdate, diff);
+                if(diff) Server.send("game", Message.PlayerUpdate, diff);
             } else {
                 // Get any stored user-generated data
                 const playerData = History.getPlayerUserData(player.ID3);
@@ -261,7 +261,7 @@ export default class GameMonitor {
                 // track the player in the game history
                 History.onJoin(player as Player);
 
-                Socket.send("game", Message.PlayerJoin, player as Player);
+                Server.send("game", Message.PlayerJoin, player as Player);
                 this.lobby.players.push(player as Player);
                 this.playerMap.set(id, player as Player);
 
@@ -273,7 +273,7 @@ export default class GameMonitor {
                         player.avatarHash = summary.avatarHash;
                         player.createdTimestamp = summary.createdTimestamp;
                         
-                        Socket.send("game", Message.PlayerUpdate, {
+                        Server.send("game", Message.PlayerUpdate, {
                             userId: player.userId,
                             ...summary
                         });
@@ -295,7 +295,7 @@ export default class GameMonitor {
             i--;
 
             // dispatch the change
-            Socket.send("game", Message.PlayerLeave, id);
+            Server.send("game", Message.PlayerLeave, id);
         }
     }
 
@@ -369,6 +369,6 @@ export default class GameMonitor {
             senderId: "1"
         }
         this.lobby.chat.push(message);
-        Socket.send("game", Message.ChatAdded, message);
+        Server.send("game", Message.ChatAdded, message);
     }
 }

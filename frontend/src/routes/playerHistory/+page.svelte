@@ -6,21 +6,10 @@
     import Time from "$lib/components/Time.svelte";
     import Popups from "$lib/popups";
     import PlayerHistory from "$lib/ws/playerHistory.svelte";
-    import WS from "$lib/ws/wsclient.svelte";
     import type { StoredPlayer } from "$types/data";
-    import { Recieves } from "$types/messages";
-    import InfiniteLoading, { type InfiniteEvent } from "svelte-infinite-loading";
+    import InfiniteLoading from "svelte-infinite-loading";
 
     PlayerHistory.init();
-
-    async function infiniteHandler(e: InfiniteEvent) {
-        let players = await WS.sendAndRecieve(Recieves.GetPlayers, PlayerHistory.players.length);
-        if(players.total !== undefined) PlayerHistory.totalPlayers = players.total;
-
-        PlayerHistory.players.push(...players.players);
-        if(players.players.length === 0) e.detail.complete();
-        else e.detail.loaded();
-    }
 
     const getColor = (player: StoredPlayer) => {
         if(!player.tags) return "";
@@ -43,8 +32,8 @@
 
 <div class="w-full h-full flex justify-center">
     <div class="overflow-y-auto" style="width: min(1000px, 90%)">
-        {#if PlayerHistory.totalPlayers !== undefined}
-            <div>Total players recorded: {PlayerHistory.totalPlayers}</div>
+        {#if PlayerHistory.players.total !== undefined}
+            <div>Total players recorded: {PlayerHistory.players.total}</div>
         {/if}
         <table class="w-full">
             <thead class="sticky top-0 bg-background">
@@ -55,7 +44,7 @@
                 </tr>
             </thead>
             <tbody>
-                {#each PlayerHistory.players as player}
+                {#each PlayerHistory.players.items as player}
                     <tr class="border-t-2 *:py-1" style="background-color: {getColor(player)}">
                         <td>
                             <Avatar avatarHash={player.avatarHash} name={player.lastName} />
@@ -71,7 +60,7 @@
                 {/each}
                 <tr>
                     <th colspan={6} class="border-t-2">
-                        <InfiniteLoading on:infinite={infiniteHandler}>
+                        <InfiniteLoading on:infinite={PlayerHistory.players.infiniteHandler}>
                             <svelte:fragment slot="noResults">{@render playersEnd()}</svelte:fragment>
                             <svelte:fragment slot="noMore">{@render playersEnd()}</svelte:fragment>
                         </InfiniteLoading>
