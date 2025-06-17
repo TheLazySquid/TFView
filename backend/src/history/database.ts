@@ -4,6 +4,7 @@ import { join } from "node:path";
 import fs from "fs";
 import Log from "src/log";
 import { createFakeHistory } from "src/fakedata/history";
+import type { Stored } from "$types/data";
 
 export function createDatabase() {
 let newDb = false;
@@ -20,7 +21,8 @@ let newDb = false;
         duration INTEGER NOT NULL,
         players TEXT NOT NULL,
         kills INTEGER NOT NULL,
-        deaths INTEGER NOT NULL
+        deaths INTEGER NOT NULL,
+        demos TEXT
     ); CREATE TABLE IF NOT EXISTS main.encounters (
         playerId TEXT NOT NULL,
         map TEXT NOT NULL,
@@ -45,4 +47,14 @@ let newDb = false;
     }
 
     return db;
+}
+
+export function parseRow<T>(row: Stored<T>, parseKeys: (keyof T)[]): T {
+    for(let key of parseKeys) {
+        if (typeof row[key] === "string") {
+            row[key] = JSON.parse(row[key]);
+        }
+    }
+
+    return row as T;
 }

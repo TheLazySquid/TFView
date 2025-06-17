@@ -9,7 +9,8 @@ export const fakeCurrentGame: CurrentGame = {
     hostname: "Valve Matchmaking Server (Chicago srcds1020-ord1 #101)",
     ip: "169.254.116.201:5472",
     kills: 5,
-    deaths: 2
+    deaths: 2,
+    demos: []
 }
 
 export const fakeLobby: Lobby = {

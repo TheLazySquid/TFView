@@ -6,6 +6,7 @@
     import Popups from "$lib/popups";
     import WS from "$lib/ws/wsclient.svelte";
     import Popup from "./Popup.svelte";
+    import { toast } from "svelte-sonner";
 
     let rowid: number | null = $state(null);
     let game: PastGame | null = $state.raw(null);
@@ -21,6 +22,13 @@
             game = gotGame;
         });
     });
+
+    const copyDemoCommand = (demo: string) => {
+        const command = `playdemo demos/${demo}`;
+        navigator.clipboard.writeText(command)
+            .then(() => toast.success("Demo command copied to clipboard!"))
+            .catch(() => toast.error("Failed to copy demo command."));
+    }
 </script>
 
 <Popup type="openGamePopup" {onOpen}>
@@ -31,7 +39,17 @@
         <div>Start time: <Time date={game.start} /></div>
         <div>Duration: <Time date={game.duration} duration={true} /></div>
         <div>Server: {game.hostname ? `${game.hostname} (${game.ip})` : "Unknown"}</div>
-        <h2>Players:</h2>
+        {#if game?.demos && game.demos.length > 0}
+            <div class="flex items-center gap-2 flex-wrap">
+                Associated demos:
+                {#each game.demos as demo}
+                    <button onclick={() => copyDemoCommand(demo)}
+                    class="border-b border-gray-300">
+                        {demo}
+                    </button>
+                {/each}
+            </div>
+        {/if}
         <div class="overflow-y-auto max-h-[400px]">
             <table class="w-full">
                 <thead class="sticky top-0 bg-background">

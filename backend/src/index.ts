@@ -7,6 +7,7 @@ import History from "./history/history";
 import LogParser from "./logParser";
 import Server from "./net/server";
 import Log from "./log";
+import Demos from "./history/demos";
 
 if(fakeData) {
     console.log("Using fake data for backend");
@@ -17,6 +18,7 @@ await Settings.init();
 Rcon.init();
 LogParser.init();
 PlayerData.init();
+Demos.init();
 
 History.init();
 GameMonitor.init();

@@ -9,8 +9,9 @@ import EventEmitter from "node:events";
 import Log from "src/log";
 import Rcon from "src/game/rcon";
 import { fakeCurrentGame } from "src/fakedata/game";
-import { createDatabase } from "./database";
+import { createDatabase, parseRow } from "./database";
 import { InfiniteList } from "src/net/infiniteList";
+import Demos from "./demos";
 
 export interface CurrentGame {
     map: string;
@@ -21,6 +22,7 @@ export interface CurrentGame {
     deaths: number;
     hostname?: string;
     ip?: string;
+    demos: string[];
 }
 
 interface CurrentPlayer {
@@ -82,6 +84,7 @@ export default class History {
         }
 
         this.listenToLog();
+        Demos.events.on("create", (name) => this.addDemo(name));
 
         setInterval(() => {
             this.updateCurrentGame();
@@ -139,10 +142,10 @@ export default class History {
             .all({ $offset: offset });
     }
 
-    static getGame(id: number) {
+    static getGame(id: number): PastGame {
         let game = this.db.query<Stored<PastGame>, {}>(`SELECT * FROM games WHERE rowid = $rowid`)
             .get({ $rowid: id });
-        return { ...game, players: JSON.parse(game.players) }
+        return parseRow(game, ["players", "demos"]);
     }
 
     static countEncounters(id: string): number {
@@ -202,7 +205,7 @@ export default class History {
         this.currentGame = {
             map, hostname, ip,
             startTime: Date.now(),
-            players: [],
+            players: [], demos: [],
             rowid: 0, kills: 0, deaths: 0
         }
 
@@ -245,6 +248,16 @@ export default class History {
             $duration: Date.now() - this.currentGame.startTime,
             $kills: this.currentGame.kills,
             $deaths: this.currentGame.deaths,
+            $rowid: this.currentGame.rowid
+        });
+    }
+
+    static addDemo(name: string) {
+        if(!this.currentGame) return;
+        this.currentGame.demos.push(name);
+
+        this.db.query(`UPDATE games SET demos = $demos WHERE rowid = $rowid`).run({
+            $demos: JSON.stringify(this.currentGame.demos),
             $rowid: this.currentGame.rowid
         });
     }

@@ -52,8 +52,12 @@ export function createFakeHistory(db: Database) {
             });
         }
 
-        db.query(`INSERT INTO games (map, hostname, ip, start, duration, players, kills, deaths)
-            VALUES($map, $hostname, $ip, $start, $duration, $players, $kills, $deaths)`).run({
+        const date = new Date(start);
+        let demo = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}.dem`;
+        let demos = JSON.stringify([demo]);
+
+        db.query(`INSERT INTO games (map, hostname, ip, start, duration, players, kills, deaths, demos)
+            VALUES($map, $hostname, $ip, $start, $duration, $players, $kills, $deaths, $demos)`).run({
             $map: map,
             $players: JSON.stringify(players),
             $start: start,
@@ -61,7 +65,8 @@ export function createFakeHistory(db: Database) {
             $hostname: "Some server " + Math.random().toString(36).slice(2),
             $ip: `${random(1, 255)}.${random(1, 255)}.${random(1, 255)}.${random(1, 255)}:${random(1000, 65535)}`,
             $kills: random(5, 50),
-            $deaths: random(5, 50)
+            $deaths: random(5, 50),
+            $demos: demos
         });
     }
 }

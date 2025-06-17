@@ -32,16 +32,17 @@ export interface PastGame {
     players: PastGamePlayer[];
     kills: number;
     deaths: number;
+    demos?: string[];
 }
 
 // What's sent to the client to be displayed on /history
 export interface PastGameEntry {
+    rowid: number;
     start: number;
     duration: number;
     map: string;
     hostname?: string;
     ip?: string;
-    rowid: number;
     kills: number;
     deaths: number;
 }
