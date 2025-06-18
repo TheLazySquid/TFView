@@ -72,8 +72,16 @@ class WSClient {
         this.switchCallbacks.set(id, callback);
     }
 
+    offSwitch(id: string) {
+        this.switchCallbacks.delete(id);
+    }
+
     on<C extends MessageTypes["channel"]>(channel: C, callback: (data: Extract<MessageTypes, SentMessage<C, any>>["data"]) => void) {
         this.listeners.set(channel, callback);
+    }
+
+    off<C extends MessageTypes["channel"]>(channel: C) {
+        this.listeners.delete(channel);
     }
 
     send<C extends RecievesTypes["channel"]>(channel: C, data: Extract<RecievesTypes, RecievedMessage<C, any, any>>["data"]) {

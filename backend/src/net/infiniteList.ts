@@ -3,17 +3,17 @@ import Server, { type Topic } from "./server";
 interface Options<T> {
 	topic: Topic;
 	listId: string;
-	getTotal: () => number;
-	getBatch: (offset: number) => T[];
+	getTotal: (params: any) => number;
+	getBatch: (offset: number, params: any) => T[];
 }
 
 export class InfiniteList<T> {
 	constructor(private options: Options<T>) {
-		Server.on(`list-${options.listId}`, (offset: number, { reply }) => {
-			let items = options.getBatch(offset);
+		Server.on(`list-${options.listId}`, ({ offset, params }, { reply }) => {
+			let items = options.getBatch(offset, params);
 			
 			if(offset === 0) {
-				let total = options.getTotal();
+				let total = options.getTotal(params);
 				reply({ items, total });
 			} else {
 				reply({ items });

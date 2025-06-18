@@ -15,6 +15,7 @@ import fsp from "fs/promises";
 import { join } from "path";
 import getActiveUser from "$shared/getActiveUser";
 import { id3ToId64 } from "$shared/steamid";
+import HistoryDatabase from "src/history/database";
 
 export default class GameMonitor {
     static logPath: string;
@@ -41,7 +42,7 @@ export default class GameMonitor {
         });
 
         const updatePlayerData = (ws: WS, id: string, key: "nickname" | "note", value: string) => {
-            if(!fakeData) History.setPlayerUserData(id, key, value);
+            if(!fakeData) HistoryDatabase.setPlayerUserData(id, key, value);
 
             let player = this.lobby.players.find(p => p.ID3 === id);
             if(!player) return;
@@ -63,7 +64,7 @@ export default class GameMonitor {
 
         Server.on(Recieves.SetTags, ({ id, tags }, { ws }) => {
             let activeTags = Object.entries(tags).filter(([_, e]) => e).map(([t]) => t);
-            if(!fakeData) History.setPlayerUserData(id, "tags", JSON.stringify(activeTags));
+            if(!fakeData) HistoryDatabase.setPlayerUserData(id, "tags", JSON.stringify(activeTags));
 
             let player = this.lobby.players.find(p => p.ID3 === id);
             if(!player) return;
@@ -78,8 +79,7 @@ export default class GameMonitor {
         if(fakeData) {
             this.lobby = fakeLobby;
 
-            let people = History.db.query<PlayerEncounter, []>(`SELECT * FROM encounters LIMIT ${this.lobby.players.length}`)
-                .all();
+            let people = HistoryDatabase.db.query<PlayerEncounter, []>(`SELECT * FROM encounters LIMIT ${this.lobby.players.length}`).all();
             for(let i = 0; i < people.length; i++) {
                 this.lobby.players[i].ID3 = people[i].playerId;
             }
@@ -248,7 +248,7 @@ export default class GameMonitor {
                 if(diff) Server.send("game", Message.PlayerUpdate, diff);
             } else {
                 // Get any stored user-generated data
-                const playerData = History.getPlayerUserData(player.ID3);
+                const playerData = HistoryDatabase.getPlayerUserData(player.ID3);
                 if(playerData) {
                     if(playerData.tags) {
                         let tags = JSON.parse(playerData.tags);
@@ -278,7 +278,7 @@ export default class GameMonitor {
                             ...summary
                         });
 
-                        History.saveAvatar(player.ID3, summary.avatarHash);
+                        HistoryDatabase.saveAvatar(player.ID3, summary.avatarHash);
                     })
                     .catch();
             }

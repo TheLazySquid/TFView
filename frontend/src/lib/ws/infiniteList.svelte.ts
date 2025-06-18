@@ -1,16 +1,20 @@
 import type { InfiniteEvent } from "svelte-infinite-loading";
 import WS from "./wsclient.svelte";
 
-interface Options<T> {
+interface Options<T, Params> {
     listId: string;
     idKey: keyof T;
+    params?: Params;
 }
 
-export class InfiniteList<T> {
+export class InfiniteList<T, Params extends Record<string, any>> {
     items: T[] = $state([]);
     total: number | undefined = $state();
+    params: Params = $state({} as Params);
 
-    constructor(private options: Options<T>) {
+    constructor(private options: Options<T, Params>) {
+        if(options.params) this.params = options.params;
+
         WS.onSwitch(`list-${options.listId}`, () => {
             this.items = [];
             this.total = undefined;
@@ -31,9 +35,19 @@ export class InfiniteList<T> {
         });
     }
 
+    destroy() {
+        WS.offSwitch(`list-${this.options.listId}`);
+        WS.off(`list-${this.options.listId}-addStart`);
+        this.total = undefined;
+        this.items = [];
+    }
+
     infiniteHandler = this.handleInfinite.bind(this);
     async handleInfinite(e: InfiniteEvent) {
-        let res = await WS.sendAndRecieve(`list-${this.options.listId}`, this.items.length);
+        let res = await WS.sendAndRecieve(`list-${this.options.listId}`, {
+            offset: this.items.length,
+            params: this.params
+        });
         if(res.total) this.total = res.total;
 
         this.items.push(...res.items);

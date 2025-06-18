@@ -1,4 +1,4 @@
-import type { SettingsType, PastGame, PastGameEntry, PlayerEncounter, Tag, StoredPlayer } from "./data";
+import type { SettingsType, PastGame, Tag } from "./data";
 import type { ChatMessage, CurrentServerInfo, KillfeedEntry, Lobby, Player } from "./lobby";
 
 // Sending messages from the backend
@@ -45,25 +45,19 @@ export type RecievedMessage<Channel, Data, Reply = void> = { channel: Channel, d
 export enum Recieves {
     Chat,
     ChatTeam,
-    GetGames,
     GetGame,
-    GetEncounters,
     UpdateSetting,
     SetNickname,
     SetNote,
-    SetTags,
-    GetPlayers
+    SetTags
 }
 
 export type RecievesTypes = 
     | RecievedMessage<Recieves.Chat, string, void>
     | RecievedMessage<Recieves.ChatTeam, string, void>
-    | RecievedMessage<Recieves.GetGames, number, { total?: number, games: PastGameEntry[] }>
     | RecievedMessage<Recieves.GetGame, number, PastGame>
-    | RecievedMessage<Recieves.GetEncounters, { id: string, offset: number }, { total?: number, encounters: PlayerEncounter[] }>
     | RecievedMessage<Recieves.UpdateSetting, { key: keyof SettingsType, value: any }, void>
     | RecievedMessage<Recieves.SetNickname, { id: string, nickname: string | null }, void>
     | RecievedMessage<Recieves.SetNote, { id: string, note: string }, void>
     | RecievedMessage<Recieves.SetTags, { id: string, tags: Record<string, boolean> }, void>
-    | RecievedMessage<Recieves.GetPlayers, number, { total?: number, players: StoredPlayer[] }>
-    | RecievedMessage<`list-${string}`, number, { total?: number, items: any[] }>
+    | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>

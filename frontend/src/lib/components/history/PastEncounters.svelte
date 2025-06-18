@@ -1,34 +1,25 @@
 <script lang="ts">
     import type { PlayerEncounter } from "$types/data";
-    import type { InfiniteEvent } from "svelte-infinite-loading";
-    import { Recieves } from "$types/messages";
     import Time from "../Time.svelte";
     import Popups from "$lib/popups";
     import InfiniteLoading from "svelte-infinite-loading";
-    import WS from "$lib/ws/wsclient.svelte";
-    import { watch } from "runed";
+    import { InfiniteList } from "$lib/ws/infiniteList.svelte";
+    import type { EncounterSearchParams } from "$types/search";
+    import { onDestroy } from "svelte";
 
     let { id }: { id: string } = $props();
-    let encounters: PlayerEncounter[] = $state([]);
-    let total: number | undefined = $state();
 
-    watch(() => id, () => {
-        encounters = [];
-        total = undefined;
+    const encounters = new InfiniteList<PlayerEncounter, EncounterSearchParams>({
+        listId: "encounters",
+        idKey: "gameId",
+        params: { id }
     });
 
-    async function onInfinite({ detail: { complete, loaded }}: InfiniteEvent) {
-        let newEncounters = await WS.sendAndRecieve(Recieves.GetEncounters, { id, offset: encounters.length });
-        if(newEncounters.total !== undefined) total = newEncounters.total;
-            
-        encounters.push(...newEncounters.encounters);
-        if(newEncounters.encounters.length === 0) complete();
-        else loaded();
-    }
+    onDestroy(() => encounters.destroy());
 </script>
 
-{#if total !== undefined}
-    <div>{total} encounters recorded</div>
+{#if encounters.total !== undefined}
+    <div>{encounters.total} encounters recorded</div>
 {/if}
 <table class="max-h-[400px] overflow-y-auto w-full">
     <thead class="sticky top-0">
@@ -41,7 +32,7 @@
         </tr>
     </thead>
     <tbody>
-        {#each encounters as encounter}
+        {#each encounters.items as encounter}
             <tr>
                 <td><Time date={encounter.time} /></td>
                 <td>{encounter.name}</td>
@@ -55,7 +46,7 @@
                 </td>
             </tr>
         {/each}
-        <InfiniteLoading on:infinite={onInfinite} identifier={id}>
+        <InfiniteLoading on:infinite={encounters.infiniteHandler} identifier={id}>
             <svelte:fragment slot="noResults">
                 No past encounters
             </svelte:fragment>
