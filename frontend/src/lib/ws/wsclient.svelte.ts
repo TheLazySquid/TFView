@@ -1,6 +1,6 @@
-import { Message, type MessageTypes, type RecievedMessage, type RecievesTypes, type SentMessage } from "$types/messages";
+import type { MessageTypes, RecievedMessage, RecievesTypes, SentMessage } from "$types/messages";
 import { networkPort } from "$shared/consts";
-import type { Tag } from "$types/data";
+import GlobalState from "./globalState.svelte";
 
 type Status = "idle" | "connecting" | "connected" | "disconnected";
 
@@ -31,7 +31,11 @@ class WSClient {
 
     connectTimeout?: Timer;
     connectSocket() {
+        let retried = false;
         const retry = () => {
+            if(retried) return;
+            retried = true;
+
             setTimeout(() => this.connectSocket(), this.pollInterval);
         }
 
@@ -113,21 +117,11 @@ export abstract class PageState {
 
     init() {
         WS.init(this.type);
+        GlobalState.init();
         this.setup?.();
     }
 
     setup?(): void;
-}
-
-export abstract class PageStateWithTags extends PageState {
-    tags: Tag[] = $state.raw([]);
-    
-    init() {
-        super.init();
-        WS.on(Message.Tags, (tags) => {
-            this.tags = tags;
-        });
-    }
 }
 
 export default WS;

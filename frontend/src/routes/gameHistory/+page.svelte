@@ -5,6 +5,7 @@
     import Popups from "$lib/popups";
     import PastGamePopup from "$lib/components/popups/PastGamePopup.svelte";
     import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
+    import * as Search from "$lib/components/search";
 
     GameHistory.init();
 </script>
@@ -18,9 +19,19 @@
 
 <div class="w-full h-full flex justify-center">
     <div class="overflow-y-auto" style="width: min(1000px, 90%)">
-        {#if GameHistory.games.total !== undefined}
-            <div>Total games recorded: {GameHistory.games.total}</div>
-        {/if}
+        <Search.SearchBox title="Search Games" singular="game" plural="games" list={GameHistory.games}>
+            <div class="content-center">Map:</div>
+            <Search.TextInput bind:value={GameHistory.games.params.map} />
+
+            <div class="content-center">Server Name:</div>
+            <Search.TextInput bind:value={GameHistory.games.params.hostname} />
+
+            <div class="content-center">After:</div>
+            <Search.DateInput bind:timestamp={GameHistory.games.params.after} />
+            
+            <div class="content-center">Before:</div>
+            <Search.DateInput bind:timestamp={GameHistory.games.params.before} />
+        </Search.SearchBox>
         <table class="w-full">
             <thead class="sticky top-0 bg-background">
                 <tr class="*:text-left">
@@ -50,7 +61,8 @@
                 {/each}
                 <tr>
                     <th colspan={6} class="border-t-2">
-                        <InfiniteLoading on:infinite={GameHistory.games.infiniteHandler}>
+                        <InfiniteLoading on:infinite={GameHistory.games.infiniteHandler}
+                            identifier={GameHistory.games.identifier}>
                             <svelte:fragment slot="noResults">{@render historyEnd()}</svelte:fragment>
                             <svelte:fragment slot="noMore">{@render historyEnd()}</svelte:fragment>
                         </InfiniteLoading>

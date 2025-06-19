@@ -11,6 +11,7 @@ export class InfiniteList<T, Params extends Record<string, any>> {
     items: T[] = $state([]);
     total: number | undefined = $state();
     params: Params = $state({} as Params);
+    identifier = $state(0);
 
     constructor(private options: Options<T, Params>) {
         if(options.params) this.params = options.params;
@@ -48,10 +49,21 @@ export class InfiniteList<T, Params extends Record<string, any>> {
             offset: this.items.length,
             params: this.params
         });
-        if(res.total) this.total = res.total;
+        if(res.total !== undefined) this.total = res.total;
 
         this.items.push(...res.items);
         if(res.items.length === 0) e.detail.complete();
         else e.detail.loaded();
+    }
+
+    resetSearch() {
+        this.total = undefined;
+        this.items = [];
+        this.identifier++;
+    }
+
+    clearSearch(params = {} as Params) {
+        this.params = params;
+        this.resetSearch();
     }
 }

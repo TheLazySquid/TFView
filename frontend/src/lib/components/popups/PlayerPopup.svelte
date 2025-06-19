@@ -18,6 +18,8 @@
     import throttle from "throttleit";
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
+    import GlobalState from "$lib/ws/globalState.svelte";
+    import TagSelector from "../history/TagSelector.svelte";
 
     let player: Player | null = $state.raw(null);
 
@@ -39,9 +41,6 @@
     }
 
     const sendNote = throttle(sendNoteFn, 200);
-
-    let hasTags = $derived(Game.tags.filter((t) => player!?.tags[t.id]));
-    let missingTags = $derived(Game.tags.filter((t) => !player!?.tags[t.id]));
 
     const saveTags = () => {
         if(!player) return;
@@ -74,38 +73,15 @@ style="max-width: min(700px, 85%);">
                 <div>Note:</div>
                 <textarea class="resize-y p-1 h-[150px] w-full outline not-focus:outline-zinc-600"
                 bind:value={player.note} onchange={sendNote}></textarea>
-                <div class="flex items-center gap-1 pt-2">
+                <TagSelector bind:tagsObj={player.tags} onChange={saveTags}>
                     <div class="-mt-1">Tags:</div>
                     {#if player.user}
                         <button class="flex items-center text-sm rounded-full px-1.5 bg-accent gap-1">
-                            <Tag size={12} />
+                            <Tag size={12} color={Game.userColor} />
                             <div class="-mt-0.5">You</div>
                         </button>
                     {/if}
-                    {#each hasTags as tag}
-                        <button class="flex items-center text-sm rounded-full px-1.5 bg-accent gap-1"
-                        onclick={() => { player!.tags[tag.id] = false; saveTags() }}>
-                            <Tag size={12} color={tag.color} />
-                            <div class="-mt-0.5">{tag.name}</div>
-                            <CircleX size={12} />
-                        </button>
-                    {/each}
-                    {#if missingTags.length > 0}
-                        <DropdownMenu.Root>
-                            <DropdownMenu.Trigger>
-                                <CirclePlus size={16} />
-                            </DropdownMenu.Trigger>
-                            <DropdownMenu.Content>
-                                {#each missingTags as tag}
-                                    <DropdownMenu.Item onclick={() => { player!.tags[tag.id] = true; saveTags() }}>
-                                        <Tag size={16} color={tag.color} />
-                                        {tag.name}
-                                    </DropdownMenu.Item>
-                                {/each}
-                            </DropdownMenu.Content>
-                        </DropdownMenu.Root>
-                    {/if}
-                </div>
+                </TagSelector>
             </Tabs.Content>
             <Tabs.Content value="encounters">
                 <!-- Required for infinite loading for some reason -->

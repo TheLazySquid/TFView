@@ -86,9 +86,11 @@ export default class Server {
                     ws.subscribe(ws.data.topic);
                     ws.subscribe("global");
 
-                    this.events.emit(`${ws.data.topic}-connect`, (channel: any, data: any) => {
+                    const callback = (channel: any, data: any) => {
                         ws.send(JSON.stringify({ channel, data }));
-                    });
+                    }
+                    this.events.emit(`${ws.data.topic}-connect`, callback);
+                    this.events.emit(`global-connect`, callback);
                 }
             },
             port: networkPort

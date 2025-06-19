@@ -22,11 +22,10 @@ export default class Settings {
         });
 
         Server.onConnect("game", (reply) => {
-            reply(Message.Tags, this.config.tags);
             reply(Message.UserColor, this.config.userColor);
         });
 
-        Server.onConnect("playerhistory", (reply) => {
+        Server.onConnect("global", (reply) => {
             reply(Message.Tags, this.config.tags);
         });
 

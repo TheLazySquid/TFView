@@ -6,9 +6,10 @@ export interface GameSearchParams {
 }
 
 export interface PlayerSearchParams {
-    id?: string;   
     name?: string;
-    tags?: string[];
+    id64?: string;
+    id3?: string;
+    tags: string[];
     after?: number;
     before?: number;
 }

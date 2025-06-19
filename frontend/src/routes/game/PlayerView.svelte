@@ -12,12 +12,13 @@
     import { Recieves } from "$types/messages";
     import Check from "@lucide/svelte/icons/check";
     import Avatar from "$lib/components/player/Avatar.svelte";
+    import GlobalState from "$lib/ws/globalState.svelte";
 
     let { index }: { index: number } = $props();
     let player = $derived(Game.players[index]);
     let color = $derived.by(() => {
         if(player.ID3 === Game.user?.ID3) return Game.userColor;
-        for(let tag of Game.tags) {
+        for(let tag of GlobalState.tags) {
             if(player.tags[tag.id]) return tag.color;
         }
         return "";
@@ -148,7 +149,7 @@
                         Tags
                     </ContextMenu.SubTrigger>
                     <ContextMenu.SubContent>
-                        {#each Game.tags as tag}
+                        {#each GlobalState.tags as tag}
                             <!-- I know there's a built in checkbox but it's causing problems -->
                             <ContextMenu.Item onclick={() => toggleTag(tag.id)} closeOnSelect={false}>
                                 <div class="w-5">

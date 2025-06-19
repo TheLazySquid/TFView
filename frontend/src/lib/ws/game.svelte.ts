@@ -1,9 +1,9 @@
 import type { ChatMessage, CurrentServerInfo, KillfeedEntry, Player } from "$types/lobby";
 import { Message } from "$types/messages";
 import { maxKillfeedSize } from "$shared/consts";
-import { PageStateWithTags } from "./wsclient.svelte";
+import { PageState } from "./wsclient.svelte";
 
-export default new class Game extends PageStateWithTags {
+export default new class Game extends PageState {
     type = "game";
     user: Player | null = $state.raw(null);
     players: Player[] = $state([]);

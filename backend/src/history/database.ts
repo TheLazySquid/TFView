@@ -11,6 +11,7 @@ import { InfiniteList } from "src/net/infiniteList";
 import Server from "src/net/server";
 import { Recieves } from "$types/messages";
 import type { Player } from "$types/lobby";
+import { id64ToId3 } from "$shared/steamid";
 
 export default class HistoryDatabase {
     static db: Database;
@@ -90,10 +91,19 @@ export default class HistoryDatabase {
         }
     }
 
-    static escapeLike(value: string) {
-        return value
-            .replace(/[\\%_]/g, "\\$&") // Escape % and _
-            .replaceAll('"', '""'); // Double up quotes
+    static escapeLike(value: string, json = false) {
+        // Escape % and _
+        value = value.replace(/[\\%_]/g, "\\$&");
+
+        // Sqlite expects quotes to be escaped with another quote
+        // And if it's a json string we also want to add in a double backslash beforehand
+        if(json) {
+            value = value.replaceAll('"', '\\\\""');
+        } else {
+            value = value.replaceAll('"', '""');
+        }
+
+        return value;
     }
 
     static parseRow<T>(row: Stored<T>, parseKeys: (keyof T)[]): T {
@@ -145,14 +155,33 @@ export default class HistoryDatabase {
     // Queries for past players
     static getPlayersQuery(query: string, params: PlayerSearchParams, offset?: number) {
         let whereClauses: string[] = [];
-        if(params.id) whereClauses.push("id = $id");
-        if(params.name) whereClauses.push(`lastName LIKE "%${this.escapeLike(params.name)}%" ESCAPE '\\'`);
         if(params.after) whereClauses.push("lastSeen >= $after");
         if(params.before) whereClauses.push("lastSeen <= $before");
 
+        
+        if(params.name) {
+            // Allow searches for id64, id3, or name
+            if(params.name.startsWith("[U:1:")) {
+                let id3 = params.name.slice(5, -1);
+                if(!isNaN(parseInt(id3))) {
+                    params.id3 = id3;
+                }
+            } else if(!isNaN(parseInt(params.name))) {
+                params.id64 = id64ToId3(params.name);
+                params.id3 = params.name;
+            }
+
+            let clause = `(lastName LIKE "%${this.escapeLike(params.name, true)}%" ESCAPE '\\'`;
+            if(params.id3) clause += ` OR id = $id3`;
+            else if(params.id64) clause += ` OR id = $id64`;
+            clause += ")";
+
+            whereClauses.push(clause);
+        }
+
         if(params.tags) {
             for(let tag of params.tags) {
-                whereClauses.push(`tags LIKE "%\\"${this.escapeLike(tag)}\\"%" ESCAPE '\\'`);
+                whereClauses.push(`tags LIKE "%""${this.escapeLike(tag, true)}""%" ESCAPE '\\'`);
             }
         }
 
