@@ -156,6 +156,8 @@ export default class History {
     }
 
     static updatePlayer(player: Player) {
+        if(player.kills === undefined || player.deaths === undefined) return;
+
         if(player.user) {
             this.currentGame.kills = player.kills;
             this.currentGame.deaths = player.deaths;

@@ -232,7 +232,7 @@ export default class GameMonitor {
 
         // add/update players
         for(let i = 0; i <= 101; i++) {
-            const playerInfo = info[i] as G15Player;
+            const playerInfo = info[i];
             const id = playerInfo.iUserID;
             ids.add(id);
             if(id === "0" || id === undefined || !playerInfo.iAccountID || playerInfo.szName === undefined) continue;
@@ -248,11 +248,10 @@ export default class GameMonitor {
                 if(diff) Server.send("game", Message.PlayerUpdate, diff);
             } else {
                 // Get any stored user-generated data
-                const playerData = HistoryDatabase.getPlayerUserData(player.ID3);
+                const playerData = HistoryDatabase.getPlayerData(player.ID3);
                 if(playerData) {
                     if(playerData.tags) {
-                        let tags = JSON.parse(playerData.tags);
-                        for(let tag of tags) player.tags[tag] = true;
+                        for(let tag of playerData.tags) player.tags[tag] = true;
                     }
                     if(playerData.nickname) player.nickname = playerData.nickname;
                     if(playerData.note) player.note = playerData.note;
@@ -299,7 +298,7 @@ export default class GameMonitor {
         }
     }
 
-    static updatePlayer(player: Partial<Player>, info: G15Player) {
+    static updatePlayer(player: Partial<Player>, info: Partial<G15Player>) {
         let diff: Partial<Player> & { userId: string } = { userId: info.iUserID };
         let changed = false;
         

@@ -72,9 +72,10 @@ export interface PlayerEncounter {
 export interface StoredPlayer {
     id: string;
     lastName: string;
+    names: string[];
     lastSeen: number;
     avatarHash?: string;
-    tags?: string;
+    tags?: string[];
     nickname?: string;
     note?: string;
 }

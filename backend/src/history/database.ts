@@ -77,6 +77,7 @@ export default class HistoryDatabase {
             id TEXT NOT NULL PRIMARY KEY,
             lastName TEXT NOT NULL,
             lastSeen INTEGER NOT NULL,
+            names TEXT NOT NULL,
             avatarHash TEXT,
             tags TEXT,
             nickname TEXT,
@@ -209,12 +210,14 @@ export default class HistoryDatabase {
     }
 
     // Saving player data
-    static getPlayerUserData(id: string) {
-        return this.db.query<StoredPlayer | null, {}>(`SELECT * FROM players WHERE id = $id`).get({ id });
+    static getPlayerData(id: string) {
+        let player = this.db.query<Stored<StoredPlayer> | null, {}>(`SELECT * FROM players WHERE id = $id`).get({ id });
+        if(!player) return null;
+        return this.parseRow(player, ["names", "tags"]);
     }
 
     static setPlayerUserData(id: string, key: "nickname" | "note" | "tags", value: string) {
-        if(!this.getPlayerUserData(id)) {
+        if(!this.getPlayerData(id)) {
             this.db.query(`INSERT INTO players (id, lastSeen) VALUES($id, $lastSeen)`)
                 .run({ id, lastSeen: Date.now() });
         }
@@ -301,17 +304,26 @@ export default class HistoryDatabase {
             deaths: player.deaths
         });
 
-        const update = { id: player.ID3, lastSeen: now, lastName: player.name };
-        if(this.getPlayerUserData(player.ID3)) {
-            this.db.query(`UPDATE players SET lastSeen = $lastSeen, lastName = $lastName WHERE id = $id`)
+        // Add the new name if it doesn't already exist
+        let names: string[] = [player.name];
+        
+        let playerData = this.getPlayerData(player.ID3);
+        if(playerData && !playerData.names.includes(player.name)) {
+            playerData.names.push(player.name);
+        }
+
+        const update = { id: player.ID3, lastSeen: now, lastName: player.name, names: JSON.stringify(names) };
+
+        if(playerData) {
+            this.db.query(`UPDATE players SET lastSeen = $lastSeen, lastName = $lastName, names = $names WHERE id = $id`)
                 .run(update);
 
             this.pastPlayers.update(player.ID3, { lastSeen: now, lastName: player.name });
         } else {
-            this.db.query(`INSERT INTO players (id, lastSeen, lastName) VALUES($id, $lastSeen, $lastName)`)
+            this.db.query(`INSERT INTO players (id, lastSeen, lastName, names) VALUES($id, $lastSeen, $lastName, $names)`)
                 .run(update);
 
-            this.pastPlayers.addStart({ id: player.ID3, lastSeen: now, lastName: player.name });
+            this.pastPlayers.addStart({ id: player.ID3, lastSeen: now, lastName: player.name, names: [player.name] });
         }
 
         return val.lastInsertRowid as number;

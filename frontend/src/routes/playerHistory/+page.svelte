@@ -14,7 +14,7 @@
     const getColor = (player: StoredPlayer) => {
         if(!player.tags) return "";
         for(let tag of PlayerHistory.tags) {
-            if(JSON.parse(player.tags).includes(tag.id)) {
+            if(player.tags.includes(tag.id)) {
                 return tag.color;
             }
         }
