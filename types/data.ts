@@ -12,6 +12,7 @@ export interface SettingsType {
     steamApiKey?: string;
     tags: Tag[];
     userColor?: string;
+    masterbaseKey?: string;
 }
 
 export interface PastGamePlayer {

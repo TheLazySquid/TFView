@@ -21,6 +21,7 @@
         { name: "RCON Port", id: "rconPort", type: "number" },
         { name: "RCON Password", id: "rconPassword", type: "password" },
         { name: "Steam API Key", id: "steamApiKey", type: "password" },
+        { name: "MegaAntiCheat Api Key", id: "masterbaseKey", type: "password" }
     ]
 
     let passwordsOpen: Record<string, boolean> = $state({});

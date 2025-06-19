@@ -192,6 +192,7 @@ export default class History {
     static onGameEnd() {
         if(!this.currentGame || fakeData) return;
 
+        this.events.emit("endGame");
         Server.send("game", Message.CurrentServer, null);
         this.updateCurrentGame();
         
