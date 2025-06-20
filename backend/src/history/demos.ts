@@ -13,15 +13,13 @@ export default class Demos {
     static watchInterval = 5000;
     static events = new EventEmitter();
     static recentDemos: string[] = [];
+    static firstDemo = true;
 
     static init() {
         this.demosPath = join(Settings.get("tfPath"), "demos");
         this.watchDemos();
 
-        // We might not have shut down gracefully, so we need to close the last session
-        this.closeLastSession();
-
-        History.events.on("gameEnd", () => this.closeDemo());
+        History.events.on("endGame", () => this.closeDemo());
     }
 
     static watchDemos() {
@@ -51,7 +49,7 @@ export default class Demos {
     }
 
     static masterbaseUrl = "megaanticheat.com";
-    static closeLastSession() {
+    static async closeLastSession() {
         const key = Settings.get("masterbaseKey");
         if(!key) return;
 
@@ -59,7 +57,7 @@ export default class Demos {
             api_key: key
         });
 
-        fetch(`https://${this.masterbaseUrl}/close_session?${params.toString()}`)
+        await fetch(`https://${this.masterbaseUrl}/close_session?${params.toString()}`)
             .catch(err => Log.error("Failed to close masterbase session:", err));
     }
 
@@ -68,6 +66,12 @@ export default class Demos {
     static async onDemoCreated(name: string) {
         const key = Settings.get("masterbaseKey");
         if(!key) return;
+
+        if(this.firstDemo) {
+            // We might not have shut down gracefully, so we need to close the last session
+            await this.closeLastSession();
+            this.firstDemo = false;
+        }
 
         const path = join(this.demosPath, name);
         let content = await fsp.readFile(path);
@@ -159,7 +163,7 @@ export default class Demos {
 
         Log.info("Closing demo session");
         
-        // The session is automatically ended when the websocket is closed
+        this.closeLastSession();
         if(this.ws) this.ws.close();
         clearInterval(this.readTimer);
         this.watchingDemo = null;

@@ -267,19 +267,15 @@ export default class GameMonitor {
                 // These are almost certainly tfbots
                 if(!Settings.get("steamApiKey") || player.ID3.length <= 2) continue;
 
-                PlayerData.getSummary(player.ID3)
-                    .then((summary) => {
-                        player.avatarHash = summary.avatarHash;
-                        player.createdTimestamp = summary.createdTimestamp;
-                        
-                        Server.send("game", Message.PlayerUpdate, {
-                            userId: player.userId,
-                            ...summary
-                        });
-
-                        HistoryDatabase.saveAvatar(player.ID3, summary.avatarHash);
-                    })
-                    .catch();
+                PlayerData.getSummary(player.ID3, (summary) => {
+                    player.avatarHash = summary.avatarHash;
+                    player.createdTimestamp = summary.createdTimestamp;
+                    
+                    Server.send("game", Message.PlayerUpdate, {
+                        userId: player.userId,
+                        ...summary
+                    });
+                });
             }
         }
 

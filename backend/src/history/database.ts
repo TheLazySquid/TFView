@@ -10,7 +10,7 @@ import { createFakeHistory } from "src/fakedata/history";
 import { InfiniteList } from "src/net/infiniteList";
 import Server from "src/net/server";
 import { Recieves } from "$types/messages";
-import type { Player } from "$types/lobby";
+import type { Player, PlayerSummary } from "$types/lobby";
 import { id64ToId3 } from "$shared/steamid";
 
 export default class HistoryDatabase {
@@ -80,6 +80,7 @@ export default class HistoryDatabase {
             lastSeen INTEGER NOT NULL,
             names TEXT NOT NULL,
             avatarHash TEXT,
+            createdTimestamp INTEGER,
             tags TEXT,
             nickname TEXT,
             note TEXT
@@ -157,7 +158,6 @@ export default class HistoryDatabase {
         let whereClauses: string[] = [];
         if(params.after) whereClauses.push("lastSeen >= $after");
         if(params.before) whereClauses.push("lastSeen <= $before");
-
         
         if(params.name) {
             // Allow searches for id64, id3, or name
@@ -246,24 +246,25 @@ export default class HistoryDatabase {
     }
 
     static setPlayerUserData(id: string, key: "nickname" | "note" | "tags", value: string) {
-        if(!this.getPlayerData(id)) {
-            this.db.query(`INSERT INTO players (id, lastSeen) VALUES($id, $lastSeen)`)
-                .run({ id, lastSeen: Date.now() });
+        try {
+            this.db.query(`UPDATE players SET ${key} = $value WHERE id = $id`).run({ value, id });
+    
+            this.pastPlayers.update(id, { [key]: value });
+        } catch {
+            Log.error(`Tried to set user data for player ${id} that doesn't exist`);
         }
-
-        this.db.query(`UPDATE players SET ${key} = $value WHERE id = $id`).run({ value, id });
-
-        this.pastPlayers.update(id, { [key]: value });
     }
 
-    static saveAvatar(id: string, avatarHash: string) {
+    static setPlayerSummary(id: string, summary: PlayerSummary) {
         try {
-            this.db.query(`UPDATE players SET avatarHash = $avatarHash WHERE id = $id`)
-                .run({ id, avatarHash });
+            let avatarHash = summary.avatarHash;
+            // We can't see the createdTimestamp of private profiles
+            let createdTimestamp = summary.createdTimestamp ?? -1;
 
-            HistoryDatabase.pastPlayers.update(id, { avatarHash });
+            this.db.query(`UPDATE players SET avatarHash = $avatarHash, createdTimestamp = $createdTimestamp WHERE id = $id`)
+                .run({ id, avatarHash, createdTimestamp });
         } catch {
-            Log.error("Tried to save the avatar of a player that doesn't exist");
+            Log.error(`Tried to set user data for player ${id} that doesn't exist`);
         }
     }
 
@@ -359,7 +360,11 @@ export default class HistoryDatabase {
     }
 
     static updatePlayerEncounter(rowid: number, info: PastGamePlayer) {
-        this.db.query(`UPDATE encounters SET kills = $kills, deaths = $deaths WHERE rowid = $rowid`)
-            .run({ kills: info.kills, deaths: info.deaths, rowid });
+        try {
+            this.db.query(`UPDATE encounters SET kills = $kills, deaths = $deaths WHERE rowid = $rowid`)
+                .run({ kills: info.kills, deaths: info.deaths, rowid });
+        } catch {
+            console.trace("WHAT???", info);
+        }
     }
 }

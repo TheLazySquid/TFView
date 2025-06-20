@@ -10,7 +10,7 @@ export type WS = Bun.ServerWebSocket<{ topic: Topic }>;
 export default class Server {
     static topics: string[] = ["game", "playerhistory", "gamehistory", "settings"];
     static events = new EventEmitter();
-    static staticPath = join(__dirname, "..", "static");
+    static staticPath = join(__dirname, "..", "..", "static");
     static server: Bun.Server;
 
     static init() {

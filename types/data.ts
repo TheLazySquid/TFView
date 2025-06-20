@@ -75,6 +75,7 @@ export interface StoredPlayer {
     names: string[];
     lastSeen: number;
     avatarHash?: string;
+    createdTimestamp?: number;
     tags?: string[];
     nickname?: string;
     note?: string;

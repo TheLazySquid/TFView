@@ -2,20 +2,18 @@ import type { SteamPlayerSummaries } from "$types/steamapi";
 import type { PlayerSummary } from "$types/lobby";
 import { id3ToId64 } from "$shared/steamid";
 import Settings from "src/settings/settings";
-import throttle from "throttleit";
 import Log from "src/log";
+import HistoryDatabase from "src/history/database";
 
 interface WaitingSummary {
 	id3: string;
 	id64: string;
-	res: (summary: PlayerSummary) => void;
+	callback: (summary: PlayerSummary) => void;
 	failedQueries: number;
 }
 
 export default class PlayerData {
 	static apiBase = "https://api.steampowered.com/"
-	static summaries = new Map<string, PlayerSummary>();
-	static removeQueue: string[] = [];
 	static summaryQueue: WaitingSummary[] = [];
 	static maxSummaries = 150;
 	static key: string;
@@ -31,6 +29,11 @@ export default class PlayerData {
 
 			fetch(url)
 				.then((resp) => {
+					// Wait longer and longer after each 429
+					if(resp.status === 429) {
+						this.delay += 10000;
+					}
+
 					if(resp.status !== 200) return rej(resp.status);
 					return resp.json().then(res, rej);
 				}, rej)
@@ -47,6 +50,8 @@ export default class PlayerData {
 		// Steam really loves to give 429s
 		this.query("ISteamUser/GetPlayerSummaries/v0002", [["steamids", ids]])
 			.then((res) => {
+				this.delay = this.baseDelay; // reset delay on success
+
 				for(let player of res.response.players) {
 					let waiting = summaries.find((s) => s.id64 === player.steamid);
 					if(!waiting) continue;
@@ -56,14 +61,10 @@ export default class PlayerData {
 						createdTimestamp: player.timecreated
 					}
 
-					waiting.res(summary);
+					// Update the player data
+					HistoryDatabase.setPlayerSummary(waiting.id3, summary);
 
-					// add the summary to cache
-					this.summaries.set(waiting.id3, summary);
-					this.removeQueue.push(waiting.id3);
-					if(this.removeQueue.length > this.maxSummaries) {
-						this.summaries.delete(this.removeQueue.shift());
-					}
+					waiting.callback(summary);
 				}
 			})
 			.catch((e) => {
@@ -74,8 +75,8 @@ export default class PlayerData {
 				}
 
 				for(let i = 0; i < summaries.length; i++) {
-					if(summaries[i].failedQueries >= 3) {
-						Log.warning(`Failed to get player summary for ${summaries[i].id3} after 3 attempts`);
+					if(summaries[i].failedQueries >= 5) {
+						Log.warning(`Failed to get player summary for ${summaries[i].id3} after 5 attempts`);
 						summaries.splice(i, 1);
 						i--;
 					} else {
@@ -88,20 +89,49 @@ export default class PlayerData {
 			});
 	}
 
-	// The steam api has a ratelimit of 100k/day, but there's an undocumented secondary ratelimit that's really low
-	static minDelay = 7500;
-	static processSummaries = throttle(this.processSummariesFn.bind(this), this.minDelay);
+	// The steam api allegedly has a ratelimit of 100k/day but it seems like steam will randomly
+	// decide to shadowban you and just make 90% of your requests return 429s
+	// It is unclear what triggers this or whether it ever goes away
+	static baseDelay = 5000;
+	static delay = this.baseDelay;
+	static lastProcessTime = 0;
+	static processTimeout: Timer | null = null;
 
-	static getSummary(id3: string) {
-		return new Promise<PlayerSummary>((res) => {
-			const id64 = id3ToId64(id3);
-			
-			// small cache for stuff like switching servers
-			if(this.summaries.has(id64)) return res(this.summaries.get(id64));
-			this.summaryQueue.push({ id3, id64, res, failedQueries: 0 });
+	static processSummaries() {
+		const now = Date.now();
+		const elapsed = now - this.lastProcessTime;
 
+		if (elapsed >= this.delay) {
+			this.lastProcessTime = now;
+			this.processSummariesFn();
+		} else if (!this.processTimeout) {
+			this.processTimeout = setTimeout(() => {
+				this.processTimeout = null;
+				this.lastProcessTime = Date.now();
+				this.processSummariesFn();
+			}, this.delay - elapsed);
+		}
+	}
+
+	static queryValidFor = 1000 * 60 * 60 * 24; // 24 hours
+	static getSummary(id3: string, callback: (summary: PlayerSummary) => void) {
+		const id64 = id3ToId64(id3);
+
+		const waitingSummary = { id3, id64, callback, failedQueries: 0 };
+
+		// Check if we have the summary stored
+		let player = HistoryDatabase.getPlayerData(id3);
+
+		if(player && player.avatarHash && player.createdTimestamp) {
+			callback({ avatarHash: player.avatarHash, createdTimestamp: player.createdTimestamp });
+
+			// Don't actively trigger a query- they happen in batches of 100, this one will happen eventually
+			this.summaryQueue.push(waitingSummary);
+		} else {
+			this.summaryQueue.push(waitingSummary);
+	
 			// Let summaries accumilate if there's multiple in the same event loop
 			setTimeout(() => this.processSummaries(), 0);
-		});
+		}
 	}
 }

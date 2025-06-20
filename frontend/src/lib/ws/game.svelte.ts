@@ -51,6 +51,8 @@ export default new class Game extends PageState {
                 // @ts-ignore Oughta fix this, even "any" doesn't work
                 player[key] = data[key];
             }
+
+            if(data.kills !== undefined) this.sortPlayers();
         });
 
         this.ws.on(Message.KillfeedAdded, (entry) => {
@@ -69,5 +71,10 @@ export default new class Game extends PageState {
         this.ws.on(Message.UserColor, (color) => {
             this.userColor = color;
         });
+    }
+
+    // Sort by most to least kills to mimic the scoreboard
+    sortPlayers() {
+        this.players.sort((a, b) => b.kills - a.kills);
     }
 }
