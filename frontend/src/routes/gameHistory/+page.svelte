@@ -10,12 +10,14 @@
     GameHistory.init();
 </script>
 
-{#snippet historyEnd()}
-    End of history
-{/snippet}
+<title>Game History | TFView</title>
 
 <PastGamePopup />
 <PastPlayerPopup />
+
+{#snippet historyEnd()}
+    End of history
+{/snippet}
 
 <div class="w-full h-full flex justify-center">
     <div class="overflow-y-auto" style="width: min(1000px, 90%)">
