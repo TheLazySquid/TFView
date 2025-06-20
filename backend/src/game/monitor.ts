@@ -1,9 +1,9 @@
-import type { ChatMessage, G15Player, KillfeedEntry, Lobby, Player, TF2Class } from "$types/lobby";
+import type { ChatMessage, G15Player, KillfeedEntry, Lobby, Player, PlayerSummary, TF2Class } from "$types/lobby";
 import type { PlayerEncounter } from "$types/data";
 import { Recieves, Message } from "$types/messages";
 import Server, { type WS } from "../net/server";
 import Rcon from "./rcon";
-import { fakeData } from "src/consts";
+import { flags } from "src/consts";
 import LogParser from "src/logParser";
 import History from "src/history/history";
 import { fakeLobby } from "src/fakedata/game";
@@ -32,12 +32,12 @@ export default class GameMonitor {
         });
 
         Server.on(Recieves.Chat, (msg) => {
-            if(fakeData) this.addFakeMessage(msg, false);
+            if(flags.fakeData) this.addFakeMessage(msg, false);
             else Rcon.run(`say ${msg}`);
         });
 
         Server.on(Recieves.ChatTeam, (msg) => {
-            if(fakeData) this.addFakeMessage(msg, true);
+            if(flags.fakeData) this.addFakeMessage(msg, true);
             else Rcon.run(`say_team ${msg}`);
         });
 
@@ -75,7 +75,7 @@ export default class GameMonitor {
             });
         });
 
-        if(fakeData) {
+        if(flags.fakeData) {
             this.lobby = fakeLobby;
 
             let people = HistoryDatabase.db.query<PlayerEncounter, []>(`SELECT * FROM encounters LIMIT ${this.lobby.players.length}`).all();
@@ -264,7 +264,7 @@ export default class GameMonitor {
                 // These are almost certainly tfbots
                 if(!Settings.get("steamApiKey") || player.ID3.length <= 2) continue;
 
-                PlayerData.getSummary(player.ID3, (summary) => {
+                const summaryCallback = (summary: PlayerSummary) => {
                     player.avatarHash = summary.avatarHash;
                     player.createdTimestamp = summary.createdTimestamp;
                     
@@ -272,7 +272,10 @@ export default class GameMonitor {
                         userId: player.userId,
                         ...summary
                     });
-                });
+                }
+
+                if(player.user) PlayerData.getUserSummary(player.ID3, summaryCallback);
+                else PlayerData.getSummary(player.ID3, summaryCallback);
             }
         }
 

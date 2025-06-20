@@ -4,12 +4,14 @@ import { id3ToId64 } from "$shared/steamid";
 import Settings from "src/settings/settings";
 import Log from "src/log";
 import HistoryDatabase from "src/history/database";
+import { flags } from "src/consts";
 
 interface WaitingSummary {
 	id3: string;
 	id64: string;
 	callback: (summary: PlayerSummary) => void;
 	failedQueries: number;
+	user?: boolean;
 }
 
 export default class PlayerData {
@@ -62,7 +64,11 @@ export default class PlayerData {
 					}
 
 					// Update the player data
-					HistoryDatabase.setPlayerSummary(waiting.id3, summary);
+					if(waiting.user) {
+						Settings.set("userSummary", summary);
+					} else {
+						HistoryDatabase.setPlayerSummary(waiting.id3, summary);
+					}
 
 					waiting.callback(summary);
 				}
@@ -113,10 +119,8 @@ export default class PlayerData {
 		}
 	}
 
-	static queryValidFor = 1000 * 60 * 60 * 24; // 24 hours
-	static getSummary(id3: string, callback: (summary: PlayerSummary) => void) {
+	static getSummary(id3: string, callback: (summary: PlayerSummary) => void) {		
 		const id64 = id3ToId64(id3);
-
 		const waitingSummary = { id3, id64, callback, failedQueries: 0 };
 
 		// Check if we have the summary stored
@@ -126,12 +130,26 @@ export default class PlayerData {
 			callback({ avatarHash: player.avatarHash, createdTimestamp: player.createdTimestamp });
 
 			// Don't actively trigger a query- they happen in batches of 100, this one will happen eventually
-			this.summaryQueue.push(waitingSummary);
-		} else {
+			if(!flags.noSteamApi) this.summaryQueue.push(waitingSummary);
+		} else if(!flags.noSteamApi) {
 			this.summaryQueue.push(waitingSummary);
 	
 			// Let summaries accumilate if there's multiple in the same event loop
 			setTimeout(() => this.processSummaries(), 0);
+		}
+	}
+
+	static getUserSummary(id3: string, callback: (summary: PlayerSummary) => void) {
+		const summary = Settings.get("userSummary");
+		if(summary) callback(summary);
+
+		const id64 = id3ToId64(id3);
+		const waitingSummary = { id3, id64, callback, failedQueries: 0, user: true };
+
+		if(!flags.noSteamApi) {
+			this.summaryQueue.push(waitingSummary);
+			
+			if(!summary) setTimeout(() => this.processSummaries(), 0);
 		}
 	}
 }

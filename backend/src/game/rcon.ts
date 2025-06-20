@@ -1,6 +1,5 @@
 import RconServer from "rcon-srcds";
 import Settings from "../settings/settings";
-import { fakeData } from "src/consts";
 import History from "src/history/history";
 import Log from "src/log";
 
@@ -9,9 +8,7 @@ export default class Rcon {
     static pollInterval = 1000;
     static connected = false;
 
-    static init() {
-        if(fakeData) return;
-        
+    static init() {        
         this.server = new RconServer({
             host: "127.0.0.1",
             port: Settings.get("rconPort"),

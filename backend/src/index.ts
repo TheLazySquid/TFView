@@ -1,5 +1,5 @@
 import Settings from "./settings/settings";
-import { fakeData } from "./consts";
+import { flags } from "./consts";
 import GameMonitor from "./game/monitor";
 import PlayerData from "./game/playerdata";
 import Rcon from "./game/rcon";
@@ -10,14 +10,14 @@ import Log from "./log";
 import Demos from "./history/demos";
 import HistoryDatabase from "./history/database";
 
-if(fakeData) {
-    console.log("Using fake data for backend");
-}
+if(flags.fakeData) Log.info("Using fake data for backend");
+if(flags.noMAC) Log.info("MegaAntiCheat integration disabled");
+if(flags.noSteamApi) Log.info("Steam API usage disabled");
 
 Log.init();
 await Settings.init();
 
-if(!fakeData) {
+if(!flags.fakeData) {
     Rcon.init();
     LogParser.init();
     PlayerData.init();

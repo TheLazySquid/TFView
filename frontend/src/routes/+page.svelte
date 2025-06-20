@@ -70,7 +70,7 @@
         </div>
     {/if}
     {#if openPanel}
-        <Resizable.PaneGroup direction="horizontal">
+        <Resizable.PaneGroup direction="horizontal" autoSaveId="game-view">
             <Resizable.Pane>
                 <Teams>
                     {@render buttons()}

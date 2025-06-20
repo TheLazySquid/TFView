@@ -1,3 +1,5 @@
+import type { PlayerSummary } from "./lobby";
+
 export interface Tag {
     id: string;
     name: string;
@@ -13,6 +15,7 @@ export interface SettingsType {
     tags: Tag[];
     userColor?: string;
     masterbaseKey?: string;
+    userSummary?: PlayerSummary;
 }
 
 export interface PastGamePlayer {

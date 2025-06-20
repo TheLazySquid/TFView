@@ -2,7 +2,7 @@ import type { StoredPlayer, PastGame, Stored, PlayerEncounter, StoredPastGame, P
 import type { EncounterSearchParams, GameSearchParams, PlayerSearchParams } from "$types/search";
 import type { CurrentGame } from "./history";
 import { Database } from "bun:sqlite";
-import { fakeData, dataPath } from "src/consts";
+import { flags, dataPath } from "src/consts";
 import { join } from "node:path";
 import fs from "fs";
 import Log from "src/log";
@@ -55,8 +55,8 @@ export default class HistoryDatabase {
 
     static createDb() {
         let newDb = false;
-        const dbPath = join(dataPath, fakeData ? "testhistory.sqlite" : "history.sqlite");
-        if(fakeData && !fs.existsSync(dbPath)) newDb = true;
+        const dbPath = join(dataPath, flags.fakeData ? "testhistory.sqlite" : "history.sqlite");
+        if(flags.fakeData && !fs.existsSync(dbPath)) newDb = true;
 
         this.db = new Database(dbPath, { strict: true });
 
@@ -292,6 +292,8 @@ export default class HistoryDatabase {
 
             this.db.query(`UPDATE players SET avatarHash = $avatarHash, createdTimestamp = $createdTimestamp WHERE id = $id`)
                 .run({ id, avatarHash, createdTimestamp });
+
+            console.log("Got here");
         } catch {
             Log.error(`Tried to set user data for player ${id} that doesn't exist`);
         }

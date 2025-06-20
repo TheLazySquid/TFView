@@ -7,6 +7,7 @@ import Log from "src/log";
 import { EventEmitter } from "node:events";
 import History from "./history";
 import Rcon from "src/game/rcon";
+import { flags } from "src/consts";
 
 export default class Demos {
     static demosPath: string;
@@ -41,7 +42,7 @@ export default class Demos {
 
                 Log.info("Demo created:", name);
                 this.events.emit("create", name);
-                this.onDemoCreated(name);
+                this.startSession(name);
             });
         } catch {
             setTimeout(() => this.watchDemos(), this.watchInterval);
@@ -63,7 +64,9 @@ export default class Demos {
 
     static watchingDemo: string | null = null;
     static lastPos = 0;
-    static async onDemoCreated(name: string) {
+    static async startSession(name: string) {
+        if(flags.noMAC) return;
+        
         const key = Settings.get("masterbaseKey");
         if(!key) return;
 

@@ -27,25 +27,27 @@
         <Nameplate current={true} bind:player style="color: {nameColors[player.team]}"
             onclick={() => Popups.openPlayerPopup?.(player)} />
     </td>
-    <td>
-        {#if typeof player.class === "number"}
-            <img src="/classIcons/{classIcons[player.class]}" 
-                class="w-6 h-6" alt="Class Icon" />
-        {/if}
-    </td>
-    <td class="w-8 text-center whitespace-nowrap">
-        {player.kills}-{player.deaths}
-    </td>
-    <td class="w-8">
-        <div class="flex items-center justify-center">
-            {#if player.alive}
-                {#if showHealth}
-                    {player.health}
-                {/if}
-            {:else}
-                <Skull />
+    {#if player.team !== 1}
+        <td>
+            {#if typeof player.class === "number"}
+                <img src="/classIcons/{classIcons[player.class]}" 
+                    class="w-6 h-6" alt="Class Icon" />
             {/if}
-        </div>
-    </td>
+        </td>
+        <td class="w-8 text-center whitespace-nowrap">
+            {player.kills}-{player.deaths}
+        </td>
+        <td class="w-8">
+            <div class="flex items-center justify-center">
+                {#if player.alive}
+                    {#if showHealth}
+                        {player.health}
+                    {/if}
+                {:else}
+                    <Skull />
+                {/if}
+            </div>
+        </td>
+    {/if}
     <td class="w-8 text-center">{player.ping}</td>
 </tr>

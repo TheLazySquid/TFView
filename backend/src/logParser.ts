@@ -2,7 +2,6 @@ import fs from "node:fs";
 import { join } from "node:path";
 import Settings from "./settings/settings";
 import Log from "./log";
-import { fakeData } from "./consts";
 
 interface LogListener {
     regex: RegExp;
@@ -16,9 +15,7 @@ export default class LogParser {
     static pollInterval = 1000;
     static listeners: LogListener[] = [];
 
-    static init() {
-        if(fakeData) return;
-        
+    static init() {        
         // watch the log for updates
         this.logPath = join(Settings.get("tfPath"), "console.log");
         this.logFile = Bun.file(this.logPath);

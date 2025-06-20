@@ -1,7 +1,7 @@
 import type { PastGamePlayer } from "$types/data";
 import type { Player } from "$types/lobby";
 import { Message } from "$types/messages";
-import { fakeData } from "src/consts";
+import { flags } from "src/consts";
 import LogParser from "src/logParser";
 import Server from "src/net/server";
 import EventEmitter from "node:events";
@@ -43,7 +43,7 @@ export default class History {
             send(Message.CurrentServer, this.getCurrentServer());
         });
 
-        if(fakeData) {
+        if(flags.fakeData) {
             this.currentGame = fakeCurrentGame;
             return;
         }
@@ -192,7 +192,7 @@ export default class History {
     }
 
     static onGameEnd() {
-        if(!this.currentGame || fakeData) return;
+        if(!this.currentGame || flags.fakeData) return;
 
         this.events.emit("endGame");
         Server.send("game", Message.CurrentServer, null);
