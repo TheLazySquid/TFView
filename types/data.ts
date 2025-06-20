@@ -24,7 +24,7 @@ export interface PastGamePlayer {
 }
 
 // What's stored in the database
-export interface PastGame {
+export interface StoredPastGame {
     start: number;
     duration: number;
     map: string;
@@ -37,15 +37,8 @@ export interface PastGame {
 }
 
 // What's sent to the client to be displayed on /history
-export interface PastGameEntry {
+export type PastGame = Omit<StoredPastGame, 'players'> & {
     rowid: number;
-    start: number;
-    duration: number;
-    map: string;
-    hostname?: string;
-    ip?: string;
-    kills: number;
-    deaths: number;
 }
 
 export interface CurrentGame {
@@ -79,4 +72,8 @@ export interface StoredPlayer {
     tags?: string[];
     nickname?: string;
     note?: string;
+}
+
+export type PastPlayer = Omit<StoredPlayer, 'tags'> & {
+    tags: Record<string, boolean>;
 }

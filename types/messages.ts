@@ -1,4 +1,4 @@
-import type { SettingsType, PastGame, Tag } from "./data";
+import type { PastPlayer, SettingsType, StoredPastGame, Tag } from "./data";
 import type { ChatMessage, CurrentServerInfo, KillfeedEntry, Lobby, Player } from "./lobby";
 
 // Sending messages from the backend
@@ -46,6 +46,7 @@ export enum Recieves {
     Chat,
     ChatTeam,
     GetGame,
+    GetPlayer,
     UpdateSetting,
     SetNickname,
     SetNote,
@@ -55,7 +56,8 @@ export enum Recieves {
 export type RecievesTypes = 
     | RecievedMessage<Recieves.Chat, string, void>
     | RecievedMessage<Recieves.ChatTeam, string, void>
-    | RecievedMessage<Recieves.GetGame, number, PastGame>
+    | RecievedMessage<Recieves.GetGame, number, StoredPastGame>
+    | RecievedMessage<Recieves.GetPlayer, string, PastPlayer>
     | RecievedMessage<Recieves.UpdateSetting, { key: keyof SettingsType, value: any }, void>
     | RecievedMessage<Recieves.SetNickname, { id: string, nickname: string | null }, void>
     | RecievedMessage<Recieves.SetNote, { id: string, note: string }, void>

@@ -1,0 +1,149 @@
+<script lang="ts">
+    import * as ContextMenu from "$lib/components/ui/context-menu";
+    import * as Tooltip from "$lib/components/ui/tooltip";
+    import type { PastPlayer } from "$types/data";
+    import type { Player } from "$types/lobby";
+    import UserPen from "@lucide/svelte/icons/user-pen";
+    import Notepad from "@lucide/svelte/icons/notepad-text";
+    import Check from "@lucide/svelte/icons/check";
+    import Popups from "$lib/popups";
+    import WS from "$lib/ws/wsclient.svelte";
+    import { Recieves } from "$types/messages";
+    import { id3ToId64 } from "$shared/steamid";
+    import GlobalState from "$lib/ws/globalState.svelte";
+    import type { HTMLButtonAttributes } from "svelte/elements";
+
+    interface PastProps { player: PastPlayer; current: false }
+    interface CurrentProps { player: Player; current: true }
+    type Props = (PastProps | CurrentProps) & HTMLButtonAttributes;
+
+    let { player = $bindable(), current, ...restProps }: Props = $props();
+
+    let name = $derived(current ? (player as Player).name : (player as PastPlayer).lastName);
+    let id = $derived(current ? (player as Player).ID3 : (player as PastPlayer).id);
+    let id64 = $derived(id3ToId64(id));
+
+    const setNickname = () => {
+        Popups.openInputPopup?.({
+            title: `Enter nickname for ${name}`,
+            callback: (nickname) => {
+                player.nickname = nickname;
+                WS.send(Recieves.SetNickname, {
+                    id,
+                    nickname
+                });
+            },
+            defaultValue: player.nickname || name
+        });
+    }
+
+    const removeNickname = () => {
+        player.nickname = null;
+        WS.send(Recieves.SetNickname, { id, nickname: null });
+    }
+
+    const editNote = () => {
+        Popups.openInputPopup?.({
+            title: `Edit note for ${name}`,
+            callback: (note) => {
+                player.note = note;
+                WS.send(Recieves.SetNote, { id, note });
+            },
+            defaultValue: player.note,
+            textarea: true
+        });
+    }
+
+    const toggleTag = (id: string) => {
+        player.tags[id] = !player.tags[id];
+        
+        WS.send(Recieves.SetTags, { id, tags: $state.snapshot(player.tags) });
+    }
+</script>
+
+{#snippet link(text: string, url: string)}
+    <ContextMenu.Item class="p-0">
+        <a class="h-full w-full px-2 py-1" href={url} target="_blank">
+            {text}
+        </a>
+    </ContextMenu.Item>
+{/snippet}
+
+<ContextMenu.Root>
+    <ContextMenu.Trigger>
+        <div class="flex items-center pr-2">
+            <button class="grow text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
+            class:italic={player.nickname} {...restProps}>
+                {player.nickname ? player.nickname : name}
+            </button>
+            {#if player.nickname}
+                <Tooltip.Provider>
+                    <Tooltip.Root>
+                        <Tooltip.Trigger><UserPen /></Tooltip.Trigger>
+                        <Tooltip.Content class="text-white">Nickname applied, real name is {name}</Tooltip.Content>
+                    </Tooltip.Root>
+                </Tooltip.Provider>
+            {/if}
+            {#if player.note}
+                <Tooltip.Provider>
+                    <Tooltip.Root>
+                        <Tooltip.Trigger class="cursor-pointer" onclick={editNote}><Notepad /></Tooltip.Trigger>
+                        <Tooltip.Content class="text-white">Player has note saved</Tooltip.Content>
+                    </Tooltip.Root>
+                </Tooltip.Provider>
+            {/if}
+        </div>
+    </ContextMenu.Trigger>
+    <ContextMenu.Content>
+        <ContextMenu.Sub>
+            <ContextMenu.SubTrigger class="p-0">
+                <a class="h-full w-full px-2 py-1.5" href={`https://steamcommunity.com/profiles/${id64}`} target="_blank">
+                    Open Profile
+                </a>
+            </ContextMenu.SubTrigger>
+            <ContextMenu.SubContent>
+                <!-- Expanded from the list I contributed to MegaAntiCheat -->
+                {@render link("Steam Community", `https://steamcommunity.com/profiles/${id64}`)}
+                {@render link("Steamid.io", `https://steamid.io/lookup/${id64}`)}
+                {@render link("Backpack.tf", `https://backpack.tf/profiles/${id64}`)}
+                {@render link("RGL", `https://rgl.gg/Public/PlayerProfile?p=${id64}`)}
+                {@render link("ETF2L", `https://etf2l.org/search/${id64}`)}
+                {@render link("Logs.tf", `https://logs.tf/profile/${id64}`)}
+                {@render link("More.tf", `https://more.tf/profile/${id64}`)}
+                {@render link("Demos.tf", `https://demos.tf/profiles/${id64}`)}
+                {@render link("Trends.tf", `https://trends.tf/player/${id64}`)}
+                {@render link("UGC", `https://www.ugcleague.com/players_page.cfm?player_id=${id64}`)}
+                {@render link("Ozfortress", `https://ozfortress.com/users/steam_id/${id64}`)}
+            </ContextMenu.SubContent>
+        </ContextMenu.Sub>
+        <ContextMenu.Item onclick={setNickname}>
+            Set Nickname
+        </ContextMenu.Item>
+        {#if player.nickname}
+            <ContextMenu.Item onclick={removeNickname}>
+                Remove Nickname
+            </ContextMenu.Item>
+        {/if}
+        <ContextMenu.Item onclick={editNote}>
+            Edit Note
+        </ContextMenu.Item>
+        <ContextMenu.Sub>
+            <ContextMenu.SubTrigger>
+                Tags
+            </ContextMenu.SubTrigger>
+            <ContextMenu.SubContent>
+                {#each GlobalState.tags as tag}
+                    <!-- I know there's a built in checkbox but it's causing problems -->
+                    <ContextMenu.Item onclick={() => toggleTag(tag.id)} closeOnSelect={false}>
+                        <div class="w-5">
+                            {#if player.tags[tag.id]}
+                                <Check />
+                            {/if}
+                        </div>
+                        {tag.name}
+                    </ContextMenu.Item>
+                {/each}
+            </ContextMenu.SubContent>
+        </ContextMenu.Sub>
+    </ContextMenu.Content>
+</ContextMenu.Root>

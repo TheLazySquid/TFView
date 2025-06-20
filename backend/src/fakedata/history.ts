@@ -23,11 +23,12 @@ export function createFakeHistory(db: Database) {
 
             if(!recorded[index]) {
                 recorded[index] = true;
-                db.query(`INSERT INTO players (id, lastName, lastSeen)
-                    VALUES($id, $lastName, $lastSeen)`).run({
-                    $id: playerIds[index],
-                    $lastName: playerNames[index],
-                    $lastSeen: time
+                db.query(`INSERT INTO players (id, lastName, lastSeen, names)
+                    VALUES($id, $lastName, $lastSeen, $names)`).run({
+                    id: playerIds[index],
+                    lastName: playerNames[index],
+                    lastSeen: time,
+                    names: JSON.stringify([playerNames[index]])
                 });
             }
 
@@ -42,13 +43,13 @@ export function createFakeHistory(db: Database) {
 
             db.query(`INSERT INTO encounters (playerId, map, name, gameId, time, kills, deaths)
                 VALUES($playerId, $map, $name, $gameId, $time, $kills, $deaths)`).all({
-                $playerId: playerIds[index],
-                $name: playerNames[index],
-                $map: map,
-                $gameId: i + 1,
-                $time: time,
-                $kills: player.kills,
-                $deaths: player.deaths
+                playerId: playerIds[index],
+                name: playerNames[index],
+                map: map,
+                gameId: i + 1,
+                time: time,
+                kills: player.kills,
+                deaths: player.deaths
             });
         }
 
@@ -58,15 +59,15 @@ export function createFakeHistory(db: Database) {
 
         db.query(`INSERT INTO games (map, hostname, ip, start, duration, players, kills, deaths, demos)
             VALUES($map, $hostname, $ip, $start, $duration, $players, $kills, $deaths, $demos)`).run({
-            $map: map,
-            $players: JSON.stringify(players),
-            $start: start,
-            $duration: random(5e5, 5e6),
-            $hostname: "Some server " + Math.random().toString(36).slice(2),
-            $ip: `${random(1, 255)}.${random(1, 255)}.${random(1, 255)}.${random(1, 255)}:${random(1000, 65535)}`,
-            $kills: random(5, 50),
-            $deaths: random(5, 50),
-            $demos: demos
+            map: map,
+            players: JSON.stringify(players),
+            start: start,
+            duration: random(5e5, 5e6),
+            hostname: "Some server " + Math.random().toString(36).slice(2),
+            ip: `${random(1, 255)}.${random(1, 255)}.${random(1, 255)}.${random(1, 255)}:${random(1000, 65535)}`,
+            kills: random(5, 50),
+            deaths: random(5, 50),
+            demos: demos
         });
     }
 }

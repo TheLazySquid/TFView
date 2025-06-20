@@ -1,23 +1,23 @@
 <script lang="ts">
-    import type { StoredPlayer } from "$types/data";
     import Avatar from "$lib/components/player/Avatar.svelte";
     import PastGamePopup from "$lib/components/popups/PastGamePopup.svelte";
     import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
     import ProfilePicturePopup from "$lib/components/popups/ProfilePicturePopup.svelte";
     import Time from "$lib/components/Time.svelte";
-    import Popups from "$lib/popups";
     import PlayerHistory from "$lib/ws/playerHistory.svelte";
     import InfiniteLoading from "svelte-infinite-loading";
     import GlobalState from "$lib/ws/globalState.svelte";
     import TagSelector from "$lib/components/history/TagSelector.svelte";
     import * as Search from "$lib/components/search";
+    import Nameplate from "$lib/components/player/Nameplate.svelte";
+    import Popups from "$lib/popups";
+    import InputPopup from "$lib/components/popups/InputPopup.svelte";
 
     PlayerHistory.init();
 
-    const getColor = (player: StoredPlayer) => {
-        if(!player.tags) return "";
+    const getColor = (tags: Record<string, boolean>) => {
         for(let tag of GlobalState.tags) {
-            if(player.tags.includes(tag.id)) {
+            if(tags[tag.id]) {
                 return tag.color;
             }
         }
@@ -28,6 +28,7 @@
 <ProfilePicturePopup />
 <PastPlayerPopup />
 <PastGamePopup />
+<InputPopup />
 
 {#snippet playersEnd()}
     No more players recorded
@@ -57,16 +58,14 @@
                 </tr>
             </thead>
             <tbody>
-                {#each PlayerHistory.players.items as player}
-                    <tr class="border-t-2 *:py-1" style="background-color: {getColor(player)}">
+                {#each PlayerHistory.players.items as player, i}
+                    <tr class="border-t-2 *:py-1" style="background-color: {getColor(player.tags)}">
                         <td>
                             <Avatar avatarHash={player.avatarHash} name={player.lastName} />
                         </td>
                         <td>
-                            <button onclick={() => Popups.openPastPlayerPopup?.(player.id, player.lastName)}
-                                class="underline w-full text-left">
-                                {player.lastName}
-                            </button>
+                            <Nameplate current={false} bind:player={PlayerHistory.players.items[i]}
+                                onclick={() => Popups.openPastPlayerPopup?.(player.id)} /> 
                         </td>
                         <td><Time date={player.lastSeen} /></td>
                     </tr>

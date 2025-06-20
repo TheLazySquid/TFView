@@ -42,7 +42,7 @@ export default class GameMonitor {
         });
 
         const updatePlayerData = (ws: WS, id: string, key: "nickname" | "note", value: string) => {
-            if(!fakeData) HistoryDatabase.setPlayerUserData(id, key, value);
+            HistoryDatabase.setPlayerUserData(id, key, value);
 
             let player = this.lobby.players.find(p => p.ID3 === id);
             if(!player) return;
@@ -63,8 +63,7 @@ export default class GameMonitor {
         });
 
         Server.on(Recieves.SetTags, ({ id, tags }, { ws }) => {
-            let activeTags = Object.entries(tags).filter(([_, e]) => e).map(([t]) => t);
-            if(!fakeData) HistoryDatabase.setPlayerUserData(id, "tags", JSON.stringify(activeTags));
+            HistoryDatabase.setPlayerTags(id, tags);
 
             let player = this.lobby.players.find(p => p.ID3 === id);
             if(!player) return;
@@ -250,9 +249,7 @@ export default class GameMonitor {
                 // Get any stored user-generated data
                 const playerData = HistoryDatabase.getPlayerData(player.ID3);
                 if(playerData) {
-                    if(playerData.tags) {
-                        for(let tag of playerData.tags) player.tags[tag] = true;
-                    }
+                    if(playerData.tags) player.tags = playerData.tags;
                     if(playerData.nickname) player.nickname = playerData.nickname;
                     if(playerData.note) player.note = playerData.note;
                 }

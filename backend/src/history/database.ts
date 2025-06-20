@@ -1,4 +1,4 @@
-import type { StoredPlayer, PastGameEntry, Stored, PlayerEncounter, PastGame, PastGamePlayer } from "$types/data";
+import type { StoredPlayer, PastGame, Stored, PlayerEncounter, StoredPastGame, PastGamePlayer, PastPlayer } from "$types/data";
 import type { EncounterSearchParams, GameSearchParams, PlayerSearchParams } from "$types/search";
 import type { CurrentGame } from "./history";
 import { Database } from "bun:sqlite";
@@ -16,8 +16,8 @@ import { id64ToId3 } from "$shared/steamid";
 export default class HistoryDatabase {
     static db: Database;
     static pageSize = 50;
-    static pastGames: InfiniteList<PastGameEntry>;
-    static pastPlayers: InfiniteList<StoredPlayer>;
+    static pastGames: InfiniteList<PastGame>;
+    static pastPlayers: InfiniteList<PastPlayer>;
     static encounters: InfiniteList<PlayerEncounter>;
 
     static init() {
@@ -46,6 +46,10 @@ export default class HistoryDatabase {
 
         Server.on(Recieves.GetGame, (rowid, { reply }) => {
             reply(this.getGame(rowid));
+        });
+
+        Server.on(Recieves.GetPlayer, (id, { reply }) => {
+            reply(this.getPlayerData(id));
         });
     }
 
@@ -136,11 +140,11 @@ export default class HistoryDatabase {
         const queryStart = `SELECT start, duration, map, hostname, ip, kills, deaths, rowid FROM games`;
         let query = this.getGamesQuery(queryStart, params, offset);
 
-        return this.db.query<PastGameEntry, {}>(query).all({ ...params, offset });
+        return this.db.query<PastGame, {}>(query).all({ ...params, offset });
     }
 
-    static getGame(id: number): PastGame {
-        let game = this.db.query<Stored<PastGame>, {}>(`SELECT * FROM games WHERE rowid = rowid`)
+    static getGame(id: number): StoredPastGame {
+        let game = this.db.query<Stored<StoredPastGame>, {}>(`SELECT * FROM games WHERE rowid = rowid`)
             .get({ rowid: id });
         return this.parseRow(game, ["players", "demos"]);
     }
@@ -171,7 +175,8 @@ export default class HistoryDatabase {
                 params.id3 = params.name;
             }
 
-            let clause = `(lastName LIKE "%${this.escapeLike(params.name, true)}%" ESCAPE '\\'`;
+            let clause = `(names LIKE "%""${this.escapeLike(params.name, true)}""%" ESCAPE '\\'` +
+                ` OR nickname LIKE "%${this.escapeLike(params.name)}%" ESCAPE '\\'`;
             if(params.id3) clause += ` OR id = $id3`;
             else if(params.id64) clause += ` OR id = $id64`;
             clause += ")";
@@ -192,11 +197,23 @@ export default class HistoryDatabase {
         return query;
     }
 
-    static getPlayers(offset: number, params: PlayerSearchParams) {
+    static getPlayers(offset: number, params: PlayerSearchParams): PastPlayer[] {
         const queryStart = `SELECT * FROM players`;
         let query = this.getPlayersQuery(queryStart, params, offset);
 
-        return this.db.query<StoredPlayer, {}>(query).all({ ...params, offset });
+        let rows = this.db.query<Stored<StoredPlayer>, {}>(query).all({ ...params, offset });
+        return rows.map(row => this.parsePlayerRow(row));
+    }
+
+    static parsePlayerRow(row: Stored<StoredPlayer>): PastPlayer {
+        let parsed = this.parseRow(row, ["names", "tags"]);
+
+        let tags: Record<string, boolean> = {};
+        if(parsed.tags) {
+            for(let tag of parsed.tags) tags[tag] = true;
+        }
+
+        return { ...parsed, tags };
     }
 
     static countPlayers(params: PlayerSearchParams) {
@@ -239,19 +256,31 @@ export default class HistoryDatabase {
     }
 
     // Saving player data
-    static getPlayerData(id: string) {
+    static getPlayerData(id: string): PastPlayer {
         let player = this.db.query<Stored<StoredPlayer> | null, {}>(`SELECT * FROM players WHERE id = $id`).get({ id });
         if(!player) return null;
-        return this.parseRow(player, ["names", "tags"]);
+        return this.parsePlayerRow(player);
     }
 
-    static setPlayerUserData(id: string, key: "nickname" | "note" | "tags", value: string) {
+    static setPlayerUserData(id: string, key: "nickname" | "note", value: string) {
         try {
             this.db.query(`UPDATE players SET ${key} = $value WHERE id = $id`).run({ value, id });
     
             this.pastPlayers.update(id, { [key]: value });
         } catch {
-            Log.error(`Tried to set user data for player ${id} that doesn't exist`);
+            Log.error(`Tried to set ${key} for player ${id} that doesn't exist`);
+        }
+    }
+
+    static setPlayerTags(id: string, tags: Record<string, boolean>) {
+        try {
+            let activeTags = Object.entries(tags).filter(([_, e]) => e).map(([t]) => t);
+            this.db.query(`UPDATE players SET tags = $tags WHERE id = $id`)
+                .run({ tags: JSON.stringify(activeTags), id });
+    
+            this.pastPlayers.update(id, { tags });
+        } catch {
+            Log.error(`Tried to set tags for player ${id} that doesn't exist`);
         }
     }
 
@@ -353,7 +382,7 @@ export default class HistoryDatabase {
             this.db.query(`INSERT INTO players (id, lastSeen, lastName, names) VALUES($id, $lastSeen, $lastName, $names)`)
                 .run(update);
 
-            this.pastPlayers.addStart({ id: player.ID3, lastSeen: now, lastName: player.name, names: [player.name] });
+            this.pastPlayers.addStart({ id: player.ID3, lastSeen: now, lastName: player.name, names: [player.name], tags: {} });
         }
 
         return val.lastInsertRowid as number;
@@ -364,7 +393,7 @@ export default class HistoryDatabase {
             this.db.query(`UPDATE encounters SET kills = $kills, deaths = $deaths WHERE rowid = $rowid`)
                 .run({ kills: info.kills, deaths: info.deaths, rowid });
         } catch {
-            console.trace("WHAT???", info);
+            console.trace("Somehow kills managed to be null despite the fact that that's completely impossible", info);
         }
     }
 }

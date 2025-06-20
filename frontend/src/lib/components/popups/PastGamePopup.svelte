@@ -1,6 +1,6 @@
 <script lang="ts">
     import Time from "$lib/components/Time.svelte";
-    import type { PastGame } from "$types/data";
+    import type { StoredPastGame } from "$types/data";
     import { Recieves } from "$types/messages";
     import { NinetyRingWithBg } from "svelte-svg-spinners";
     import Popups from "$lib/popups";
@@ -9,7 +9,7 @@
     import { toast } from "svelte-sonner";
 
     let rowid: number | null = $state(null);
-    let game: PastGame | null = $state.raw(null);
+    let game: StoredPastGame | null = $state.raw(null);
     
     const onOpen = (id: number) => {
         if(rowid !== id) game = null;
@@ -62,7 +62,7 @@
                     {#each game.players as player}
                         <tr>
                             <td>
-                                <button onclick={() => Popups.openPastPlayerPopup?.(player.id, player.name)} 
+                                <button onclick={() => Popups.openPastPlayerPopup?.(player.id)} 
                                     class="underline">
                                     {player.name}
                                 </button>

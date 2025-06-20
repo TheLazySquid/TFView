@@ -28,6 +28,7 @@ export class InfiniteList<T, Params extends Record<string, any>> {
 
         WS.on(`list-${options.listId}-update`, ({ id, update }: { id: any, update: Partial<T> }) => {
             let item = this.items.find((i) => i[options.idKey] === id);
+            if(!item) return;
 
             for(let key in update) {
                 // @ts-ignore trust me the alternative is worse

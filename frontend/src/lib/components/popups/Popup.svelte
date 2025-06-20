@@ -7,7 +7,7 @@
 
     interface Props extends DialogPrimitive.ContentProps {
         type: keyof PopupsType;
-        onOpen?: (...args: any[]) => void;
+        onOpen?: (...args: any[]) => (void | Promise<void>);
         onClose?: () => void;
         children: Snippet;
         class?: string;
@@ -17,11 +17,12 @@
     let { type, onOpen, onClose, children, class: className = "", style = "", ...restProps }: Props = $props();
     let modalOpen = $state(false);
 
-    Popups[type] = (...args: any) => {
+    Popups[type] = async (...args: any) => {
         Popups.closePopup?.();
 
         modalOpen = true;
-        onOpen?.(...args);
+        
+        if(onOpen) await onOpen(...args);
 
         Popups.closePopup = () => {
             modalOpen = false;

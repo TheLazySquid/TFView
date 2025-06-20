@@ -2,7 +2,6 @@
     import type { Player } from "$types/lobby";
     import * as Dialog from "$lib/components/ui/dialog";
     import * as Tabs from "$lib/components/ui/tabs";
-    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
     import PastEncounters from "../history/PastEncounters.svelte";
     import Chat from "../game/Chat.svelte";
     import InfoIcon from "@lucide/svelte/icons/user";
@@ -10,15 +9,12 @@
     import ChatIcon from "@lucide/svelte/icons/message-square-more";
     import KillfeedIcon from "@lucide/svelte/icons/swords";
     import Tag from "@lucide/svelte/icons/tag";
-    import CircleX from "@lucide/svelte/icons/circle-x";
-    import CirclePlus from "@lucide/svelte/icons/circle-plus";
     import Killfeed from "../game/Killfeed.svelte";
     import Popup from "./Popup.svelte";
     import Game from "$lib/ws/game.svelte";
     import throttle from "throttleit";
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
-    import GlobalState from "$lib/ws/globalState.svelte";
     import TagSelector from "../history/TagSelector.svelte";
 
     let player: Player | null = $state.raw(null);

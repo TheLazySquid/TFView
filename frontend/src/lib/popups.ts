@@ -10,7 +10,7 @@ export interface InputOptions {
 export interface PopupsType {
     openPlayerPopup: (player: Player) => void;
     openGamePopup: (rowid: number) => void;
-    openPastPlayerPopup: (id: string, name: string) => void;
+    openPastPlayerPopup: (id: string) => void;
     openProfilePicturePopup: (avatarHash: string, name: string) => void;
     openInputPopup: (options: InputOptions) => void;
 }
