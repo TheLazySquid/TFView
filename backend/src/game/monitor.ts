@@ -23,6 +23,7 @@ export default class GameMonitor {
     static userAccountID3 = "";
     static lobby: Lobby = { players: [], killfeed: [], chat: [] };
     static playerMap = new Map<string, Player>();
+    static missedQueries = new Map<string, number>();
     static pollInterval = 1000;
     static readStart = 0;
 
@@ -236,6 +237,8 @@ export default class GameMonitor {
             ids.add(id);
             if(id === "0" || id === undefined || !playerInfo.iAccountID || playerInfo.szName === undefined) continue;
             
+            this.missedQueries.delete(id);
+            
             let player: Partial<Player> = { kills: 0, deaths: 0, tags: {} };
             if(playerInfo.iAccountID === this.userAccountID3) player.user = true;
             if(this.playerMap.has(id)) player = this.playerMap.get(id);
@@ -290,8 +293,17 @@ export default class GameMonitor {
             const id = this.lobby.players[i].userId;
             if(ids.has(id)) continue;
 
+            // Allow the player to be missing up to 3 times before removing them
+            // Since for some reason dumpplayer will randomly not return some players
+            let missingFor = this.missedQueries.get(id) ?? 0;
+            if(missingFor < 3) {
+                this.missedQueries.set(id, missingFor + 1);
+                continue;
+            }
+
             this.playerMap.delete(id);
             this.potentialClasses.delete(id);
+            this.missedQueries.delete(id);
             this.lobby.players.splice(i, 1);
             i--;
 
