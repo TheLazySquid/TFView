@@ -12,7 +12,14 @@
     const encounters = new InfiniteList<PlayerEncounter, EncounterSearchParams>({
         listId: "encounters",
         idKey: "gameId",
-        params: { id }
+        params: { id },
+        filter: (encounter, params) => (
+            encounter.playerId === params.id &&
+            (!params.after || encounter.time > params.after) &&
+            (!params.before || encounter.time < params.before) &&
+            (!params.map || encounter.map.includes(params.map)) &&
+            (!params.name || encounter.name.includes(params.name))
+        )
     });
 
     onDestroy(() => encounters.destroy());

@@ -244,7 +244,13 @@ export default class GameMonitor {
 
             // dispatch the changes
             if(this.playerMap.has(id)) {
-                if(diff) Server.send("game", Message.PlayerUpdate, diff);
+                if(!diff) continue;
+                
+                Server.send("game", Message.PlayerUpdate, diff);
+
+                if(diff.name && diff.name !== "unconnected") {
+                    History.updatePlayerName(player.ID3, diff.name);
+                }
             } else {
                 // Get any stored user-generated data
                 const playerData = HistoryDatabase.getPlayerData(player.ID3);

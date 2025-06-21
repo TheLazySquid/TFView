@@ -5,6 +5,7 @@ interface Options<T, Params> {
     listId: string;
     idKey: keyof T;
     params?: Params;
+    filter: (item: T, params: Params) => boolean;
 }
 
 export class InfiniteList<T, Params extends Record<string, any>> {
@@ -22,6 +23,8 @@ export class InfiniteList<T, Params extends Record<string, any>> {
         });
 
         WS.on(`list-${options.listId}-addStart`, (item: T) => {
+            if(!this.options.filter(item, this.params)) return;
+
             this.items.unshift(item);
             if(this.total !== undefined) this.total++;
         });
@@ -40,6 +43,7 @@ export class InfiniteList<T, Params extends Record<string, any>> {
     destroy() {
         WS.offSwitch(`list-${this.options.listId}`);
         WS.off(`list-${this.options.listId}-addStart`);
+        WS.off(`list-${this.options.listId}-update`);
         this.total = undefined;
         this.items = [];
     }

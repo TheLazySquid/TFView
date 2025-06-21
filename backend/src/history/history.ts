@@ -191,6 +191,17 @@ export default class History {
         this.updateCurrentGame();
     }
 
+    static updatePlayerName(id3: string, name: string) {
+        if(!this.currentGame || !this.currentPlayers.has(id3)) return;
+
+        let player = this.currentPlayers.get(id3);
+        if(!player) return;
+
+        player.info.name = name;
+        HistoryDatabase.updatePlayerName(id3, name);
+        HistoryDatabase.updatePlayerEncounterName(player.rowid, name);
+    }
+
     static onGameEnd() {
         if(!this.currentGame || flags.fakeData) return;
 

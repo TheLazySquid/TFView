@@ -175,7 +175,7 @@ export default class HistoryDatabase {
                 params.id3 = params.name;
             }
 
-            let clause = `(names LIKE "%""${this.escapeLike(params.name, true)}""%" ESCAPE '\\'` +
+            let clause = `(names LIKE "%${this.escapeLike(params.name, true)}%" ESCAPE '\\'` +
                 ` OR nickname LIKE "%${this.escapeLike(params.name)}%" ESCAPE '\\'`;
             if(params.id3) clause += ` OR id = $id3`;
             else if(params.id64) clause += ` OR id = $id64`;
@@ -293,10 +293,29 @@ export default class HistoryDatabase {
             this.db.query(`UPDATE players SET avatarHash = $avatarHash, createdTimestamp = $createdTimestamp WHERE id = $id`)
                 .run({ id, avatarHash, createdTimestamp });
 
-            console.log("Got here");
+            this.pastPlayers.update(id, { avatarHash, createdTimestamp });
         } catch {
             Log.error(`Tried to set user data for player ${id} that doesn't exist`);
         }
+    }
+
+    static updatePlayerName(id: string, name: string) {
+        // There's a small chance that someone's name was accidentally saved as "unconnected"
+        // This does mean that if someone switches their name to "unconnected" mid-game it won't be saved
+        // Or if they are named unconnected and then change it that alias will be wiped
+        // But casual doesn't even allow changing names mid-game so it shouldn't be an issue
+        let playerData = this.getPlayerData(id);
+        if(!playerData) {
+            Log.error(`Tried to update name for player ${id} that doesn't exist`);
+            return;
+        }
+
+        let names = playerData.names;
+        if(names[names.length - 1] === "unconnected") names.pop();
+        if(!names.includes(name)) names.push(name);
+
+        this.db.query(`UPDATE players SET lastName = $lastName, names = $names WHERE id = $id`)
+            .run({ id, lastName: name, names: JSON.stringify(names) });
     }
 
     static createCurrentGame(game: CurrentGame) {
@@ -397,5 +416,10 @@ export default class HistoryDatabase {
         } catch {
             console.trace("Somehow kills managed to be null despite the fact that that's completely impossible", info);
         }
+    }
+
+    static updatePlayerEncounterName(rowid: number, name: string) {
+        this.db.query(`UPDATE encounters SET name = $name WHERE rowid = $rowid`)
+            .run({ name, rowid });
     }
 }
