@@ -16,8 +16,13 @@ export interface PopupsType {
 }
 
 export interface PopupsMethods {
-    closePopup?: () => void;
+    closePopup: ((() => void) | undefined)[];
+    openPopups: number;
 }
 
-let Popups: Partial<PopupsType & PopupsMethods> = {};
+let Popups: Partial<PopupsType> & PopupsMethods = {
+    closePopup: [],
+    openPopups: 0
+};
+
 export default Popups;

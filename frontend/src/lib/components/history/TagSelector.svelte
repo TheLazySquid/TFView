@@ -45,7 +45,7 @@
             <DropdownMenu.Trigger>
                 <CirclePlus size={16} />
             </DropdownMenu.Trigger>
-            <DropdownMenu.Content>
+            <DropdownMenu.Content class="z-[100]">
                 {#each missingTags as tag}
                     <DropdownMenu.Item onclick={() => tagsObj[tag.id] = true}>
                         <Tag size={16} color={tag.color} />

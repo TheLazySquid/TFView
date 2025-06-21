@@ -3,7 +3,6 @@
     import Popup from "./Popup.svelte";
     import * as Dialog from "$lib/components/ui/dialog";
     import { Button } from "$lib/components/ui/button";
-    import Popups from "$lib/popups";
 
     let options: InputOptions | null = $state.raw(null);
     let value = $state("");
@@ -12,15 +11,16 @@
         if(opts.defaultValue) value = opts.defaultValue;
     }
 
+    let popup: Popup;
     const cancel = () => {
-        Popups.closePopup?.();
+        popup.closePopup();
     }
 
     const confirm = () => {
         if(!options?.textarea && !value.trim()) return;
 
         options?.callback(value.trim());
-        Popups.closePopup?.();
+        popup.closePopup();
     }
 
     const onkeydown = (e: KeyboardEvent) => {
@@ -28,7 +28,7 @@
     }
 </script>
 
-<Popup type="openInputPopup" {onOpen}>
+<Popup type="openInputPopup" {onOpen} bind:this={popup}>
     <Dialog.Header>
         <Dialog.Title>{options?.title}</Dialog.Title>
     </Dialog.Header>

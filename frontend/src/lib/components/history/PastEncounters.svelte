@@ -26,7 +26,7 @@
 </script>
 
 {#if encounters.total !== undefined}
-    <div>{encounters.total} encounters recorded</div>
+    <div>{encounters.total} {encounters.total === 1 ? "encounter" : "encounters"} recorded</div>
 {/if}
 <table class="max-h-[400px] overflow-y-auto w-full">
     <thead class="sticky top-0">

@@ -16,6 +16,7 @@
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
     import TagSelector from "../history/TagSelector.svelte";
+    import Avatar from "../player/Avatar.svelte";
 
     let player: Player | null = $state.raw(null);
 
@@ -49,9 +50,12 @@
 </script>
 
 <Popup type="openPlayerPopup" {onOpen} class="min-h-[450px] flex flex-col *:nth-[2]:flex-grow"
-style="max-width: min(700px, 85%);">
+style="max-width: min(700px, 85%);" group={0}>
     {#if player}
-        <Dialog.Header class="text-2xl">{ player.name }</Dialog.Header>
+        <Dialog.Header class="text-2xl flex flex-row items-center">
+            <Avatar avatarHash={player.avatarHash} name={player.name} />
+            { player.name }
+        </Dialog.Header>
         <Tabs.Root bind:value={tab}>
             <Tabs.List class="w-full">
                 <Tabs.Trigger value="info"><InfoIcon /></Tabs.Trigger>

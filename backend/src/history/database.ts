@@ -144,7 +144,7 @@ export default class HistoryDatabase {
     }
 
     static getGame(id: number): StoredPastGame {
-        let game = this.db.query<Stored<StoredPastGame>, {}>(`SELECT * FROM games WHERE rowid = rowid`)
+        let game = this.db.query<Stored<StoredPastGame>, {}>(`SELECT * FROM games WHERE rowid = $rowid`)
             .get({ rowid: id });
         return this.parseRow(game, ["players", "demos"]);
     }

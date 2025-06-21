@@ -12,31 +12,48 @@
         children: Snippet;
         class?: string;
         style?: string;
+        group?: number;
     }
 
-    let { type, onOpen, onClose, children, class: className = "", style = "", ...restProps }: Props = $props();
+    let { type, onOpen, onClose, children, class: className = "", style = "", group, ...restProps }: Props = $props();
     let modalOpen = $state(false);
+    let zIndex = $state(50);
+
+    export function closePopup() {
+        modalOpen = false;
+        Popups.openPopups--;
+        if(group !== undefined) Popups.closePopup[group] = undefined;
+    }
 
     Popups[type] = async (...args: any) => {
-        Popups.closePopup?.();
-
-        modalOpen = true;
-        
+        if(group !== undefined) Popups.closePopup[group]?.();
         if(onOpen) await onOpen(...args);
+        
+        modalOpen = true;
+        Popups.openPopups++;
+        zIndex = Popups.openPopups + 50;
 
-        Popups.closePopup = () => {
-            modalOpen = false;
-            Popups.closePopup = undefined;
+        if(group !== undefined) {
+            Popups.closePopup[group] = () => {
+                modalOpen = false;
+                Popups.closePopup[group] = undefined;
+                Popups.openPopups--;
+                onClose?.();
+            }
         }
     }
 
     const onOpenChange = (open: boolean) => {
-        if(!open) onClose?.();
+        if(open) return;
+        
+        Popups.openPopups--;
+        onClose?.();
+        if(group !== undefined) Popups.closePopup[group] = undefined;
     }
 </script>
 
 <Dialog.Root bind:open={modalOpen} {onOpenChange}>
-    <Dialog.Content style="z-index: 50; {style}" class={className} {...restProps}>
+    <Dialog.Content style="z-index: {zIndex}; {style}" class={className} {...restProps}>
         {@render children()}
     </Dialog.Content>
 </Dialog.Root>

@@ -31,7 +31,7 @@
     }
 </script>
 
-<Popup type="openGamePopup" {onOpen}>
+<Popup type="openGamePopup" {onOpen} group={0}>
     {#if !game}
         <NinetyRingWithBg color="white" />
     {:else}
