@@ -12,6 +12,7 @@ export interface PlayerSearchParams {
     tags: string[];
     after?: number;
     before?: number;
+    sortBy: 'encounters' | 'lastSeen';
 }
 
 export interface EncounterSearchParams {

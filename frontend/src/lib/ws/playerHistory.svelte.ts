@@ -9,7 +9,7 @@ export default new class PlayerHistory extends PageState {
     players = new InfiniteList<PastPlayer, PlayerSearchParams>({
         listId: "pastplayers",
         idKey: "id",
-        params: { tags: [] },
+        params: { tags: [], sortBy: "lastSeen" },
         filter: (player, params) => {
             if(params.name) {
                 // Allow searches for id64, id3, or name

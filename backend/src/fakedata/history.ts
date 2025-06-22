@@ -23,12 +23,14 @@ export function createFakeHistory(db: Database) {
 
             if(!recorded[index]) {
                 recorded[index] = true;
-                db.query(`INSERT INTO players (id, lastName, lastSeen, names)
-                    VALUES($id, $lastName, $lastSeen, $names)`).run({
+                db.query(`INSERT INTO players (id, lastName, lastSeen, names, encounters)
+                    VALUES($id, $lastName, $lastSeen, $names, $encounters)`).run({
                     id: playerIds[index],
                     lastName: playerNames[index],
                     lastSeen: time,
-                    names: JSON.stringify([playerNames[index]])
+                    names: JSON.stringify([playerNames[index]]),
+                    // This isn't accurate, but we don't care for fake data
+                    encounters: random(1, 15)
                 });
             }
 

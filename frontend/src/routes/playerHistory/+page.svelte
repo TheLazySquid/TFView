@@ -48,8 +48,14 @@
             <div class="content-center">Last seen before:</div>
             <Search.DateInput bind:timestamp={PlayerHistory.players.params.before} />
 
-            <div>Tags:</div>
+            <div class="content-center">Tags:</div>
             <TagSelector bind:tags={PlayerHistory.players.params.tags} />
+
+            <div class="content-center">Sort by:</div>
+            <Search.Select bind:value={PlayerHistory.players.params.sortBy} options={{
+                lastSeen: "Last Seen",
+                encounters: "Times Encountered"
+            }} />
         </Search.SearchBox>
         <table class="w-full">
             <thead class="sticky top-0 bg-background">
@@ -57,6 +63,7 @@
                     <th class="min-w-10 w-10"></th>
                     <th>Name</th>
                     <th>Last Seen</th>
+                    <th>Times Encounterd</th>
                 </tr>
             </thead>
             <tbody>
@@ -70,6 +77,7 @@
                                 onclick={() => Popups.openPastPlayerPopup?.(player.id)} /> 
                         </td>
                         <td><Time date={player.lastSeen} /></td>
+                        <td>{player.encounters}</td>
                     </tr>
                 {/each}
                 <tr>

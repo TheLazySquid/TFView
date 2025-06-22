@@ -83,6 +83,7 @@ export default class HistoryDatabase {
             lastName TEXT NOT NULL,
             lastSeen INTEGER NOT NULL,
             names TEXT NOT NULL,
+            encounters INTEGER NOT NULL,
             avatarHash TEXT,
             createdTimestamp INTEGER,
             tags TEXT,
@@ -191,7 +192,9 @@ export default class HistoryDatabase {
         }
 
         if(whereClauses.length > 0) query += " WHERE " + whereClauses.join(" AND ");
-        query += ` ORDER BY lastSeen DESC LIMIT ${this.pageSize}`;
+        if(params.sortBy === "encounters") query += ` ORDER BY encounters DESC `;
+        else query += ` ORDER BY lastSeen DESC `;
+        query += ` LIMIT ${this.pageSize}`;
         if(offset !== undefined) query += ` OFFSET $offset`;
 
         return query;
@@ -392,18 +395,26 @@ export default class HistoryDatabase {
             playerData.names.push(player.name);
         }
 
-        const update = { id: player.ID3, lastSeen: now, lastName: player.name, names: JSON.stringify(names) };
+        const update = { id: player.ID3, lastSeen: now, lastName: player.name, names: JSON.stringify(names), encounters: 1 };
+        if(playerData) update.encounters = playerData.encounters + 1;
 
         if(playerData) {
-            this.db.query(`UPDATE players SET lastSeen = $lastSeen, lastName = $lastName, names = $names WHERE id = $id`)
+            this.db.query(`UPDATE players SET lastSeen = $lastSeen, lastName = $lastName, names = $names, encounters = $encounters WHERE id = $id`)
                 .run(update);
 
             this.pastPlayers.update(player.ID3, { lastSeen: now, lastName: player.name });
         } else {
-            this.db.query(`INSERT INTO players (id, lastSeen, lastName, names) VALUES($id, $lastSeen, $lastName, $names)`)
+            this.db.query(`INSERT INTO players (id, lastSeen, lastName, names, encounters) VALUES($id, $lastSeen, $lastName, $names, $encounters)`)
                 .run(update);
 
-            this.pastPlayers.addStart({ id: player.ID3, lastSeen: now, lastName: player.name, names: [player.name], tags: {} });
+            this.pastPlayers.addStart({
+                id: player.ID3,
+                lastSeen: now,
+                lastName: player.name,
+                names: [player.name],
+                tags: {},
+                encounters: update.encounters
+            });
         }
 
         return val.lastInsertRowid as number;

@@ -70,6 +70,7 @@ export interface StoredPlayer {
     lastName: string;
     names: string[];
     lastSeen: number;
+    encounters: number;
     avatarHash?: string;
     createdTimestamp?: number;
     tags?: string[];
