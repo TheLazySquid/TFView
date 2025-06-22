@@ -52,6 +52,9 @@ export interface Player {
     // Gotten from loginusers.vdf
     user?: boolean;
 
+    // From history
+    names?: string[];
+
     // user-generated
     tags: Record<string, boolean>;
     nickname?: string | null;

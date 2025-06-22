@@ -261,6 +261,7 @@ export default class GameMonitor {
                     if(playerData.tags) player.tags = playerData.tags;
                     if(playerData.nickname) player.nickname = playerData.nickname;
                     if(playerData.note) player.note = playerData.note;
+                    player.names = playerData.names;
                 }
 
                 // track the player in the game history

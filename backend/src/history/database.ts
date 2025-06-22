@@ -288,6 +288,7 @@ export default class HistoryDatabase {
     }
 
     static setPlayerSummary(id: string, summary: PlayerSummary) {
+        console.log("Setting summary", id, summary.avatarHash);
         try {
             let avatarHash = summary.avatarHash;
             // We can't see the createdTimestamp of private profiles

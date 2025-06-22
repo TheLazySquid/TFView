@@ -11,6 +11,8 @@ export default new class PlayerHistory extends PageState {
         idKey: "id",
         params: { tags: [], sortBy: "lastSeen" },
         filter: (player, params) => {
+            if(params.sortBy === "encounters") return false;
+
             if(params.name) {
                 // Allow searches for id64, id3, or name
                 if(params.name.startsWith("[U:1:")) {

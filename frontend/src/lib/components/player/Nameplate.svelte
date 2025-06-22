@@ -1,4 +1,5 @@
 <script lang="ts">
+    import type { HTMLButtonAttributes } from "svelte/elements";
     import * as ContextMenu from "$lib/components/ui/context-menu";
     import * as Tooltip from "$lib/components/ui/tooltip";
     import type { PastPlayer } from "$types/data";
@@ -6,12 +7,12 @@
     import UserPen from "@lucide/svelte/icons/user-pen";
     import Notepad from "@lucide/svelte/icons/notepad-text";
     import Check from "@lucide/svelte/icons/check";
+    import TextCursorInput from "@lucide/svelte/icons/text-cursor-input";
     import Popups from "$lib/popups";
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
     import { id3ToId64 } from "$shared/steamid";
     import GlobalState from "$lib/ws/globalState.svelte";
-    import type { HTMLButtonAttributes } from "svelte/elements";
 
     interface PastProps { player: PastPlayer; current: false }
     interface CurrentProps { player: Player; current: true }
@@ -89,6 +90,18 @@
                     <Tooltip.Root>
                         <Tooltip.Trigger class="cursor-pointer" onclick={editNote}><Notepad /></Tooltip.Trigger>
                         <Tooltip.Content class="text-white">Player has note saved</Tooltip.Content>
+                    </Tooltip.Root>
+                </Tooltip.Provider>
+            {/if}
+            {#if player.names && player.names.length > 1}
+                <Tooltip.Provider>
+                    <Tooltip.Root>
+                        <Tooltip.Trigger class="cursor-pointer">
+                            <TextCursorInput />
+                        </Tooltip.Trigger>
+                        <Tooltip.Content class="text-white">
+                            Past {player.names.length === 2 ? "name" : "names"}: {player.names.slice(0, -1).join(", ")}
+                        </Tooltip.Content>
                     </Tooltip.Root>
                 </Tooltip.Provider>
             {/if}
