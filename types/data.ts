@@ -37,12 +37,11 @@ export interface StoredPastGame {
     kills: number;
     deaths: number;
     demos?: string[];
+    rowid: number;
 }
 
 // What's sent to the client to be displayed on /history
-export type PastGame = Omit<StoredPastGame, 'players'> & {
-    rowid: number;
-}
+export type PastGame = Omit<StoredPastGame, 'players'>;
 
 export interface CurrentGame {
     start: number;

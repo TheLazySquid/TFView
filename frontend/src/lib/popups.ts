@@ -7,12 +7,20 @@ export interface InputOptions {
     callback: (value: string) => void;
 }
 
+export interface ConfirmOptions {
+    title: string;
+    message?: string;
+    onConfirm: () => void;
+    onCancel?: () => void;
+}
+
 export interface PopupsType {
     openPlayerPopup: (player: Player) => void;
     openGamePopup: (rowid: number) => void;
     openPastPlayerPopup: (id: string) => void;
     openProfilePicturePopup: (avatarHash: string, name: string) => void;
     openInputPopup: (options: InputOptions) => void;
+    openConfirmPopup: (options: ConfirmOptions) => void;
 }
 
 export interface PopupsMethods {

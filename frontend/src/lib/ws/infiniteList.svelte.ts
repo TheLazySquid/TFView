@@ -38,12 +38,21 @@ export class InfiniteList<T, Params extends Record<string, any>> {
                 item[key] = update[key];
             }
         });
+
+        WS.on(`list-${options.listId}-delete`, (id: any) => {
+            let index = this.items.findIndex((i) => i[options.idKey] === id);
+            if(index === -1) return;
+
+            this.items.splice(index, 1);
+            if(this.total !== undefined) this.total--;
+        });
     }
 
     destroy() {
         WS.offSwitch(`list-${this.options.listId}`);
         WS.off(`list-${this.options.listId}-addStart`);
         WS.off(`list-${this.options.listId}-update`);
+        WS.off(`list-${this.options.listId}-delete`);
         this.total = undefined;
         this.items = [];
     }

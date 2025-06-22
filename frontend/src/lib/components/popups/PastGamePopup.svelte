@@ -7,21 +7,16 @@
     import WS from "$lib/ws/wsclient.svelte";
     import Popup from "./Popup.svelte";
     import { toast } from "svelte-sonner";
+    import DeleteGame from "../history/DeleteGame.svelte";
 
     let rowid: number | null = $state(null);
     let game: StoredPastGame | null = $state.raw(null);
+    let popup: Popup;
     
-    const onOpen = (id: number) => {
-        if(rowid !== id) game = null;
+    const onOpen = async (id: number) => {
         rowid = id;
+        game = await WS.sendAndRecieve(Recieves.GetGame, rowid);
     }
-
-    $effect(() => {
-        if(rowid === null) return;
-        WS.sendAndRecieve(Recieves.GetGame, rowid).then((gotGame) => {
-            game = gotGame;
-        });
-    });
 
     const copyDemoCommand = (demo: string) => {
         const command = `playdemo demos/${demo}`;
@@ -31,12 +26,14 @@
     }
 </script>
 
-<Popup type="openGamePopup" {onOpen} group={0}>
+<Popup type="openGamePopup" {onOpen} group={0} bind:this={popup}>
     {#if !game}
         <NinetyRingWithBg color="white" />
     {:else}
-        <div>Map: {game.map}</div>
-        <div>Start time: <Time date={game.start} /></div>
+        <div class="flex items-center gap-2">
+            Game on {game.map} on <Time date={game.start} />
+            <DeleteGame {game} onSuccess={() => popup.closePopup()} />
+        </div>
         <div>Duration: <Time date={game.duration} duration={true} /></div>
         <div>Server: {game.hostname ? `${game.hostname} (${game.ip})` : "Unknown"}</div>
         {#if game?.demos && game.demos.length > 0}

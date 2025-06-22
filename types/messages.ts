@@ -37,7 +37,8 @@ export type MessageTypes =
     | SentMessage<Message.Tags, Tag[]>
     | SentMessage<Message.UserColor, string | undefined>
     | SentMessage<`list-${string}-addStart`, any>
-    | SentMessage<`list-${string}-update`, { id: string, update: any }>
+    | SentMessage<`list-${string}-update`, { id: any, update: any }>
+    | SentMessage<`list-${string}-delete`, any>
 
 // Recieving messages
 export type RecievedMessage<Channel, Data, Reply = void> = { channel: Channel, data: Data, replyType: Reply };
@@ -50,7 +51,8 @@ export enum Recieves {
     UpdateSetting,
     SetNickname,
     SetNote,
-    SetTags
+    SetTags,
+    DeleteGame
 }
 
 export type RecievesTypes = 
@@ -62,4 +64,5 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.SetNickname, { id: string, nickname: string | null }, void>
     | RecievedMessage<Recieves.SetNote, { id: string, note: string }, void>
     | RecievedMessage<Recieves.SetTags, { id: string, tags: Record<string, boolean> }, void>
+    | RecievedMessage<Recieves.DeleteGame, number, true | string>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>

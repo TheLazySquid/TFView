@@ -1,6 +1,6 @@
 import type { PastGamePlayer } from "$types/data";
 import type { Player } from "$types/lobby";
-import { Message } from "$types/messages";
+import { Message, Recieves } from "$types/messages";
 import { flags } from "src/consts";
 import LogParser from "src/logParser";
 import Server from "src/net/server";
@@ -41,6 +41,19 @@ export default class History {
         Server.onConnect("game", (send) => {
             if(!this.currentGame) return;
             send(Message.CurrentServer, this.getCurrentServer());
+        });
+
+        Server.on(Recieves.DeleteGame, (rowid, { reply }) => {
+            // Prevent deleting the current game
+            if(this.currentGame?.rowid === rowid) {
+                reply("Unable to delete the game as it is currently being played.");
+                return;
+            }
+
+            HistoryDatabase.deleteGame(rowid);
+            reply(true);
+
+            Log.info("Deleted game with rowid", rowid);
         });
 
         if(flags.fakeData) {

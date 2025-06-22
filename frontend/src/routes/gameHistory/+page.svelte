@@ -6,6 +6,9 @@
     import PastGamePopup from "$lib/components/popups/PastGamePopup.svelte";
     import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
     import * as Search from "$lib/components/search";
+    import ConfirmPopup from "$lib/components/popups/ConfirmPopup.svelte";
+    import DeleteGame from "$lib/components/history/DeleteGame.svelte";
+
 
     GameHistory.init();
 </script>
@@ -14,6 +17,7 @@
 
 <PastGamePopup />
 <PastPlayerPopup />
+<ConfirmPopup />
 
 {#snippet historyEnd()}
     End of history
@@ -43,6 +47,7 @@
                     <th style="width: 30%">Server</th>
                     <th>K/D</th>
                     <th style="width: 10%"></th>
+                    <th style="width: 5%"></th>
                 </tr>
             </thead>
             <tbody>
@@ -58,6 +63,9 @@
                             onclick={() => Popups.openGamePopup?.(game.rowid)}>
                                 Details
                             </button>
+                        </td>
+                        <td>
+                            <DeleteGame class="h-full w-full flex justify-center items-center" {game} />
                         </td>
                     </tr>
                 {/each}

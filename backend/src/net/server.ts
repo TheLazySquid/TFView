@@ -114,6 +114,10 @@ export default class Server {
         this.server.publish(topic, JSON.stringify({ channel, data }));
     }
 
+    static sendTo<C extends MessageTypes["channel"]>(ws: WS, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {
+        ws.send(JSON.stringify({ channel, data }));
+    }
+
     static sendOthers<C extends MessageTypes["channel"]>(ws: WS, topic: Topic, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {
         ws.publish(topic, JSON.stringify({ channel, data }));
     }

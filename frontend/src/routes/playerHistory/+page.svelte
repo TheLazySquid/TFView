@@ -12,6 +12,7 @@
     import Nameplate from "$lib/components/player/Nameplate.svelte";
     import Popups from "$lib/popups";
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
+    import ConfirmPopup from "$lib/components/popups/ConfirmPopup.svelte";
 
     PlayerHistory.init();
 
@@ -31,6 +32,7 @@
 <PastPlayerPopup />
 <PastGamePopup />
 <InputPopup />
+<ConfirmPopup />
 
 {#snippet playersEnd()}
     No more players recorded

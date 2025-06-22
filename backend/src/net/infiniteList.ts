@@ -28,4 +28,8 @@ export class InfiniteList<T> {
 	update(id: any, update: Partial<T>) {
 		Server.send(this.options.topic, `list-${this.options.listId}-update`, { id, update });
 	}
+
+	delete(id: any) {
+		Server.send(this.options.topic, `list-${this.options.listId}-delete`, id);
+	}
 }

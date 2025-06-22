@@ -14,15 +14,15 @@ export default class Log {
         logfn(text);
     }
 
-    static info(...text: string[]) {
+    static info(...text: any[]) {
         this.addLog("Info", text.join(" "), console.log);
     }
 
-    static warning(...text: string[]) {
+    static warning(...text: any[]) {
         this.addLog("Warning", text.join(" "), console.warn);
     }
 
-    static error(...text: string[]) {
+    static error(...text: any[]) {
         this.addLog("Error", text.join(" "), console.error);
     }
 }

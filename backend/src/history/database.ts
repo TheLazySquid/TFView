@@ -145,7 +145,7 @@ export default class HistoryDatabase {
     }
 
     static getGame(id: number): StoredPastGame {
-        let game = this.db.query<Stored<StoredPastGame>, {}>(`SELECT * FROM games WHERE rowid = $rowid`)
+        let game = this.db.query<Stored<StoredPastGame>, {}>(`SELECT *, rowid FROM games WHERE rowid = $rowid`)
             .get({ rowid: id });
         return this.parseRow(game, ["players", "demos"]);
     }
@@ -433,5 +433,38 @@ export default class HistoryDatabase {
     static updatePlayerEncounterName(rowid: number, name: string) {
         this.db.query(`UPDATE encounters SET name = $name WHERE rowid = $rowid`)
             .run({ name, rowid });
+    }
+
+    // Deleting games
+    static deleteGame(rowid: number) {
+        const run = this.db.transaction(() => {
+            this.db.query(`DELETE FROM games WHERE rowid = $rowid`).run({ rowid });
+
+            // Remove 1 from the encounters of each player in the game
+            let players = this.db.query<{ playerId: string }, {}>(`SELECT playerId FROM encounters WHERE gameId = $rowid`).all({ rowid });
+
+            let encounters: (number | null)[] = [];
+            for(let player of players) {
+                // Get the number of encounters for each player, then decrease by 1
+                let val = this.db.query<{ encounters: number }, {}>(`SELECT encounters FROM players WHERE id = $id`).get({ id: player.playerId });
+                if(!val) encounters.push(null);
+
+                encounters.push(val.encounters - 1);
+                this.db.query(`UPDATE players SET encounters = $encounters WHERE id = $id`).run({ encounters: val.encounters - 1, id: player.playerId });
+            }
+
+            // Delete the encounters for the game
+            this.db.query(`DELETE FROM encounters WHERE gameId = $rowid`).run({ rowid });
+            
+            // Update infinite lists
+            this.pastGames.delete(rowid);
+            for(let i = 0; i < players.length; i++) {
+                if(encounters[i] === null) continue;
+                let playerId = players[i].playerId;
+                this.pastPlayers.update(playerId, { encounters: encounters[i] });
+            }
+        });
+
+        run.immediate();
     }
 }
