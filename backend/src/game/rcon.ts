@@ -36,6 +36,7 @@ export default class Rcon {
                 
                 this.server.connection.once("close", () => {
                     this.connected = false;
+                    this.server.disconnect();
                     History.onGameEnd();
                     Log.info("RCON Disconnected");
                     pollReconnect();
