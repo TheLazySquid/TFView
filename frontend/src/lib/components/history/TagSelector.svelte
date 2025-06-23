@@ -18,7 +18,6 @@
     if(tags) tagsObj = Object.fromEntries(tags.map((t) => [t, true]));
 
     watch(() => Object.values(tagsObj), () => {
-        console.log($state.snapshot(tagsObj));
         if(tags) {
             tags = Object.keys(tagsObj).filter((key) => tagsObj[key]);
         }

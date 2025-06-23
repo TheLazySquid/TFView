@@ -89,11 +89,15 @@ style="max-width: min(700px, 85%);" group={0}>
                     <PastEncounters id={player.ID3} />
                 {/if}
             </Tabs.Content>
-            <Tabs.Content value="chat">
-                <Chat id={player.userId} />
+            <Tabs.Content value="chat" class="grid max-h-[400px]">
+                {#if tab === "chat"}
+                    <Chat id={player.ID3} />
+                {/if}
             </Tabs.Content>
-            <Tabs.Content value="kills" class="grid">
-                <Killfeed id={player.userId} />
+            <Tabs.Content value="kills" class="grid max-h-[400px]">
+                {#if tab === "kills"}
+                    <Killfeed id={player.ID3} />
+                {/if}
             </Tabs.Content>
         </Tabs.Root>
     {/if}

@@ -26,7 +26,6 @@
         "svelte-awesome-color-picker": "^4.0.2",
         "svelte-dnd-action": "^0.9.61",
         "svelte-infinite-loading": "^1.4.0",
-        "svelte-resize-observer-action": "^0.0.4",
         "svelte-svg-spinners": "^0.2.1",
         "svelte-tiny-virtual-list": "^2.1.2",
         "throttleit": "^2.1.0",
@@ -1164,8 +1163,6 @@
     "svelte-dnd-action": ["svelte-dnd-action@0.9.61", "", { "peerDependencies": { "svelte": ">=3.23.0 || ^5.0.0-next.0" } }, "sha512-xj0jZNdV44MAMbdGIAuBYEombmK7A7ticemOtdR5ErWw0f3IxcfcnrRjlYEK0rRjsahVsU+VdGUMwjPVyXrSrA=="],
 
     "svelte-infinite-loading": ["svelte-infinite-loading@1.4.0", "", {}, "sha512-Jo+f/yr/HmZQuIiiKKzAHVFXdAUWHW2RBbrcQTil8JVk1sCm/riy7KTJVzjBgQvHasrFQYKF84zvtc9/Y4lFYg=="],
-
-    "svelte-resize-observer-action": ["svelte-resize-observer-action@0.0.4", "", {}, "sha512-PbhdQKCzf6r9a8p7N8BuSIY6GhL/oM+G2j9OPXTwMD10t33rkwPgJdQNp15d+9uFrPC9luiLDl5fdoz02iT+Fg=="],
 
     "svelte-sonner": ["svelte-sonner@1.0.4", "", { "dependencies": { "runed": "^0.26.0" }, "peerDependencies": { "svelte": "^5.0.0" } }, "sha512-ctm9jeV0Rf3im2J6RU1emccrJFjRSdNSPsLlxaF62TLZw9bB1D40U/U7+wqEgohJY/X7FBdghdj0BFQF/IqKPQ=="],
 

@@ -22,3 +22,11 @@ export interface EncounterSearchParams {
     after?: number;
     before?: number;
 }
+
+export interface KillfeedSearchParams {
+    id?: string;
+}
+
+export interface ChatSearchParams {
+    id?: string;
+}

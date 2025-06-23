@@ -87,12 +87,6 @@ export interface CurrentServerInfo {
     ip: string;
 }
 
-export interface Lobby {
-    players: Player[];
-    killfeed: KillfeedEntry[];
-    chat: ChatMessage[];
-}
-
 export interface PlayerSummary {
     avatarHash: string;
     createdTimestamp: number;

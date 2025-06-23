@@ -9,10 +9,10 @@ class WSClient {
     pollInterval = 1000;
     timeout = 5000;
     ws?: WebSocket;
-    listeners = new Map<any, (data: any) => void>();
+    listeners = new Map<any, ((data: any) => void)[]>();
     replies = new Map<string, (data: any) => void>();
     status: Status = $state("idle");
-    switchCallbacks = new Map<string, () => void>();
+    switchCallbacks = new Set<() => void>();
 
     init(route: string) {
         this.route = route;
@@ -67,25 +67,32 @@ class WSClient {
                 this.replies.get(message.reply)?.(message.data);
                 this.replies.delete(message.reply);
             } else {
-                this.listeners.get(message.channel)?.(message.data);
+                this.listeners.get(message.channel)?.forEach(cb => cb(message.data));
             }
         });
     }
 
-    onSwitch(id: string, callback: () => void) {
-        this.switchCallbacks.set(id, callback);
+    onSwitch(callback: () => void) {
+        this.switchCallbacks.add(callback);
     }
 
-    offSwitch(id: string) {
-        this.switchCallbacks.delete(id);
+    offSwitch(callback: () => void) {
+        this.switchCallbacks.delete(callback);
     }
 
     on<C extends MessageTypes["channel"]>(channel: C, callback: (data: Extract<MessageTypes, SentMessage<C, any>>["data"]) => void) {
-        this.listeners.set(channel, callback);
+        let listeners = this.listeners.get(channel);
+        if(listeners) listeners.push(callback);
+        else this.listeners.set(channel, [callback]);
     }
 
-    off<C extends MessageTypes["channel"]>(channel: C) {
-        this.listeners.delete(channel);
+    off<C extends MessageTypes["channel"]>(channel: C, callback: (data: Extract<MessageTypes, SentMessage<C, any>>["data"]) => void) {
+        let listeners = this.listeners.get(channel);
+        if(!listeners) return;
+
+        let index = listeners.indexOf(callback);
+        if(index === -1) return;
+        listeners.splice(index, 1);
     }
 
     send<C extends RecievesTypes["channel"]>(channel: C, data: Extract<RecievesTypes, RecievedMessage<C, any, any>>["data"]) {

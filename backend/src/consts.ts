@@ -24,3 +24,4 @@ if(flags.noNet) {
 }
 
 export const dataPath = join(homedir(), ".tfview");
+export const pageSize = 50;

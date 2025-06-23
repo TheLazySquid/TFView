@@ -2,7 +2,7 @@ import type { StoredPlayer, PastGame, Stored, PlayerEncounter, StoredPastGame, P
 import type { EncounterSearchParams, GameSearchParams, PlayerSearchParams } from "$types/search";
 import type { CurrentGame } from "./history";
 import { Database } from "bun:sqlite";
-import { flags, dataPath } from "src/consts";
+import { flags, dataPath, pageSize } from "src/consts";
 import { join } from "node:path";
 import fs from "fs";
 import Log from "src/log";
@@ -15,10 +15,9 @@ import { id64ToId3 } from "$shared/steamid";
 
 export default class HistoryDatabase {
     static db: Database;
-    static pageSize = 50;
-    static pastGames: InfiniteList<PastGame>;
-    static pastPlayers: InfiniteList<PastPlayer>;
-    static encounters: InfiniteList<PlayerEncounter>;
+    static pastGames: InfiniteList<PastGame, GameSearchParams>;
+    static pastPlayers: InfiniteList<PastPlayer, PlayerSearchParams>;
+    static encounters: InfiniteList<PlayerEncounter, EncounterSearchParams>;
 
     static init() {
         this.createDb();
@@ -131,7 +130,7 @@ export default class HistoryDatabase {
         if(params.before) whereClauses.push("start <= $before");
 
         if(whereClauses.length > 0) query += " WHERE " + whereClauses.join(" AND ");
-        query += ` ORDER BY start DESC LIMIT ${this.pageSize}`;
+        query += ` ORDER BY start DESC LIMIT ${pageSize}`;
         if(offset !== undefined) query += ` OFFSET $offset`;
 
         return query;
@@ -194,7 +193,7 @@ export default class HistoryDatabase {
         if(whereClauses.length > 0) query += " WHERE " + whereClauses.join(" AND ");
         if(params.sortBy === "encounters") query += ` ORDER BY encounters DESC `;
         else query += ` ORDER BY lastSeen DESC `;
-        query += ` LIMIT ${this.pageSize}`;
+        query += ` LIMIT ${pageSize}`;
         if(offset !== undefined) query += ` OFFSET $offset`;
 
         return query;
@@ -237,7 +236,7 @@ export default class HistoryDatabase {
         if(params.before) whereClauses.push("time <= $before");
 
         if(whereClauses.length > 0) query += " WHERE " + whereClauses.join(" AND ");
-        query += ` ORDER BY time DESC LIMIT ${this.pageSize}`;
+        query += ` ORDER BY time DESC LIMIT ${pageSize}`;
         if(offset !== undefined) query += ` OFFSET $offset`;
 
         return query;
@@ -288,7 +287,6 @@ export default class HistoryDatabase {
     }
 
     static setPlayerSummary(id: string, summary: PlayerSummary) {
-        console.log("Setting summary", id, summary.avatarHash);
         try {
             let avatarHash = summary.avatarHash;
             // We can't see the createdTimestamp of private profiles

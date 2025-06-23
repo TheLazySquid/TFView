@@ -55,8 +55,8 @@
         });
     }
 
-    const toggleTag = (id: string) => {
-        player.tags[id] = !player.tags[id];
+    const toggleTag = (tagId: string) => {
+        player.tags[tagId] = !player.tags[tagId];
         
         WS.send(Recieves.SetTags, { id, tags: $state.snapshot(player.tags) });
     }

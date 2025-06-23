@@ -1,5 +1,5 @@
 import type { PastPlayer, SettingsType, StoredPastGame, Tag } from "./data";
-import type { ChatMessage, CurrentServerInfo, KillfeedEntry, Lobby, Player } from "./lobby";
+import type { ChatMessage, CurrentServerInfo, KillfeedEntry, Player } from "./lobby";
 
 // Sending messages from the backend
 export type SentMessage<Channel, Data> = { channel: Channel, data: Data };
@@ -7,14 +7,10 @@ export type SentMessage<Channel, Data> = { channel: Channel, data: Data };
 export enum Message {
     Warning,
     Error,
-    InitialGame,
+    InitialPlayers,
     PlayerJoin,
     PlayerLeave,
     PlayerUpdate,
-    KillfeedAdded,
-    ChatAdded,
-    GameAdded,
-    GameUpdated,
     InitialSettings,
     SettingUpdate,
     CurrentServer,
@@ -25,12 +21,10 @@ export enum Message {
 export type MessageTypes =
     | SentMessage<Message.Warning, string>
     | SentMessage<Message.Error, string>
-    | SentMessage<Message.InitialGame, Lobby>
+    | SentMessage<Message.InitialPlayers, Player[]>
     | SentMessage<Message.PlayerJoin, Player>
     | SentMessage<Message.PlayerLeave, string>
-    | SentMessage<Message.PlayerUpdate, Partial<Player> & { userId: string }>
-    | SentMessage<Message.KillfeedAdded, KillfeedEntry>
-    | SentMessage<Message.ChatAdded, ChatMessage>
+    | SentMessage<Message.PlayerUpdate, Partial<Player> & { ID3: string }>
     | SentMessage<Message.InitialSettings, SettingsType>
     | SentMessage<Message.SettingUpdate, { key: keyof SettingsType, value: any }>
     | SentMessage<Message.CurrentServer, CurrentServerInfo | null>

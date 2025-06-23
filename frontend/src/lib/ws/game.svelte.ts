@@ -1,6 +1,5 @@
-import type { ChatMessage, CurrentServerInfo, KillfeedEntry, Player } from "$types/lobby";
+import type { CurrentServerInfo, Player } from "$types/lobby";
 import { Message } from "$types/messages";
-import { maxKillfeedSize } from "$shared/consts";
 import { PageState } from "./wsclient.svelte";
 
 export default new class Game extends PageState {
@@ -8,34 +7,30 @@ export default new class Game extends PageState {
     user: Player | null = $state.raw(null);
     players: Player[] = $state([]);
     playersMap = new Map<string, Player>();
-    killfeed: KillfeedEntry[] = $state([]);
-    // stored in reverse order for performance
-    chat: ChatMessage[] = $state([]);
     currentServer: CurrentServerInfo | null = $state(null);
     userColor: string | undefined = $state();
 
     setup() {
-        this.ws.on(Message.InitialGame, (data) => {
-            this.killfeed = data.killfeed;
-            this.chat = data.chat.toReversed(); 
-            this.players = data.players;
+        this.ws.on(Message.InitialPlayers, (players) => {
+            console.log("Initial players", players);
+            this.players = players;
             this.playersMap.clear();
 
             for(let player of this.players) {
                 if(player.user) this.user = player;
-                this.playersMap.set(player.userId, player);
+                this.playersMap.set(player.ID3, player);
             }
         });
 
         this.ws.on(Message.PlayerJoin, (player) => {
             this.players.push(player);
-            this.playersMap.set(player.userId, this.players[this.players.length - 1]);
+            this.playersMap.set(player.ID3, this.players[this.players.length - 1]);
 
             if(player.user) this.user = player;
         });
 
         this.ws.on(Message.PlayerLeave, (id) => {
-            let index = this.players.findIndex((p) => p.userId === id);
+            let index = this.players.findIndex((p) => p.ID3 === id);
             if(index === -1) return;
 
             if(this.players[index].user) this.user = null;
@@ -44,7 +39,7 @@ export default new class Game extends PageState {
         });
 
         this.ws.on(Message.PlayerUpdate, (data) => {
-            let player = this.playersMap.get(data.userId);
+            let player = this.playersMap.get(data.ID3);
             if(!player) return;
 
             for(let key in data) {
@@ -53,15 +48,6 @@ export default new class Game extends PageState {
             }
 
             if(data.kills !== undefined) this.sortPlayers();
-        });
-
-        this.ws.on(Message.KillfeedAdded, (entry) => {
-            this.killfeed.push(entry);
-            if(this.killfeed.length > maxKillfeedSize) this.killfeed.shift();
-        });
-
-        this.ws.on(Message.ChatAdded, (message) => {
-            this.chat.unshift(message);
         });
 
         this.ws.on(Message.CurrentServer, (server) => {

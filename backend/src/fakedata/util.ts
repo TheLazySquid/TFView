@@ -1,3 +1,5 @@
+import { fakePlayers } from "./game";
+
 export function random(min: number, max: number) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -87,6 +89,11 @@ export const playerNames = [
 ]
 
 export const playerIds = [];
-for(let i = 0; i < playerNames.length; i++) {
+
+for(let player of fakePlayers) {
+    playerIds.push(player.ID3);
+}
+
+for(let i = playerIds.length; i < playerNames.length; i++) {
     playerIds.push(random(1e7, 1e10 - 1).toString());
 }

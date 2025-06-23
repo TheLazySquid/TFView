@@ -38,7 +38,6 @@
 		"svelte-awesome-color-picker": "^4.0.2",
 		"svelte-dnd-action": "^0.9.61",
 		"svelte-infinite-loading": "^1.4.0",
-		"svelte-resize-observer-action": "^0.0.4",
 		"svelte-svg-spinners": "^0.2.1",
 		"svelte-tiny-virtual-list": "^2.1.2",
 		"throttleit": "^2.1.0"

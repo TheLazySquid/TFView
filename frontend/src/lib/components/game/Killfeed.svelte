@@ -1,51 +1,48 @@
 <script lang="ts">
-    import Game from "$lib/ws/game.svelte";
+    import type { KillfeedEntry } from "$types/lobby";
     import { getWeaponImage } from "$lib/killfeed";
-    import VirtualList from "svelte-tiny-virtual-list";
-    import { resize } from "svelte-resize-observer-action";
-    import { onMount, tick } from "svelte";
+    import { onDestroy, onMount } from "svelte";
     import { killfeedBlue, killfeedRed } from "$lib/consts";
+    import { InfiniteList } from "$lib/ws/infiniteList.svelte";
+    import type { KillfeedSearchParams } from "$types/search";
+    import InfiniteLoading from "svelte-infinite-loading";
     
-    let { id, height }: { id?: string, height?: number } = $props();
-    let container: HTMLElement;
-    let containerHeight = $state(window.innerHeight);
-    let list: HTMLElement;
+    let { id }: { id: string } = $props();
 
-    onMount(() => {
-        let el = container.querySelector<HTMLElement>(".virtual-list-wrapper");
-        if(el) list = el;
+    const kills = new InfiniteList<KillfeedEntry, KillfeedSearchParams>({
+        listId: "killfeed",
+        filter: (item, params) => {
+            if(!params.id) return true;
+            return item.killerId === params.id || item.victimId === params.id;
+        },
+        params: { id },
+        reverse: true
     });
 
-    const killfeed = $derived(id ? Game.killfeed.filter(m => m.killerId === id || m.victimId === id) : Game.killfeed);
-
-    $effect(() => {
-        killfeed.length;
-        if(!list) return;
-        tick().then(() => {
-            if(list.scrollTop > 41) list.scrollTop += 40;
-        });
-    });
+    let scrollContainer: HTMLElement;
+    onMount(() => kills.setScrollContainer(scrollContainer));
+    onDestroy(() => kills.destroy());
 </script>
 
-<div class="h-full" use:resize={(e) => containerHeight = e.contentRect.height} bind:this={container}>
-    <VirtualList height={containerHeight} itemCount={killfeed.length} itemSize={40}>
-        <div slot="item" let:index let:style {style}>
-            {@const kill = killfeed[killfeed.length - index - 1]}
-            <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill mb-2 w-fit"
-                class:crit={kill.crit}>
-                <div class="whitespace-nowrap"
-                style="color: {kill.killerTeam === 2 ? killfeedRed : killfeedBlue}">
-                    {kill.killer}
-                </div>
-                <img class="px-4"
-                src={getWeaponImage(kill.weapon, kill.crit)} alt={kill.weapon} />
-                <div class="whitespace-nowrap"
-                style="color: {kill.killerTeam === 2 ? killfeedBlue : killfeedRed}">
-                    {kill.victim}
-                </div>
+<div class="h-full min-h-0 overflow-y-auto" bind:this={scrollContainer}>
+    <InfiniteLoading on:infinite={kills.infiniteHandler} direction="top">
+        <div slot="noResults"></div>
+        <div slot="noMore"></div>
+    </InfiniteLoading>
+    {#each kills.items as kill}
+        <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill mb-2 w-fit"
+            class:crit={kill.crit}>
+            <div class="whitespace-nowrap"
+            style="color: {kill.killerTeam === 2 ? killfeedRed : killfeedBlue}">
+                {kill.killer}
+            </div>
+            <img class="px-4" src={getWeaponImage(kill.weapon, kill.crit)} alt={kill.weapon} />
+            <div class="whitespace-nowrap"
+            style="color: {kill.killerTeam === 2 ? killfeedBlue : killfeedRed}">
+                {kill.victim}
             </div>
         </div>
-    </VirtualList>
+    {/each}
 </div>
 
 <style>

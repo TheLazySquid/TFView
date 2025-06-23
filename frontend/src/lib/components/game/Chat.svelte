@@ -1,9 +1,13 @@
 <script lang="ts">
     import { nameColors } from "$lib/consts";
-    import Game from "$lib/ws/game.svelte";
+    import { InfiniteList } from "$lib/ws/infiniteList.svelte";
     import WS from "$lib/ws/wsclient.svelte";
+    import type { ChatMessage } from "$types/lobby";
     import { Recieves } from "$types/messages";
+    import type { ChatSearchParams } from "$types/search";
     import Send from "@lucide/svelte/icons/send";
+    import { onDestroy, onMount } from "svelte";
+    import InfiniteLoading from "svelte-infinite-loading";
 
     let { id }: { id?: string } = $props();
     let team = $state(false);
@@ -21,12 +25,25 @@
         message = "";
     }
 
-    const messages = $derived(id ? Game.chat.filter(m => m.senderId === id) : Game.chat);
+    const chat = new InfiniteList<ChatMessage, ChatSearchParams>({
+        listId: "chat",
+        filter: (item, params) => !params.id || item.senderId === params.id,
+        params: { id },
+        reverse: true
+    });
+    
+    let scrollContainer: HTMLElement;
+    onMount(() => chat.setScrollContainer(scrollContainer));
+    onDestroy(() => chat.destroy());
 </script>
 
-<div class="h-full flex flex-col gap-2">
-    <div class="flex flex-col items-start overflow-y-auto grow">
-        {#each messages as message}
+<div class="max-h-full h-full min-h-0 flex flex-col gap-2">
+    <div class="overflow-y-auto grow min-h-0" bind:this={scrollContainer}>
+        <InfiniteLoading on:infinite={chat.infiniteHandler} direction="top">
+            <div slot="noResults"></div>
+            <div slot="noMore"></div>
+        </InfiniteLoading>
+        {#each chat.items as message}
             <div class="text-[0px] *:text-base">
                 {#if message.dead}
                     <span class="mr-1">*DEAD*</span>
