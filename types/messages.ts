@@ -27,7 +27,7 @@ export type MessageTypes =
     | SentMessage<Message.PlayerUpdate, Partial<Player> & { ID3: string }>
     | SentMessage<Message.InitialSettings, SettingsType>
     | SentMessage<Message.SettingUpdate, { key: keyof SettingsType, value: any }>
-    | SentMessage<Message.CurrentServer, CurrentServerInfo | null>
+    | SentMessage<Message.CurrentServer, { server: CurrentServerInfo | null, definitelyNotInGame?: boolean }>
     | SentMessage<Message.Tags, Tag[]>
     | SentMessage<Message.UserColor, string | undefined>
     | SentMessage<`list-${string}-addStart`, any>

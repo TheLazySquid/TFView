@@ -7,7 +7,7 @@
     import type { KillfeedSearchParams } from "$types/search";
     import InfiniteLoading from "svelte-infinite-loading";
     
-    let { id }: { id: string } = $props();
+    let { id }: { id?: string } = $props();
 
     const kills = new InfiniteList<KillfeedEntry, KillfeedSearchParams>({
         listId: "killfeed",

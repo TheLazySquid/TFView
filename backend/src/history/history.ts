@@ -36,11 +36,14 @@ export default class History {
     static pageSize = 50;
     static events = new EventEmitter();
     static updateInterval = 10000;
+    static definitelyNotInGame = false;
 
     static init() {        
         Server.onConnect("game", (send) => {
-            if(!this.currentGame) return;
-            send(Message.CurrentServer, this.getCurrentServer());
+            send(Message.CurrentServer, {
+                server: this.getCurrentServer(),
+                definitelyNotInGame: this.definitelyNotInGame
+            });
         });
 
         Server.on(Recieves.DeleteGame, (rowid, { reply }) => {
@@ -70,11 +73,12 @@ export default class History {
     }
 
     static getCurrentServer() {
+        if(!this.currentGame) return null;
         return {
             start: this.currentGame.startTime,
             map: this.currentGame.map,
             hostname: this.currentGame.hostname,
-            ip: this.currentGame.ip 
+            ip: this.currentGame.ip
         }
     }
 
@@ -99,7 +103,7 @@ export default class History {
 
             this.currentGame.hostname = hostname;
             this.currentGame.ip = ip;
-            Server.send("game", Message.CurrentServer, this.getCurrentServer());
+            Server.send("game", Message.CurrentServer, { server: this.getCurrentServer(), definitelyNotInGame: false });
 
             HistoryDatabase.updateCurrentHostname(this.currentGame);
             Log.info("Updated server with ip", ip, "hostname", hostname);
@@ -114,6 +118,7 @@ export default class History {
             rowid: 0, kills: 0, deaths: 0
         }
 
+        this.definitelyNotInGame = false;
         this.currentGame.rowid = HistoryDatabase.createCurrentGame(this.currentGame);
 
         this.events.emit("startGame");
@@ -122,7 +127,7 @@ export default class History {
         if(hostname) Log.info("Game started:", map, hostname, ip);
         else Log.info("Game started:", map, "(hostname pending)");
 
-        Server.send("game", Message.CurrentServer, this.getCurrentServer());
+        Server.send("game", Message.CurrentServer, { server: this.getCurrentServer(), definitelyNotInGame: false });
     }
 
     static updateCurrentGame() {
@@ -218,8 +223,9 @@ export default class History {
     static onGameEnd() {
         if(!this.currentGame || flags.fakeData) return;
 
+        this.definitelyNotInGame = true;
+        Server.send("game", Message.CurrentServer, { server: null, definitelyNotInGame: true });
         this.events.emit("endGame");
-        Server.send("game", Message.CurrentServer, null);
         this.updateCurrentGame();
         
         Log.info(`Recorded game: ${this.currentGame.map}`);

@@ -77,6 +77,10 @@
             <div class="pl-5">
                 Server: <i>{Game.currentServer.hostname}</i>
             </div>
+        {:else}
+            <div class="pl-3">
+                Current game not detected
+            </div>
         {/if}
     </div>
 </div>

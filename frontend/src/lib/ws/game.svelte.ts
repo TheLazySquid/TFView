@@ -9,6 +9,7 @@ export default new class Game extends PageState {
     playersMap = new Map<string, Player>();
     currentServer: CurrentServerInfo | null = $state(null);
     userColor: string | undefined = $state();
+    definitelyNotInGame = $state(false);
 
     setup() {
         this.ws.on(Message.InitialPlayers, (players) => {
@@ -50,8 +51,11 @@ export default new class Game extends PageState {
             if(data.kills !== undefined) this.sortPlayers();
         });
 
-        this.ws.on(Message.CurrentServer, (server) => {
+        this.ws.on(Message.CurrentServer, ({ server, definitelyNotInGame }) => {
             this.currentServer = server;
+            if(definitelyNotInGame !== undefined) {
+                this.definitelyNotInGame = definitelyNotInGame;
+            }
         });
 
         this.ws.on(Message.UserColor, (color) => {

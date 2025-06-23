@@ -58,7 +58,7 @@
 {/snippet}
 
 <div class="w-full h-full relative">
-    {#if !Game.currentServer}
+    {#if (Game.players.length === 0 && !Game.currentServer) || Game.definitelyNotInGame}
         <div class="absolute top-0 left-0 w-full h-full backdrop-blur-xs z-10 flex items-center justify-center"
         style="background-color: rgba(0,0,0,0.5)">
             <Card.Root class="w-[500px]">

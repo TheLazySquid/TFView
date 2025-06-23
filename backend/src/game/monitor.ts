@@ -1,5 +1,4 @@
 import type { ChatMessage, G15Player, KillfeedEntry, Player, PlayerSummary, TF2Class } from "$types/lobby";
-import type { PlayerEncounter } from "$types/data";
 import type { ChatSearchParams, KillfeedSearchParams } from "$types/search";
 import { Recieves, Message } from "$types/messages";
 import Server, { type WS } from "../net/server";
@@ -110,10 +109,18 @@ export default class GameMonitor {
         });
 
         this.listenToLog();
-
         this.poll();
+
         History.events.on("startGame", () => {
             this.gotResponse = false;
+        });
+        
+        // When the game ends make all players ready to be removed
+        // Since odds are most will leave before the next game starts
+        History.events.on("endGame", () => {
+            for(let player of this.players) {
+                this.missedQueries.set(player.ID3, 3);
+            }
         });
     }
 
