@@ -78,7 +78,7 @@
                             <Nameplate current={false} bind:player={PlayerHistory.players.items[i]}
                                 onclick={() => Popups.openPastPlayerPopup?.(player.id)} /> 
                         </td>
-                        <td><Time date={player.lastSeen} /></td>
+                        <td><Time timestamp={player.lastSeen} type="date" /></td>
                         <td>{player.encounters}</td>
                     </tr>
                 {/each}

@@ -1,7 +1,8 @@
 <script lang="ts">
-    import { timeFmt } from "$lib/consts";
+    import { dateFmt, timeFmt } from "$lib/consts";
 
-    let { date, duration = false }: { date: number, duration?: boolean } = $props();
+    type Type = "date" | "duration" | "time";
+    let { timestamp, type }: { timestamp: number, type: Type } = $props();
 
     let text = $state("");
 
@@ -9,10 +10,10 @@
     const minuteLen = secondLen * 60;
     const hourLen = minuteLen * 60;
 
-    if(duration) {
-        const hours = Math.floor(date / hourLen);
-        const minutes = Math.floor((date % hourLen) / minuteLen);
-        const seconds = Math.ceil((date % minuteLen) / secondLen);
+    if(type === "duration") {
+        const hours = Math.floor(timestamp / hourLen);
+        const minutes = Math.floor((timestamp % hourLen) / minuteLen);
+        const seconds = Math.ceil((timestamp % minuteLen) / secondLen);
 
         if(hours === 0 && minutes === 0) {
             text = `${seconds} second${seconds > 1 ? "s" : ""}`;
@@ -22,8 +23,10 @@
             }
             text += `${minutes} minute${minutes > 1 ? "s" : ""}`
         }
+    } else if(type === "date") {
+        text = dateFmt.format(timestamp);
     } else {
-        text = timeFmt.format(date);
+        text = timeFmt.format(timestamp);
     }
 </script>
 

@@ -181,7 +181,8 @@ export default class GameMonitor {
                 crit: match[4] !== undefined,
                 killerTeam: killer.team,
                 killerId: killer.ID3,
-                victimId: victim.ID3
+                victimId: victim.ID3,
+                timestamp: Date.now()
             }
 
             this.killfeed.push(entry);
@@ -230,7 +231,8 @@ export default class GameMonitor {
                 name: match[3],
                 text: match[4],
                 senderTeam: player.team,
-                senderId: player.ID3
+                senderId: player.ID3,
+                timestamp: Date.now()
             }
 
             this.chat.push(message);
@@ -426,7 +428,8 @@ export default class GameMonitor {
             dead: false,
             team,
             text: msg,
-            senderId: this.players[0].ID3
+            senderId: this.players[0].ID3,
+            timestamp: Date.now()
         }
         this.chat.push(message);
     }

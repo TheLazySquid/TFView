@@ -31,10 +31,10 @@
         <NinetyRingWithBg color="white" />
     {:else}
         <div class="flex items-center gap-2">
-            Game on {game.map} on <Time date={game.start} />
+            Game on {game.map} on <Time timestamp={game.start} type="date" />
             <DeleteGame {game} onSuccess={() => popup.closePopup()} />
         </div>
-        <div>Duration: <Time date={game.duration} duration={true} /></div>
+        <div>Duration: <Time timestamp={game.duration} type="duration" /></div>
         <div>Server: {game.hostname ? `${game.hostname} (${game.ip})` : "Unknown"}</div>
         {#if game?.demos && game.demos.length > 0}
             <div class="flex items-center gap-2 flex-wrap">

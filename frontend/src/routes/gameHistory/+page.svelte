@@ -53,8 +53,8 @@
             <tbody>
                 {#each GameHistory.games.items as game}
                     <tr class="border-t-2 *:py-1">
-                        <td class="whitespace-nowrap"><Time date={game.start} /></td>
-                        <td><Time date={game.duration} duration={true} /></td>
+                        <td class="whitespace-nowrap"><Time timestamp={game.start} type="date" /></td>
+                        <td><Time timestamp={game.duration} type="duration" /></td>
                         <td>{game.map}</td>
                         <td>{game.hostname ?? "Unknown"}</td>
                         <td>{game.kills}/{game.deaths}</td>

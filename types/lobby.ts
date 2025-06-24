@@ -69,6 +69,7 @@ export interface KillfeedEntry {
     killerTeam: number;
     killerId: string;
     victimId: string;
+    timestamp: number;
 }
 
 export interface ChatMessage {
@@ -78,6 +79,7 @@ export interface ChatMessage {
     team: boolean;
     dead: boolean;
     senderId: string;
+    timestamp: number;
 }
 
 export interface CurrentServerInfo {

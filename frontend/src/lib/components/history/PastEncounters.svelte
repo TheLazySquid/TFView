@@ -42,7 +42,7 @@
         <tbody>
             {#each encounters.items as encounter}
                 <tr>
-                    <td><Time date={encounter.time} /></td>
+                    <td><Time timestamp={encounter.time} type="date" /></td>
                     <td>{encounter.name}</td>
                     <td>{encounter.map}</td>
                     <td>{encounter.kills}/{encounter.deaths}</td>

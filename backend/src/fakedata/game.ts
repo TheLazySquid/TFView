@@ -1,3 +1,4 @@
+import type { ChatMessage, KillfeedEntry, Player } from "$types/lobby";
 import type { CurrentGame } from "src/history/history";
 
 export const fakeCurrentGame: CurrentGame = {
@@ -12,7 +13,7 @@ export const fakeCurrentGame: CurrentGame = {
     demos: []
 }
 
-export const fakePlayers = [
+export const fakePlayers: Player[] = [
     {
         name: "Grim Bloody Fable",
         userId: "105",
@@ -76,7 +77,7 @@ export const fakePlayers = [
     }
 ];
 
-export const fakeKillfeed = [
+export const fakeKillfeed: KillfeedEntry[] = [
     {
         killer: "Still Alive",
         victim: "Screamin' Eagles",
@@ -84,7 +85,8 @@ export const fakeKillfeed = [
         weapon: "tf_projectile_rocket",
         crit: true,
         killerId: "97733808",
-        victimId: "10403381"
+        victimId: "10403381",
+        timestamp: Date.now() - 90000
     },
     {
         killer: "Grim Bloody Fable",
@@ -93,18 +95,20 @@ export const fakeKillfeed = [
         weapon: "scattergun",
         crit: false,
         killerId: "1127822620",
-        victimId: "97733808"
+        victimId: "97733808",
+        timestamp: Date.now()
     }
 ]
 
-export const fakeChat = [
+export const fakeChat: ChatMessage[] = [
     {
         name: "Still Alive",
         text: "I'm not even angry",
         senderTeam: 3,
         dead: true,
         team: false,
-        senderId: "97733808"
+        senderId: "97733808",
+        timestamp: Date.now() - 200000
     },
     {
         name: "Screamin' Eagles",
@@ -112,7 +116,8 @@ export const fakeChat = [
         senderTeam: 2,
         dead: false,
         team: true,
-        senderId: "10403381"
+        senderId: "10403381",
+        timestamp: Date.now() - 130000
     },
     {
         name: "Mentlegen",
@@ -120,6 +125,7 @@ export const fakeChat = [
         senderTeam: 1,
         dead: false,
         team: false,
-        senderId: "83927554"
+        senderId: "83927554",
+        timestamp: Date.now() - 60000
     }
 ]

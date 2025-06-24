@@ -8,6 +8,7 @@
     import Send from "@lucide/svelte/icons/send";
     import { onDestroy, onMount } from "svelte";
     import InfiniteLoading from "svelte-infinite-loading";
+    import Time from "../Time.svelte";
 
     let { id }: { id?: string } = $props();
     let team = $state(false);
@@ -38,12 +39,16 @@
 </script>
 
 <div class="max-h-full h-full min-h-0 flex flex-col gap-2">
-    <div class="overflow-y-auto grow min-h-0" bind:this={scrollContainer}>
-        <InfiniteLoading on:infinite={chat.infiniteHandler} direction="top">
-            <div slot="noResults"></div>
-            <div slot="noMore"></div>
-        </InfiniteLoading>
+    <div class="overflow-y-auto grow min-h-0 grid auto-rows-max gap-x-2" bind:this={scrollContainer}
+        style="grid-template-columns: auto 1fr">
+        <div class="col-span-2">
+            <InfiniteLoading on:infinite={chat.infiniteHandler} direction="top">
+                <div slot="noResults"></div>
+                <div slot="noMore"></div>
+            </InfiniteLoading>
+        </div>
         {#each chat.items as message}
+            <div class="text-zinc-400 content-center"><Time timestamp={message.timestamp} type="time" /></div>
             <div class="text-[0px] *:text-base">
                 {#if message.dead}
                     <span class="mr-1">*DEAD*</span>
