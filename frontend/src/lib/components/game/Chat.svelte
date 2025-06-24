@@ -43,11 +43,17 @@
     <div class="overflow-y-auto grow min-h-0 grid auto-rows-max gap-x-2" bind:this={scrollContainer}
         style="grid-template-columns: auto 1fr">
         <div class="col-span-2">
-            <InfiniteLoading on:infinite={chat.infiniteHandler} direction="top">
+            <InfiniteLoading on:infinite={chat.infiniteHandler} direction="top"
+                identifier={chat.identifier}>
                 <div slot="noResults"></div>
                 <div slot="noMore"></div>
             </InfiniteLoading>
         </div>
+        {#if chat.items.length === 0}
+            <div class="col-span-2 text-center text-zinc-400 pt-2">
+                No Chat Messages Recorded
+            </div>
+        {/if}
         {#each chat.items as message}
             <div class="text-zinc-400 content-center"><Time timestamp={message.timestamp} type="time" /></div>
             <div class="text-[0px] *:text-base">

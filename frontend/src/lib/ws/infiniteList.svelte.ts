@@ -53,12 +53,18 @@ export class InfiniteList<T, Params extends Record<string, any>> {
             this.items.push(item);
 
             // Stick to the bottom
-            if(this.scrollContainer) {
-                let atBottom = this.scrollContainer.scrollHeight - this.scrollContainer.scrollTop <= this.scrollContainer.clientHeight + 1;
-                await tick();
+            if(!this.scrollContainer) return;
 
-                if(atBottom) this.scrollContainer.scrollTop = this.scrollContainer.scrollHeight;
-            }
+            let atBottom = this.scrollContainer.scrollHeight - this.scrollContainer.scrollTop <= this.scrollContainer.clientHeight + 1;
+            if(!atBottom) return;
+
+            await tick();
+            this.scrollContainer.scrollTop = this.scrollContainer.scrollHeight;
+
+            // Remove old items
+            if(this.items.length < 150) return;
+            this.items.splice(0, this.items.length - 150);
+            this.identifier++;
         } else {
             this.items.unshift(item);
         }

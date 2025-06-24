@@ -29,11 +29,17 @@
 <div class="h-full min-h-0 overflow-y-auto grid auto-rows-max gap-2" bind:this={scrollContainer}
     style="grid-template-columns: auto 1fr">
     <div class="col-span-2">
-        <InfiniteLoading on:infinite={kills.infiniteHandler} direction="top">
+        <InfiniteLoading on:infinite={kills.infiniteHandler} direction="top"
+            identifier={kills.identifier}>
             <div slot="noResults"></div>
             <div slot="noMore"></div>
         </InfiniteLoading>
     </div>
+    {#if kills.items.length === 0}
+        <div class="col-span-2 text-center text-zinc-400">
+            No Kills Recorded
+        </div>
+    {/if}
     {#each kills.items as kill}
         <div class="text-zinc-400 content-center"><Time timestamp={kill.timestamp} type="time" /></div>
         <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill w-fit"

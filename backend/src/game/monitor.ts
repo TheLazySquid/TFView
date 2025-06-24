@@ -358,11 +358,10 @@ export default class GameMonitor {
 
     static pruneOldEntries() {
         const start = 5000;
-        const hardCap = 40000;
 
         // remove old chat messages
         for(let i = start; i < this.chat.items.length; i++) {
-            if(i > hardCap || !this.playerMap.has(this.chat.items[i].senderId)) {
+            if(!this.playerMap.has(this.chat.items[i].senderId)) {
                 this.chat.items.splice(i, 1);
                 i--;
             }
@@ -371,7 +370,7 @@ export default class GameMonitor {
         // remove old killfeed entries
         for(let i = start; i < this.killfeed.items.length; i++) {
             const entry = this.killfeed.items[i];
-            if(i > hardCap || !this.playerMap.has(entry.killerId) && !this.playerMap.has(entry.victimId)) {
+            if(!this.playerMap.has(entry.killerId) && !this.playerMap.has(entry.victimId)) {
                 this.killfeed.items.splice(i, 1);
                 i--;
             }

@@ -48,6 +48,7 @@ export class LoadedInfiniteList<T, Params> {
 	lastId?: string;
 	lastParams?: Params;
 	filteredItems?: T[];
+	hardLengthCap = 40000;
 
 	constructor(private options: LoadedOptions<T, Params>) {
 		Server.on(`list-${options.listId}`, ({ offset, params }, { reply }) => {
@@ -64,6 +65,8 @@ export class LoadedInfiniteList<T, Params> {
 
 	push(item: T) {
 		this.items.push(item);
+		
+		if(this.items.length > this.hardLengthCap) this.items.shift();
 		if(this.lastParams && this.options.filter(item, this.lastParams)) this.filteredItems?.push(item);
 
 		Server.send(this.options.topic, `list-${this.options.listId}-addStart`, item);
