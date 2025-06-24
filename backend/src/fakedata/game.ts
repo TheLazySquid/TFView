@@ -30,7 +30,8 @@ export const fakePlayers: Player[] = [
         class: 1,
         user: true,
         tags: {},
-        note: ""
+        note: "",
+        killstreak: 9
     },
     {
         name: "Screamin' Eagles",
@@ -45,7 +46,9 @@ export const fakePlayers: Player[] = [
         deaths: 5,
         tags: {},
         nickname: "Some Guy",
-        note: ""
+        note: "",
+        killstreak: 0,
+        encounters: 6
     },
     {
         name: "Still Alive",
@@ -59,7 +62,8 @@ export const fakePlayers: Player[] = [
         kills: 5,
         deaths: 2,
         tags: {},
-        note: ""
+        note: "",
+        killstreak: 2
     },
     {
         name: "Mentlegen",
@@ -73,7 +77,8 @@ export const fakePlayers: Player[] = [
         kills: 0,
         deaths: 0,
         tags: {},
-        note: ""
+        note: "",
+        killstreak: 0
     }
 ];
 

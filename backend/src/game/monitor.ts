@@ -187,6 +187,10 @@ export default class GameMonitor {
 
             this.killfeed.push(entry);
 
+            // Deaths are handled in the player update
+            killer.killstreak++;
+            let message: Partial<Player> & { ID3: string } = { ID3: killer.ID3, killstreak: killer.killstreak };
+
             // See if we can guess the player's class
             const classes = killClasses[match[3]];
             if(classes) {
@@ -200,7 +204,7 @@ export default class GameMonitor {
                         this.potentialClasses.delete(killer.ID3);
                     }
 
-                    Server.send("game", Message.PlayerUpdate, { ID3: killer.ID3, class: classes[0] });
+                    message.class = classes[0];
                 } else if(options) {
                     let possibilities: TF2Class[] = [];
 
@@ -212,12 +216,12 @@ export default class GameMonitor {
                     if(possibilities.length === 0) this.potentialClasses.delete(killer.ID3);
                     else if(possibilities.length === 1) {
                         killer.class = possibilities[0];
-
-                        Server.send("game", Message.PlayerUpdate, { ID3: killer.ID3, class: possibilities[0] });
+                        message.class = possibilities[0];
                     }
                 }
             }
 
+            Server.send("game", Message.PlayerUpdate, message);
         });
 
         // parse the chat
@@ -261,7 +265,13 @@ export default class GameMonitor {
             
             this.missedQueries.delete(id);
             
-            let player: Partial<Player> = { kills: 0, deaths: 0, tags: {} };
+            let player: Partial<Player> = {
+                kills: 0,
+                deaths: 0,
+                tags: {},
+                killstreak: 0
+            }
+
             if(playerInfo.iAccountID === this.userAccountID3) player.user = true;
             if(this.playerMap.has(id)) player = this.playerMap.get(id);
 
@@ -270,7 +280,9 @@ export default class GameMonitor {
             // dispatch the changes
             if(this.playerMap.has(id)) {
                 if(!diff) continue;
-                
+
+                // Reset the killstreak when dying/respawning
+                if(diff.alive !== undefined) player.killstreak = 0;
                 Server.send("game", Message.PlayerUpdate, diff);
 
                 if(diff.name && diff.name !== "unconnected") {
@@ -283,6 +295,7 @@ export default class GameMonitor {
                     if(playerData.tags) player.tags = playerData.tags;
                     if(playerData.nickname) player.nickname = playerData.nickname;
                     if(playerData.note) player.note = playerData.note;
+                    if(playerData.encounters) player.encounters = playerData.encounters;
                     player.names = playerData.names;
                 }
 
@@ -366,6 +379,7 @@ export default class GameMonitor {
         let changed = false;
         
         const copy = (key: string, value: any) => {
+            if(typeof value === "number" && isNaN(value)) return;
             if(value === undefined || player[key] === value) return;
 
             diff[key] = value;

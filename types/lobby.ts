@@ -46,6 +46,9 @@ export interface Player {
     kills: number;
     deaths: number;
 
+    // From killfeed
+    killstreak: number;
+
     // Estimated based on killfeed and health
     class?: TF2Class;
 
@@ -54,6 +57,7 @@ export interface Player {
 
     // From history
     names?: string[];
+    encounters?: number;
 
     // user-generated
     tags: Record<string, boolean>;

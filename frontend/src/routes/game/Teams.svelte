@@ -1,11 +1,14 @@
 <script lang="ts">
     import type { Component, Snippet } from "svelte";
     import * as Resizable from "$lib/components/ui/resizable";
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
     import TeamView from "./TeamView.svelte";
+    import Settings from "@lucide/svelte/icons/settings";
     import Split from "@lucide/svelte/icons/table";
     import Together from "@lucide/svelte/icons/rows-3";
     import TV from "@lucide/svelte/icons/tv";
     import Game from "$lib/ws/game.svelte";
+    import { columns } from "./state.svelte";
 
     let { children }: { children?: Snippet } = $props();
 
@@ -24,6 +27,10 @@
     const toggleShowSpectators = () => {
         showSpectators = !showSpectators;
         localStorage.setItem(spectaorsKey, showSpectators ? "true" : "false");
+    }
+
+    const saveColumns = () => {
+        localStorage.setItem("game-columns", JSON.stringify($state.snapshot(columns)))
     }
 </script>
 
@@ -64,6 +71,19 @@
         </Resizable.PaneGroup>
     </div>
     <div class="border-t p-1 flex items-center">
+        <DropdownMenu.Root>
+            <DropdownMenu.Trigger class="pr-3 pl-1">
+                <Settings size={20} />
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Content>
+                <DropdownMenu.CheckboxItem onCheckedChange={saveColumns} bind:checked={columns.class}>Class</DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem onCheckedChange={saveColumns} bind:checked={columns.killstreak}>Killstreak</DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem onCheckedChange={saveColumns} bind:checked={columns.kd}>K/D</DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem onCheckedChange={saveColumns} bind:checked={columns.ping}>Ping</DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem onCheckedChange={saveColumns} bind:checked={columns.health}>Health</DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem onCheckedChange={saveColumns} bind:checked={columns.encounters}>Encounters</DropdownMenu.CheckboxItem>
+            </DropdownMenu.Content>
+        </DropdownMenu.Root>
         {@render splitButton(Split, true, "rounded-l-sm")}
         {@render splitButton(Together, false, "rounded-r-sm")}
         <button class="ml-3 p-1 border rounded-sm flex items-center gap-2" class:bg-accent={showSpectators}

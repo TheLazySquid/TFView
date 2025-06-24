@@ -420,12 +420,8 @@ export default class HistoryDatabase {
     }
 
     static updatePlayerEncounter(rowid: number, info: PastGamePlayer) {
-        try {
-            this.db.query(`UPDATE encounters SET kills = $kills, deaths = $deaths WHERE rowid = $rowid`)
-                .run({ kills: info.kills, deaths: info.deaths, rowid });
-        } catch {
-            console.trace("Somehow kills managed to be null despite the fact that that's completely impossible", info);
-        }
+        this.db.query(`UPDATE encounters SET kills = $kills, deaths = $deaths WHERE rowid = $rowid`)
+            .run({ kills: info.kills, deaths: info.deaths, rowid });
     }
 
     static updatePlayerEncounterName(rowid: number, name: string) {
