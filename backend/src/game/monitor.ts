@@ -282,7 +282,11 @@ export default class GameMonitor {
                 if(!diff) continue;
 
                 // Reset the killstreak when dying/respawning
-                if(diff.alive !== undefined) player.killstreak = 0;
+                if(diff.alive !== undefined || diff.team !== undefined) {
+                    player.killstreak = 0;
+                    diff.killstreak = 0;
+                }
+                
                 Server.send("game", Message.PlayerUpdate, diff);
 
                 if(diff.name && diff.name !== "unconnected") {
