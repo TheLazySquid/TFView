@@ -1,3 +1,4 @@
+import Popups from "$lib/popups";
 import type { CurrentServerInfo, Player } from "$types/lobby";
 import { Message } from "$types/messages";
 import { PageState } from "./wsclient.svelte";
@@ -66,5 +67,14 @@ export default new class Game extends PageState {
     // Sort by most to least kills to mimic the scoreboard
     sortPlayers() {
         this.players.sort((a, b) => b.kills - a.kills);
+    }
+
+    openPlayer(id: string) {
+        let player = this.playersMap.get(id);
+        if(player) {
+            Popups.openPlayerPopup?.(player);
+        } else {
+            Popups.openPastPlayerPopup?.(id);
+        }
     }
 }

@@ -9,6 +9,7 @@
     import { onDestroy, onMount } from "svelte";
     import InfiniteLoading from "svelte-infinite-loading";
     import Time from "../Time.svelte";
+    import Game from "$lib/ws/game.svelte";
 
     let { id }: { id?: string } = $props();
     let team = $state(false);
@@ -56,9 +57,9 @@
                 {#if message.team}
                     <span class="mr-1">(TEAM)</span>
                 {/if}
-                <span style="color: {nameColors[message.senderTeam]}">
+                <button style="color: {nameColors[message.senderTeam]}" onclick={() => Game.openPlayer(message.senderId)}>
                     {message.name}
-                </span>
+                </button>
                 <span>: {message.text}</span>
             </div>
         {/each}

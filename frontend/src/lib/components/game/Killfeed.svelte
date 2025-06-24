@@ -7,6 +7,7 @@
     import type { KillfeedSearchParams } from "$types/search";
     import InfiniteLoading from "svelte-infinite-loading";
     import Time from "$lib/components/Time.svelte";
+    import Game from "$lib/ws/game.svelte";
     
     let { id }: { id?: string } = $props();
 
@@ -37,15 +38,15 @@
         <div class="text-zinc-400 content-center"><Time timestamp={kill.timestamp} type="time" /></div>
         <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill w-fit"
             class:crit={kill.crit}>
-            <div class="whitespace-nowrap"
+            <button class="whitespace-nowrap" onclick={() => Game.openPlayer(kill.killerId)}
             style="color: {kill.killerTeam === 2 ? killfeedRed : killfeedBlue}">
                 {kill.killer}
-            </div>
+            </button>
             <img class="px-4" src={getWeaponImage(kill.weapon, kill.crit)} alt={kill.weapon} />
-            <div class="whitespace-nowrap"
+            <button class="whitespace-nowrap" onclick={() => Game.openPlayer(kill.victimId)}
             style="color: {kill.killerTeam === 2 ? killfeedBlue : killfeedRed}">
                 {kill.victim}
-            </div>
+            </button>
         </div>
     {/each}
 </div>
