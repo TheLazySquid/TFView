@@ -13,6 +13,7 @@
     import { Recieves } from "$types/messages";
     import { id3ToId64 } from "$shared/steamid";
     import GlobalState from "$lib/ws/globalState.svelte";
+    import { toast } from "svelte-sonner";
 
     interface PastProps { player: PastPlayer; current: false }
     interface CurrentProps { player: Player; current: true }
@@ -60,6 +61,12 @@
         
         WS.send(Recieves.SetTags, { id, tags: $state.snapshot(player.tags) });
     }
+
+    const copy = (text: string) => {
+        navigator.clipboard.writeText(text)
+            .then(() => toast.success(`"${text}" copied to clipboard!`))
+            .catch(() => toast.error("Failed to copy to clipboard."));
+    }
 </script>
 
 {#snippet link(text: string, url: string)}
@@ -67,6 +74,12 @@
         <a class="h-full w-full px-2 py-1" href={url} target="_blank">
             {text}
         </a>
+    </ContextMenu.Item>
+{/snippet}
+
+{#snippet copyable(text: string, label: string)}
+    <ContextMenu.Item onclick={() => copy(text)}>
+        {label}
     </ContextMenu.Item>
 {/snippet}
 
@@ -156,6 +169,20 @@
                         {tag.name}
                     </ContextMenu.Item>
                 {/each}
+            </ContextMenu.SubContent>
+        </ContextMenu.Sub>
+        <ContextMenu.Sub>
+            <ContextMenu.SubTrigger>
+                Copy
+            </ContextMenu.SubTrigger>
+            <ContextMenu.SubContent>
+                {@render copyable(name, "Name")}
+                {@render copyable(id64, "ID64")}
+                {@render copyable(id, "ID3 (Short)")}
+                {@render copyable(`[U:1:${id}]`, "ID3 (Full)")}
+                {#if current}
+                    {@render copyable((player as Player).userId, "Game UserID")}
+                {/if}
             </ContextMenu.SubContent>
         </ContextMenu.Sub>
     </ContextMenu.Content>
