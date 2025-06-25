@@ -3,7 +3,7 @@
     import * as ContextMenu from "$lib/components/ui/context-menu";
     import * as Tooltip from "$lib/components/ui/tooltip";
     import type { PastPlayer } from "$types/data";
-    import type { Player } from "$types/lobby";
+    import type { KickReason, Player } from "$types/lobby";
     import UserPen from "@lucide/svelte/icons/user-pen";
     import Notepad from "@lucide/svelte/icons/notepad-text";
     import Check from "@lucide/svelte/icons/check";
@@ -67,6 +67,10 @@
             .then(() => toast.success(`"${text}" copied to clipboard!`))
             .catch(() => toast.error("Failed to copy to clipboard."));
     }
+
+    const kick = (userId: string, reason: KickReason) => {
+        WS.send(Recieves.KickPlayer, { userId, reason });
+    }
 </script>
 
 {#snippet link(text: string, url: string)}
@@ -80,6 +84,12 @@
 {#snippet copyable(text: string, label: string)}
     <ContextMenu.Item onclick={() => copy(text)}>
         {label}
+    </ContextMenu.Item>
+{/snippet}
+
+{#snippet kickButton(text: string, reason: KickReason)}
+    <ContextMenu.Item onclick={() => kick((player as Player).userId, reason)}>
+        {text}
     </ContextMenu.Item>
 {/snippet}
 
@@ -185,5 +195,18 @@
                 {/if}
             </ContextMenu.SubContent>
         </ContextMenu.Sub>
+        {#if current}
+            <ContextMenu.Sub>
+                <ContextMenu.SubTrigger>
+                    Call Votekick
+                </ContextMenu.SubTrigger>
+                <ContextMenu.SubContent>
+                    {@render kickButton("Cheating", "cheating")}
+                    {@render kickButton("Idle", "idle")}
+                    {@render kickButton("Scamming", "scamming")}
+                    {@render kickButton("Other", "other")}
+                </ContextMenu.SubContent>
+            </ContextMenu.Sub>
+        {/if}
     </ContextMenu.Content>
 </ContextMenu.Root>

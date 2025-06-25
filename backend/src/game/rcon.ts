@@ -2,6 +2,8 @@ import RconServer from "rcon-srcds";
 import Settings from "../settings/settings";
 import History from "src/history/history";
 import Log from "src/log";
+import Server from "src/net/server";
+import { Recieves } from "$types/messages";
 
 export default class Rcon {
     static server: RconServer;
@@ -16,6 +18,10 @@ export default class Rcon {
         });
 
         this.connect();
+
+        Server.on(Recieves.KickPlayer, ({ userId, reason }) => {
+            this.run(`callvote kick "${userId} ${reason}"`)
+        });
     }
     
     static connect() {

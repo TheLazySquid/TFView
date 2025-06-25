@@ -1,5 +1,5 @@
 import type { PastPlayer, SettingsType, StoredPastGame, Tag } from "./data";
-import type { ChatMessage, CurrentServerInfo, KillfeedEntry, Player } from "./lobby";
+import type { ChatMessage, CurrentServerInfo, KickReason, KillfeedEntry, Player } from "./lobby";
 
 // Sending messages from the backend
 export type SentMessage<Channel, Data> = { channel: Channel, data: Data };
@@ -46,17 +46,19 @@ export enum Recieves {
     SetNickname,
     SetNote,
     SetTags,
-    DeleteGame
+    DeleteGame,
+    KickPlayer
 }
 
 export type RecievesTypes = 
-    | RecievedMessage<Recieves.Chat, string, void>
-    | RecievedMessage<Recieves.ChatTeam, string, void>
+    | RecievedMessage<Recieves.Chat, string>
+    | RecievedMessage<Recieves.ChatTeam, string>
     | RecievedMessage<Recieves.GetGame, number, StoredPastGame>
     | RecievedMessage<Recieves.GetPlayer, string, PastPlayer>
-    | RecievedMessage<Recieves.UpdateSetting, { key: keyof SettingsType, value: any }, void>
-    | RecievedMessage<Recieves.SetNickname, { id: string, nickname: string | null }, void>
-    | RecievedMessage<Recieves.SetNote, { id: string, note: string }, void>
-    | RecievedMessage<Recieves.SetTags, { id: string, tags: Record<string, boolean> }, void>
+    | RecievedMessage<Recieves.UpdateSetting, { key: keyof SettingsType, value: any }>
+    | RecievedMessage<Recieves.SetNickname, { id: string, nickname: string | null }>
+    | RecievedMessage<Recieves.SetNote, { id: string, note: string }>
+    | RecievedMessage<Recieves.SetTags, { id: string, tags: Record<string, boolean> }>
     | RecievedMessage<Recieves.DeleteGame, number, true | string>
+    | RecievedMessage<Recieves.KickPlayer, { userId: string, reason: KickReason }>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
