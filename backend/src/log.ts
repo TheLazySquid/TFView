@@ -1,11 +1,12 @@
 import { join } from "path";
 import fsp from "fs/promises";
+import { root } from "./consts";
 
 export default class Log {
     static logPath: string;
 
     static init() {
-        this.logPath = join(__dirname, "..", "tfview.log");
+        this.logPath = join(root, "tfview.log");
         fsp.writeFile(this.logPath, "");
     }
 

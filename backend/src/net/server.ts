@@ -3,6 +3,7 @@ import type { MessageTypes, RecievesTypes, SentMessage } from "$types/messages";
 import EventEmitter from "node:events";
 import { join } from "node:path";
 import Log from "../log";
+import { root } from "src/consts";
 
 export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "global";
 export type WS = Bun.ServerWebSocket<{ topic: Topic }>;
@@ -10,7 +11,7 @@ export type WS = Bun.ServerWebSocket<{ topic: Topic }>;
 export default class Server {
     static topics: string[] = ["game", "playerhistory", "gamehistory", "settings"];
     static events = new EventEmitter();
-    static staticPath = join(__dirname, "..", "..", "static");
+    static staticPath = join(root, "static");
     static server: Bun.Server;
 
     static init() {

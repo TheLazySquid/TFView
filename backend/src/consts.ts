@@ -1,6 +1,11 @@
 import { join } from "node:path";
 import { homedir } from "node:os";
 
+export const dataPath = join(homedir(), ".tfview");
+export const pageSize = 50;
+const notCompiled = process.execPath.replaceAll("\\", "/").includes(".bun/bin/bun");
+export const root = notCompiled ? join(Bun.main, "..", "..") : join(process.execPath, "..");
+
 // Read flags
 export let flags = {
     fakeData: false,
@@ -22,6 +27,3 @@ if(flags.noNet) {
     flags.noMAC = true;
     flags.noSteamApi = true;
 }
-
-export const dataPath = join(homedir(), ".tfview");
-export const pageSize = 50;
