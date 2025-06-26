@@ -1,11 +1,10 @@
-import type { MessageTypes, RecievedMessage, RecievesTypes, SentMessage } from "$types/messages";
+import type { MessageTypes, Page, RecievedMessage, RecievesTypes, SentMessage } from "$types/messages";
 import { networkPort } from "$shared/consts";
-import GlobalState from "./globalState.svelte";
 
 type Status = "idle" | "connecting" | "connected" | "disconnected";
 
 class WSClient {
-    route = "";
+    page = "";
     pollInterval = 1000;
     timeout = 5000;
     ws?: WebSocket;
@@ -13,12 +12,14 @@ class WSClient {
     replies = new Map<string, (data: any) => void>();
     status: Status = $state("idle");
     switchCallbacks = new Set<() => void>();
+    readyRes?: () => void;
+    ready = new Promise<void>((res) => this.readyRes = res);
 
-    init(route: string) {
-        this.route = route;
+    init(page: Page) {
+        this.page = page;
         
         if(this.ws) {
-            this.ws.send(JSON.stringify({ navigate: route }));
+            this.ws.send(JSON.stringify({ navigate: page }));
 
             for(let callback of this.switchCallbacks.values()) {
                 callback();
@@ -39,7 +40,7 @@ class WSClient {
             setTimeout(() => this.connectSocket(), this.pollInterval);
         }
 
-        this.ws = new WebSocket(`ws://localhost:${networkPort}/ws/${this.route}`);
+        this.ws = new WebSocket(`ws://localhost:${networkPort}/ws/${this.page}`);
 
         // Kill the connection after 5 seconds
         this.connectTimeout = setTimeout(() => {
@@ -52,12 +53,14 @@ class WSClient {
             clearTimeout(this.connectTimeout);
             this.status = "disconnected";
             retry();
+            this.ready = new Promise<void>((res) => this.readyRes = res);
         }, { once: true });
 
         this.ws.addEventListener("open", () => {
             clearTimeout(this.connectTimeout);
             this.status = "connected";
-            console.log("Websocket connected")
+            this.readyRes?.();
+            console.log("Websocket connected");
         }, { once: true });
 
         this.ws.addEventListener("message", (event) => {
@@ -102,33 +105,15 @@ class WSClient {
 
     sendAndRecieve<C extends RecievesTypes["channel"]>(channel: C, data: Extract<RecievesTypes, RecievedMessage<C, any, any>>["data"]):
         Promise<Extract<RecievesTypes, RecievedMessage<C, any, any>>["replyType"]> {
-        return new Promise(async (res, rej) => {
-            if(!this.ws || this.ws.readyState === 3) return rej();
-
-            if(this.ws.readyState === 0) {
-                await new Promise((res) => this.ws?.addEventListener("open", res, { once: true }));
-            }
+        return new Promise(async (res) => {
+            await this.ready;
 
             let id = crypto.randomUUID();
-            this.ws.send(JSON.stringify({ id, channel, data }));
+            this.ws!.send(JSON.stringify({ id, channel, data }));
             this.replies.set(id, res);
         });
     }
 }
 
 const WS = new WSClient();
-
-export abstract class PageState {
-    abstract type: string;
-    ws = WS;
-
-    init() {
-        WS.init(this.type);
-        GlobalState.init();
-        this.setup?.();
-    }
-
-    setup?(): void;
-}
-
 export default WS;

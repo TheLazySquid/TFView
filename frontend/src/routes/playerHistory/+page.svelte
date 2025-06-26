@@ -4,20 +4,21 @@
     import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
     import ProfilePicturePopup from "$lib/components/popups/ProfilePicturePopup.svelte";
     import Time from "$lib/components/Time.svelte";
-    import PlayerHistory from "$lib/ws/playerHistory.svelte";
+    import PlayerHistory from "$lib/ws/pages/playerHistory.svelte";
     import InfiniteLoading from "svelte-infinite-loading";
-    import GlobalState from "$lib/ws/globalState.svelte";
+    import Tags from "$lib/ws/topics/tags.svelte";
     import TagSelector from "$lib/components/history/TagSelector.svelte";
     import * as Search from "$lib/components/search";
     import Nameplate from "$lib/components/player/Nameplate.svelte";
     import Popups from "$lib/popups";
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
     import ConfirmPopup from "$lib/components/popups/ConfirmPopup.svelte";
+    import WS from "$lib/ws/wsclient.svelte";
 
-    PlayerHistory.init();
+    WS.init("playerhistory");
 
     const getColor = (tags: Record<string, boolean>) => {
-        for(let tag of GlobalState.tags) {
+        for(let tag of Tags.tags) {
             if(tags[tag.id]) {
                 return tag.color;
             }

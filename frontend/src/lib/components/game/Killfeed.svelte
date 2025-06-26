@@ -7,7 +7,7 @@
     import type { KillfeedSearchParams } from "$types/search";
     import InfiniteLoading from "svelte-infinite-loading";
     import Time from "$lib/components/Time.svelte";
-    import Game from "$lib/ws/game.svelte";
+    import Game from "$lib/ws/pages/game.svelte";
     
     let { id }: { id?: string } = $props();
 

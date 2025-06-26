@@ -4,17 +4,43 @@ import { dataPath } from "../consts";
 import Server from "src/net/server";
 import { Recieves, Message } from "$types/messages";
 
+// Fixed ids rather than random ones since if settings somehow get reset
+// This means that there's a chance that some tags will be saved
+const defaultSettings: Partial<SettingsType> = {
+    rconPort: 27015,
+    tags: [
+        {
+            name: "Cheater",
+            color: "#930d08",
+            id: "cheater"
+        },
+        {
+            name: "Suspicious",
+            color: "#c9c020",
+            id: "suspicious"
+        },
+        {
+            name: "Friend",
+            color: "#037d96",
+            id: "friend"
+        }
+    ],
+    userColor: "#7a2f00"
+}
+
 export default class Settings {
     static file: Bun.BunFile;
     static config: SettingsType;
 
     static async init() {
         this.file = Bun.file(join(dataPath, "config.json"));
+        let setupMode = false;
 
-        if(await this.file.exists()) {
+        try {
             this.config = await this.file.json();
-        } else {
-            throw new Error("Config file not found");
+        } catch {
+            this.config = defaultSettings as SettingsType;
+            setupMode = true;
         }
 
         Server.onConnect("settings", (reply) => {
@@ -25,7 +51,7 @@ export default class Settings {
             reply(Message.UserColor, this.config.userColor);
         });
 
-        Server.onConnect("global", (reply) => {
+        Server.onConnect("tags", (reply) => {
             reply(Message.Tags, this.config.tags);
         });
 
@@ -37,6 +63,8 @@ export default class Settings {
 
             Server.sendOthers(ws, "settings", Message.SettingUpdate, { key, value });
         });
+
+        return setupMode;
     }
 
     static get<T extends keyof SettingsType>(key: T): SettingsType[T] {
@@ -46,5 +74,9 @@ export default class Settings {
     static set<T extends keyof SettingsType>(key: T, value: SettingsType[T]) {
         this.config[key] = value;
         this.file.write(JSON.stringify(this.config, null, 4));
+    }
+
+    static randomPassword() {
+        return Math.random().toString(36).slice(2, 10);
     }
 }

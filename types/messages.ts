@@ -1,5 +1,5 @@
-import type { PastPlayer, SettingsType, StoredPastGame, Tag } from "./data";
-import type { ChatMessage, CurrentServerInfo, KickReason, KillfeedEntry, Player } from "./lobby";
+import type { GameDir, GameDirectories, PastPlayer, SettingsType, StoredPastGame, Tag } from "./data";
+import type { CurrentServerInfo, KickReason, Player } from "./lobby";
 
 // Sending messages from the backend
 export type SentMessage<Channel, Data> = { channel: Channel, data: Data };
@@ -15,7 +15,8 @@ export enum Message {
     SettingUpdate,
     CurrentServer,
     Tags,
-    UserColor
+    UserColor,
+    Directories
 }
 
 export type MessageTypes =
@@ -30,6 +31,7 @@ export type MessageTypes =
     | SentMessage<Message.CurrentServer, { server: CurrentServerInfo | null, definitelyNotInGame?: boolean }>
     | SentMessage<Message.Tags, Tag[]>
     | SentMessage<Message.UserColor, string | undefined>
+    | SentMessage<Message.Directories, GameDirectories>
     | SentMessage<`list-${string}-addStart`, any>
     | SentMessage<`list-${string}-update`, { id: any, update: any }>
     | SentMessage<`list-${string}-delete`, any>
@@ -47,7 +49,15 @@ export enum Recieves {
     SetNote,
     SetTags,
     DeleteGame,
-    KickPlayer
+    KickPlayer,
+    UpdateDirectory,
+    CheckLaunchOptions,
+    ApplyLaunchOptions,
+    GetRconPassword,
+    SetRconPassword,
+    CheckAutoexec,
+    ApplyAutoexec,
+    FinishSetup
 }
 
 export type RecievesTypes = 
@@ -61,4 +71,14 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.SetTags, { id: string, tags: Record<string, boolean> }>
     | RecievedMessage<Recieves.DeleteGame, number, true | string>
     | RecievedMessage<Recieves.KickPlayer, { userId: string, reason: KickReason }>
+    | RecievedMessage<Recieves.UpdateDirectory, GameDir>
+    | RecievedMessage<Recieves.CheckLaunchOptions, void, boolean>
+    | RecievedMessage<Recieves.ApplyLaunchOptions, void, boolean>
+    | RecievedMessage<Recieves.GetRconPassword, boolean, string | undefined>
+    | RecievedMessage<Recieves.SetRconPassword, string>
+    | RecievedMessage<Recieves.CheckAutoexec, boolean, boolean>
+    | RecievedMessage<Recieves.ApplyAutoexec, boolean, boolean>
+    | RecievedMessage<Recieves.FinishSetup, void>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
+
+export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup";

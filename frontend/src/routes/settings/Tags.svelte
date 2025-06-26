@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Tag } from "$types/data";
-    import Settings from "$lib/ws/settings.svelte";
+    import Settings from "$lib/ws/pages/settings.svelte";
     import { flip } from "svelte/animate";
     import { dndzone, type DndEvent } from "svelte-dnd-action";
     import { toast } from "svelte-sonner";
@@ -11,7 +11,7 @@
     import throttle from "throttleit";
     import ColorPicker from "svelte-awesome-color-picker";
     import { watch } from "runed";
-
+    
     let items: Tag[] = $state([]);
     $effect(() => {
         if(!Settings.settings.tags) return;

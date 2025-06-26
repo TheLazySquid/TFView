@@ -9,7 +9,7 @@
     import { onDestroy, onMount } from "svelte";
     import InfiniteLoading from "svelte-infinite-loading";
     import Time from "../Time.svelte";
-    import Game from "$lib/ws/game.svelte";
+    import Game from "$lib/ws/pages/game.svelte";
 
     let { id }: { id?: string } = $props();
     let team = $state(false);

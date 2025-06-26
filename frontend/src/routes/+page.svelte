@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Component } from "svelte";
-    import Game from "$lib/ws/game.svelte";
+    import Game from "$lib/ws/pages/game.svelte";
     import Killfeed from "$lib/components/game/Killfeed.svelte";
     import Chat from "$lib/components/game/Chat.svelte";
     import Teams from "./game/Teams.svelte";
@@ -14,8 +14,9 @@
     import Message from "@lucide/svelte/icons/message-square-more";
     import Close from "@lucide/svelte/icons/chevron-last";
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
+    import WS from "$lib/ws/wsclient.svelte";
 
-    Game.init();
+    WS.init("game");
 
     const storageKey = "game-openPanel";
     let openPanel = $state(localStorage.getItem(storageKey));

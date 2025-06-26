@@ -11,7 +11,7 @@
     import Tag from "@lucide/svelte/icons/tag";
     import Killfeed from "../game/Killfeed.svelte";
     import Popup from "./Popup.svelte";
-    import Game from "$lib/ws/game.svelte";
+    import Game from "$lib/ws/pages/game.svelte";
     import throttle from "throttleit";
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";

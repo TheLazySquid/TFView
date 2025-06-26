@@ -1,6 +1,6 @@
 <script lang="ts">
     import { nameColors } from "$lib/consts";
-    import Game from "$lib/ws/game.svelte";
+    import Game from "$lib/ws/pages/game.svelte";
     import PlayerView from "./PlayerView.svelte";
     import Ping from "@lucide/svelte/icons/chart-no-axes-column-increasing"
     import HeartPulse from "@lucide/svelte/icons/heart-pulse";

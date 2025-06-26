@@ -1,9 +1,11 @@
 {
-    "name": "tfview",
-    "private": true,
-    "workspaces": [
-        "backend",
-        "frontend",
-        "installer"
-    ]
+  "name": "tfview",
+  "private": true,
+  "trustedDependencies": [
+    "node-fs-dialogs"
+  ],
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
 }

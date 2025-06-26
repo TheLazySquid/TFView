@@ -1,6 +1,6 @@
 <script lang="ts">
     import Time from "$lib/components/Time.svelte";
-    import GameHistory from "$lib/ws/gameHistory.svelte";
+    import GameHistory from "$lib/ws/pages/gameHistory.svelte";
     import InfiniteLoading from "svelte-infinite-loading";
     import Popups from "$lib/popups";
     import PastGamePopup from "$lib/components/popups/PastGamePopup.svelte";
@@ -8,9 +8,9 @@
     import * as Search from "$lib/components/search";
     import ConfirmPopup from "$lib/components/popups/ConfirmPopup.svelte";
     import DeleteGame from "$lib/components/history/DeleteGame.svelte";
+    import WS from "$lib/ws/wsclient.svelte";
 
-
-    GameHistory.init();
+    WS.init("gamehistory");
 </script>
 
 <title>Game History | TFView</title>

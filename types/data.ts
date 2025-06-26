@@ -13,9 +13,21 @@ export interface SettingsType {
     rconPassword: string;
     steamApiKey?: string;
     tags: Tag[];
-    userColor?: string;
+    userColor: string;
     masterbaseKey?: string;
     userSummary?: PlayerSummary;
+}
+
+export type GameDir = "steam" | "tf";
+
+export interface GameDirInfo {
+    path: string;
+    valid: boolean;
+}
+
+export interface GameDirectories {
+    steam: GameDirInfo;
+    tf: GameDirInfo;
 }
 
 export interface PastGamePlayer {

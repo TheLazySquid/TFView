@@ -1,20 +1,27 @@
 import { networkPort } from "$shared/consts";
-import type { MessageTypes, RecievesTypes, SentMessage } from "$types/messages";
+import type { MessageTypes, Page, RecievesTypes, SentMessage } from "$types/messages";
 import EventEmitter from "node:events";
 import { join } from "node:path";
 import Log from "../log";
 import { root } from "src/consts";
 
-export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "global";
-export type WS = Bun.ServerWebSocket<{ topic: Topic }>;
+export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" | "tags" | "global";
+export type WS = Bun.ServerWebSocket<{ page: Page }>;
+
+const topics: Record<Page, Topic[]> = {
+    game: ["game", "tags", "global"],
+    playerhistory: ["playerhistory", "tags", "global"],
+    gamehistory: ["gamehistory", "tags", "global"],
+    settings: ["settings", "directories", "global"],
+    setup: ["directories", "global"]
+}
 
 export default class Server {
-    static topics: string[] = ["game", "playerhistory", "gamehistory", "settings"];
     static events = new EventEmitter();
     static staticPath = join(root, "static");
     static server: Bun.Server;
 
-    static init() {
+    static init(setupMode: boolean) {
         // listen for websocket connections
         this.server = Bun.serve({
             fetch: (req, server) => {
@@ -23,12 +30,10 @@ export default class Server {
 
                 // Handle websocket connections
                 if(parts[0] === "ws") {
-                    let topic = req.url.split("/").pop();
-                    if(!this.topics.includes(topic)) {
-                        return new Response("Invalid topic", { status: 400 });
-                    }
+                    let page = req.url.split("/").pop() as Page;
+                    if(!topics[page]) return new Response("Invalid page", { status: 400 });
     
-                    let data = { topic };
+                    let data = { page };
                     if (server.upgrade(req, { data })) return;
     
                     return new Response("Upgrade failed", { status: 500 });
@@ -36,6 +41,10 @@ export default class Server {
 
                 // Serve static files, if possible
                 let isFile = parts.at(-1).indexOf(".") !== -1;
+
+                if(!isFile && setupMode && url.pathname !== "/setup") {
+                    return Response.redirect("/setup", 307);
+                }
                 
                 let path: string;
                 if(isFile) {
@@ -57,13 +66,22 @@ export default class Server {
 
                     // Handle the websocket changing topics
                     if(data.navigate) {
-                        ws.unsubscribe(ws.data.topic);
-                        ws.data.topic = data.navigate;
-                        ws.subscribe(data.navigate);
+                        if(!topics[data.navigate]) {
+                            Log.error("Invalid page navigation:", data.navigate);
+                            return;
+                        }
 
-                        this.events.emit(`${data.navigate}-connect`, (channel: any, data: any) => {
+                        // Unsubscribe from the current page's topics and subscribe to the new page's topics
+                        for(let topic of topics[ws.data.page]) ws.unsubscribe(topic);
+
+                        const callback = (channel: any, data: any) => {
                             ws.send(JSON.stringify({ channel, data }));
-                        });
+                        }
+                        ws.data.page = data.navigate;
+                        for(let topic of topics[data.navigate]) {
+                            ws.subscribe(topic);
+                            this.events.emit(`${topic}-connect`, callback);
+                        }
 
                         return;
                     }
@@ -83,15 +101,16 @@ export default class Server {
                     this.events.emit(data.channel.toString(), data.data, actions);
                 },
                 open: (ws: WS) => {
-                    Log.info("Websocket connection established:", ws.data.topic);
-                    ws.subscribe(ws.data.topic);
-                    ws.subscribe("global");
+                    Log.info("Websocket connection established:", ws.data.page);
 
                     const callback = (channel: any, data: any) => {
                         ws.send(JSON.stringify({ channel, data }));
                     }
-                    this.events.emit(`${ws.data.topic}-connect`, callback);
-                    this.events.emit(`global-connect`, callback);
+
+                    for(let topic of topics[ws.data.page]) {
+                        ws.subscribe(topic);
+                        this.events.emit(`${topic}-connect`, callback);
+                    }
                 }
             },
             port: networkPort
@@ -109,6 +128,13 @@ export default class Server {
         ws: WS
     }) => void) {
         this.events.on(channel.toString(), callback);
+    }
+
+    static once<C extends RecievesTypes["channel"]>(channel: C, callback: (data: Extract<RecievesTypes, SentMessage<C, any>>["data"], action: {
+        reply: (response: Extract<RecievesTypes, SentMessage<C, any>>["replyType"]) => void,
+        ws: WS
+    }) => void) {
+        this.events.once(channel.toString(), callback);
     }
 
     static send<C extends MessageTypes["channel"]>(topic: Topic, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {

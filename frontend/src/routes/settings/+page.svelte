@@ -1,13 +1,15 @@
 <script lang="ts">
-    import Settings from "$lib/ws/settings.svelte";
+    import Settings from "$lib/ws/pages/settings.svelte";
     import WS from "$lib/ws/wsclient.svelte";
     import type { SettingsType } from "$types/data";
     import { Recieves } from "$types/messages";
     import EyeOpen from "@lucide/svelte/icons/eye";
     import EyeClosed from "@lucide/svelte/icons/eye-off";
     import Tags from "./Tags.svelte";
+    import Directory from "$lib/components/setup/Directory.svelte";
+    import Directories from "$lib/ws/topics/directories.svelte";
 
-    Settings.init();
+    WS.init("settings");
     
     interface Setting {
         name: string;
@@ -16,8 +18,6 @@
     }
 
     const settings: Setting[] = [
-        { name: "Steam Path", id: "steamPath", type: "string" },
-        { name: "TF Path", id: "tfPath", type: "string" },
         { name: "RCON Port", id: "rconPort", type: "number" },
         { name: "RCON Password", id: "rconPassword", type: "password" },
         { name: "Steam API Key", id: "steamApiKey", type: "password" },
@@ -32,6 +32,14 @@
 <div class="flex justify-center pt-5">
     <div style="width: min(750px, 60%)">
         <h1 class="text-2xl verdana col-span-2">Settings</h1>
+        <div>
+            Steam Directory
+            <Directory dir={Directories.steam} type="steam" />
+        </div>
+        <div>
+            TF Directory
+            <Directory dir={Directories.tf} type="tf" />
+        </div>
         <div class="grid gap-y-2" style="grid-template-columns: 1fr 300px;">
             {#each settings as setting}
                 {@const onchange = () => WS.send(Recieves.UpdateSetting, { key: setting.id, value: Settings.settings[setting.id]})}

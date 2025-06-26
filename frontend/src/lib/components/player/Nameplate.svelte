@@ -12,7 +12,7 @@
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
     import { id3ToId64 } from "$shared/steamid";
-    import GlobalState from "$lib/ws/globalState.svelte";
+    import Tags from "$lib/ws/topics/tags.svelte";
     import { toast } from "svelte-sonner";
 
     interface PastProps { player: PastPlayer; current: false }
@@ -168,7 +168,7 @@
                 Tags
             </ContextMenu.SubTrigger>
             <ContextMenu.SubContent>
-                {#each GlobalState.tags as tag}
+                {#each Tags.tags as tag}
                     <!-- I know there's a built in checkbox but it's causing problems -->
                     <ContextMenu.Item onclick={() => toggleTag(tag.id)} closeOnSelect={false}>
                         <div class="w-5">

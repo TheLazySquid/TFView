@@ -7,7 +7,7 @@
     import Split from "@lucide/svelte/icons/table";
     import Together from "@lucide/svelte/icons/rows-3";
     import TV from "@lucide/svelte/icons/tv";
-    import Game from "$lib/ws/game.svelte";
+    import Game from "$lib/ws/pages/game.svelte";
     import { columns } from "./state.svelte";
 
     let { children }: { children?: Snippet } = $props();

@@ -1,9 +1,9 @@
 <script lang="ts">
     import Skull from "@lucide/svelte/icons/skull";
     import { classIcons, nameColors } from "$lib/consts";
-    import Game from "$lib/ws/game.svelte";
+    import Game from "$lib/ws/pages/game.svelte";
     import Avatar from "$lib/components/player/Avatar.svelte";
-    import GlobalState from "$lib/ws/globalState.svelte";
+    import Tags from "$lib/ws/topics/tags.svelte";
     import Nameplate from "$lib/components/player/Nameplate.svelte";
     import Popups from "$lib/popups";
     import { columns } from "./state.svelte";
@@ -12,7 +12,7 @@
     let player = $derived(Game.players[index]);
     let color = $derived.by(() => {
         if(player.ID3 === Game.user?.ID3) return Game.userColor;
-        for(let tag of GlobalState.tags) {
+        for(let tag of Tags.tags) {
             if(player.tags[tag.id]) return tag.color;
         }
         return "";

@@ -3,7 +3,7 @@
     import Tag from "@lucide/svelte/icons/tag";
     import CircleX from "@lucide/svelte/icons/circle-x";
     import CirclePlus from "@lucide/svelte/icons/circle-plus";
-    import GlobalState from "$lib/ws/globalState.svelte";
+    import Tags from "$lib/ws/topics/tags.svelte";
     import type { Snippet } from "svelte";
     import { watch } from "runed";
 
@@ -25,8 +25,8 @@
         onChange?.();
     }, { lazy: true });
 
-    let hasTags = $derived(GlobalState.tags.filter((t) => tagsObj[t.id]));
-    let missingTags = $derived(GlobalState.tags.filter((t) => !tagsObj[t.id]));
+    let hasTags = $derived(Tags.tags.filter((t) => tagsObj[t.id]));
+    let missingTags = $derived(Tags.tags.filter((t) => !tagsObj[t.id]));
 </script>
 
 <div class="flex items-center flex-wrap gap-1">

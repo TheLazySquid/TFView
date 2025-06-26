@@ -9,13 +9,11 @@ import History from "src/history/history";
 import PlayerData from "./playerdata";
 import Settings from "src/settings/settings";
 import { killClasses, startingAmmo, startingHealths } from "./classConsts";
-import fsp from "fs/promises";
-import { join } from "path";
-import getActiveUser from "$shared/getActiveUser";
 import { id3ToId64 } from "$shared/steamid";
 import HistoryDatabase from "src/history/database";
 import { fakeChat, fakeKillfeed, fakePlayers } from "src/fakedata/game";
 import { LoadedInfiniteList } from "src/net/infiniteList";
+import { getCurrentUserId } from "src/util";
 
 export default class GameMonitor {
     static logPath: string;
@@ -101,12 +99,8 @@ export default class GameMonitor {
             return;
         }
 
-        const path = join(Settings.get("steamPath"), "config", "loginusers.vdf");
-
         // TODO: Error handling
-        fsp.readFile(path).then((loginusers) => {
-            this.userAccountID3 = getActiveUser(loginusers.toString());
-        });
+        getCurrentUserId().then((id3) => this.userAccountID3 = id3);
 
         this.listenToLog();
         this.poll();
