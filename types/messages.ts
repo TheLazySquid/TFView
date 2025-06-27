@@ -54,7 +54,6 @@ export enum Recieves {
     CheckLaunchOptions,
     ApplyLaunchOptions,
     GetRconPassword,
-    SetRconPassword,
     CheckAutoexec,
     ApplyAutoexec,
     FinishSetup
@@ -75,10 +74,9 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.CheckLaunchOptions, void, boolean>
     | RecievedMessage<Recieves.ApplyLaunchOptions, void, boolean>
     | RecievedMessage<Recieves.GetRconPassword, boolean, string | undefined>
-    | RecievedMessage<Recieves.SetRconPassword, string>
     | RecievedMessage<Recieves.CheckAutoexec, boolean, boolean>
     | RecievedMessage<Recieves.ApplyAutoexec, boolean, boolean>
-    | RecievedMessage<Recieves.FinishSetup, void>
+    | RecievedMessage<Recieves.FinishSetup, void, true>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
 export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup";

@@ -14,12 +14,21 @@ export default class LogParser {
     static readStart = 0;
     static pollInterval = 1000;
     static listeners: LogListener[] = [];
+    static shouldRestart = true;
 
     static init() {        
         // watch the log for updates
-        this.logPath = join(Settings.get("tfPath"), "console.log");
-        this.logFile = Bun.file(this.logPath);
-        this.poll();
+        if(Settings.get("tfPath")) {
+            this.logPath = join(Settings.get("tfPath"), "console.log");
+            this.logFile = Bun.file(this.logPath);
+            this.poll();
+        }
+
+        Settings.on("tfPath", (path) => {
+            this.shouldRestart = true;
+            this.logPath = join(path, "console.log");
+            this.logFile = Bun.file(this.logPath);
+        });
 
         // fs.watch can't be relied on for log updates, somehow the log
         // doesn't trigger whatever listeners it uses
@@ -30,8 +39,9 @@ export default class LogParser {
         this.listeners.push({ regex, callback });
     }
 
-    static shouldRestart = true;
     static poll() {
+        if(!this.logFile) return;
+
         this.logFile.stat()
             .then(stat => {
                 if(this.shouldRestart) {

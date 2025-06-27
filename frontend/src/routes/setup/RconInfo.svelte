@@ -8,7 +8,7 @@
     Setup.getRconInfo();
 
     const updatePassword = () => {
-        WS.send(Recieves.SetRconPassword, Setup.password);
+        WS.send(Recieves.UpdateSetting, { key: "rconPassword", value: Setup.password });
     }
 </script>
 

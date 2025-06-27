@@ -21,8 +21,9 @@
             flyFactor = 1;
             step++;
         } else {
-            WS.send(Recieves.FinishSetup, undefined);
-            goto("/");
+            // Make sure the server isn't in setup mode, then redirect to the main page
+            WS.sendAndRecieve(Recieves.FinishSetup, undefined)
+                .then(() => goto("/"));
         }
     }
 

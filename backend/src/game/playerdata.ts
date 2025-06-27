@@ -18,15 +18,14 @@ export default class PlayerData {
 	static apiBase = "https://api.steampowered.com/"
 	static summaryQueue: WaitingSummary[] = [];
 	static maxSummaries = 150;
-	static key: string;
 
-	static init() {
-		this.key = Settings.get("steamApiKey");
-	}
-
-	static query(path: string, params: string[][] = []) {
+	static query(path: string, params: Record<string, any> = {}) {
 		return new Promise<SteamPlayerSummaries>((res, rej) => {
-			let searchParams = new URLSearchParams([["key", this.key], ...params]);
+			let searchParams = new URLSearchParams({
+				key: Settings.get("steamApiKey"),
+				...params
+			});
+			
 			const url = this.apiBase + path + "/?" + searchParams.toString();
 
 			fetch(url)
@@ -50,7 +49,7 @@ export default class PlayerData {
 		const ids = summaries.map(s => s.id64).join(",");
 
 		// Steam really loves to give 429s
-		this.query("ISteamUser/GetPlayerSummaries/v0002", [["steamids", ids]])
+		this.query("ISteamUser/GetPlayerSummaries/v0002", { steamids: ids })
 			.then((res) => {
 				this.delay = this.baseDelay; // reset delay on success
 
@@ -142,6 +141,7 @@ export default class PlayerData {
 	static getUserSummary(id3: string, callback: (summary: PlayerSummary) => void) {
 		const summary = Settings.get("userSummary");
 		if(summary) callback(summary);
+		if(!Settings.get("steamApiKey")) return;
 
 		const id64 = id3ToId64(id3);
 		const waitingSummary = { id3, id64, callback, failedQueries: 0, user: true };

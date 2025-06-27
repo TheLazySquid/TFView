@@ -17,13 +17,13 @@ export default class Demos {
     static firstDemo = true;
 
     static init() {
-        this.demosPath = join(Settings.get("tfPath"), "demos");
         this.watchDemos();
-
         History.events.on("endGame", () => this.closeDemo());
     }
 
     static watchDemos() {
+        this.demosPath = join(Settings.get("tfPath"), "demos");
+
         try {
             watch(this.demosPath, null, async (event, file) => {
                 const name = file.toString();

@@ -1,5 +1,5 @@
 import { networkPort } from "$shared/consts";
-import type { MessageTypes, Page, RecievesTypes, SentMessage } from "$types/messages";
+import { Recieves, type MessageTypes, type Page, type RecievesTypes, type SentMessage } from "$types/messages";
 import EventEmitter from "node:events";
 import { join } from "node:path";
 import Log from "../log";
@@ -20,8 +20,14 @@ export default class Server {
     static events = new EventEmitter();
     static staticPath = join(root, "static");
     static server: Bun.Server;
+    static setupMode = false;
 
-    static init(setupMode: boolean) {
+    static init() {
+        this.on(Recieves.FinishSetup, (_, { reply }) => {
+            this.setupMode = false;
+            reply(true);
+        });
+
         // listen for websocket connections
         this.server = Bun.serve({
             fetch: (req, server) => {
@@ -42,7 +48,7 @@ export default class Server {
                 // Serve static files, if possible
                 let isFile = parts.at(-1).indexOf(".") !== -1;
 
-                if(!isFile && setupMode && url.pathname !== "/setup") {
+                if(!isFile && this.setupMode && url.pathname !== "/setup") {
                     return Response.redirect("/setup", 307);
                 }
                 

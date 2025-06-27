@@ -17,6 +17,12 @@ export default class Rcon {
             encoding: "utf8"
         });
 
+        Settings.on("rconPort", (port) => {
+            if(this.connected) return;
+            this.server.port = port;
+            this.server.disconnect();
+        });
+
         this.connect();
 
         Server.on(Recieves.KickPlayer, ({ userId, reason }) => {
@@ -30,10 +36,7 @@ export default class Rcon {
         }
 
         const password = Settings.get("rconPassword");
-        if(!password) {
-            pollReconnect();
-            return;
-        }
+        if(!password) return pollReconnect();
 
         this.server.authenticate(password)
             .then(() => {

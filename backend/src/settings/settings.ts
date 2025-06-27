@@ -3,6 +3,7 @@ import type { SettingsType } from "$types/data";
 import { dataPath } from "../consts";
 import Server from "src/net/server";
 import { Recieves, Message } from "$types/messages";
+import EventEmitter from "node:events";
 
 // Fixed ids rather than random ones since if settings somehow get reset
 // This means that there's a chance that some tags will be saved
@@ -31,6 +32,7 @@ const defaultSettings: Partial<SettingsType> = {
 export default class Settings {
     static file: Bun.BunFile;
     static config: SettingsType;
+    static events = new EventEmitter();
 
     static async init() {
         this.file = Bun.file(join(dataPath, "config.json"));
@@ -55,12 +57,12 @@ export default class Settings {
             reply(Message.Tags, this.config.tags);
         });
 
-        // I'd love to do an actual directory picker when picking the steam/tf directories
-        // But for some reason there's only like two packages with 0 downloads that do it
-        // And both of them suck
         Server.on(Recieves.UpdateSetting, ({ key, value }, { ws }) => {
             this.set(key, value);
+            this.events.emit(key, value);
 
+            if(key === "tags") Server.send("tags", Message.Tags, value);
+            else if(key === "userColor") Server.send("game", Message.UserColor, value);
             Server.sendOthers(ws, "settings", Message.SettingUpdate, { key, value });
         });
 
@@ -78,5 +80,9 @@ export default class Settings {
 
     static randomPassword() {
         return Math.random().toString(36).slice(2, 10);
+    }
+
+    static on<T extends keyof SettingsType>(key: T, callback: (value: SettingsType[T]) => void) {
+        this.events.on(key, callback);
     }
 }

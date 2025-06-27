@@ -305,7 +305,7 @@ export default class GameMonitor {
                 this.playerMap.set(id, player as Player);
 
                 // These are almost certainly tfbots
-                if(!Settings.get("steamApiKey") || player.ID3.length <= 2) continue;
+                if(player.ID3.length <= 2) continue;
 
                 const summaryCallback = (summary: PlayerSummary) => {
                     player.avatarHash = summary.avatarHash;
