@@ -17,6 +17,11 @@
     import { Recieves } from "$types/messages";
     import TagSelector from "../history/TagSelector.svelte";
     import Avatar from "../player/Avatar.svelte";
+    import { nameColors } from "$lib/consts";
+    import HeartPulse from "@lucide/svelte/icons/heart-pulse";
+    import Skull from "@lucide/svelte/icons/skull";
+    import Ping from "@lucide/svelte/icons/chart-no-axes-column-increasing"
+    import Eye from "@lucide/svelte/icons/eye";
 
     let player: Player | null = $state.raw(null);
 
@@ -24,7 +29,6 @@
         player = openPlayer;
     }
 
-    const teams = ["Unassigned", "Spectator", "Red", "Blue"];
     let tab = $state("info");
     let showHealth = $derived(Game.user?.team === 1 || player!?.team === Game.user?.team);
     
@@ -54,7 +58,9 @@ style="max-width: min(700px, 85%);" group={0}>
     {#if player}
         <Dialog.Header class="text-2xl flex flex-row items-center">
             <Avatar avatarHash={player.avatarHash} name={player.name} />
-            { player.name }
+            <div style="color: {nameColors[player.team]};">
+                { player.name }
+            </div>
         </Dialog.Header>
         <Tabs.Root bind:value={tab}>
             <Tabs.List class="w-full">
@@ -64,12 +70,36 @@ style="max-width: min(700px, 85%);" group={0}>
                 <Tabs.Trigger value="kills"><KillfeedIcon /></Tabs.Trigger>
             </Tabs.List>
             <Tabs.Content value="info">
-                <div>Team: {teams[player.team]}</div>
-                <div>Ping: {player.ping}</div>
-                <div>Alive: {player.alive}</div>
-                {#if showHealth}
-                    <div>Health: {player.health}</div>
-                {/if}
+                <div class="grid gap-x-2" style="grid-template-columns: auto auto 1fr">
+                    {#if !player.user}
+                        <Eye />
+                        <div>Encounters</div>
+                        <div>{player.encounters ?? 0}</div>
+                    {/if}
+
+                    <HeartPulse />
+                    {#if showHealth}
+                        <div>Health</div>
+                        <div>
+                            {#if !player.alive}
+                                <Skull />
+                            {:else}
+                                {player.health}
+                            {/if}
+                        </div>
+                    {:else}
+                        <div>Alive?</div>
+                        <div>{ player.alive ? "Yes" : "No" }</div>
+                    {/if}
+
+                    <img src="/Killstreak_icon.png" alt="Killstreak" width="24" height="24" />
+                    <div>Killstreak</div>
+                    <div>{player.killstreak}</div>
+
+                    <Ping />
+                    <div>Ping</div>
+                    <div>{player.ping} ms</div>
+                </div>
                 <div>Note:</div>
                 <textarea class="resize-y p-1 h-[150px] w-full outline not-focus:outline-zinc-600"
                 bind:value={player.note} onchange={sendNote}></textarea>
