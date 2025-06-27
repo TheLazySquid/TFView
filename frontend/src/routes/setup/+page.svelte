@@ -10,9 +10,10 @@
     import Autoexec from "./Autoexec.svelte";
     import { Recieves } from "$types/messages";
     import { goto } from "$app/navigation";
+    import Integrations from "./Integrations.svelte";
 
     let step = $state(0);
-    const steps = 4;
+    const steps = 5;
 
     let flyFactor = $state(1);
     const back = () => { flyFactor = -1; step-- }
@@ -32,7 +33,7 @@
         else if(step === 1) return Setup.launchOptionsValid;
         else if(step === 2) return Setup.password !== "";
         else if(step === 3) return Setup.autoexecValid;
-        return false;
+        return true;
     });
 
     WS.init("setup");
@@ -58,6 +59,8 @@
                         <RconInfo />
                     {:else if step === 3}
                         <Autoexec />
+                    {:else if step === 4}
+                        <Integrations />
                     {/if}
                 </div>
             {/key}

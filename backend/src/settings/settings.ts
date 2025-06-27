@@ -66,6 +66,10 @@ export default class Settings {
             Server.sendOthers(ws, "settings", Message.SettingUpdate, { key, value });
         });
 
+        Server.on(Recieves.GetSetting, (key, { reply }) => {
+            reply(this.get(key));
+        });
+
         return setupMode;
     }
 

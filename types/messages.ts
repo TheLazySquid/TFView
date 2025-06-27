@@ -56,7 +56,8 @@ export enum Recieves {
     GetRconPassword,
     CheckAutoexec,
     ApplyAutoexec,
-    FinishSetup
+    FinishSetup,
+    GetSetting
 }
 
 export type RecievesTypes = 
@@ -65,6 +66,7 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.GetGame, number, StoredPastGame>
     | RecievedMessage<Recieves.GetPlayer, string, PastPlayer>
     | RecievedMessage<Recieves.UpdateSetting, { key: keyof SettingsType, value: any }>
+    | RecievedMessage<Recieves.GetSetting, keyof SettingsType, any>
     | RecievedMessage<Recieves.SetNickname, { id: string, nickname: string | null }>
     | RecievedMessage<Recieves.SetNote, { id: string, note: string }>
     | RecievedMessage<Recieves.SetTags, { id: string, tags: Record<string, boolean> }>

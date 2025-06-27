@@ -6,6 +6,17 @@ export default new class Setup {
     mastercomfig = $state(false);
     password = $state(Math.random().toString(36).slice(2, 10));
     autoexecValid = $state(false);
+    steamApiKey = $state("");
+    masterbaseKey = $state("");
+
+    constructor() {
+        WS.sendAndRecieve(Recieves.GetSetting, "steamApiKey").then((key) => {
+            if(key) this.steamApiKey = key;
+        });
+        WS.sendAndRecieve(Recieves.GetSetting, "masterbaseKey").then((key) => {
+            if(key) this.masterbaseKey = key;
+        });
+    }
 
     async checkLaunchOptions() {
         this.launchOptionsValid = await WS.sendAndRecieve(Recieves.CheckLaunchOptions, undefined);
