@@ -4,7 +4,7 @@ import { Message } from "$types/messages";
 import WS from "../wsclient.svelte";
 
 export default new class Game {
-    user: Player | null = $state.raw(null);
+    userTeam = $state(-1);
     players: Player[] = $state([]);
     playersMap = new Map<string, Player>();
     currentServer: CurrentServerInfo | null = $state(null);
@@ -18,7 +18,7 @@ export default new class Game {
             this.playersMap.clear();
 
             for(let player of this.players) {
-                if(player.user) this.user = player;
+                if(player.user) this.userTeam = player.team;
                 this.playersMap.set(player.ID3, player);
             }
         });
@@ -27,14 +27,14 @@ export default new class Game {
             this.players.push(player);
             this.playersMap.set(player.ID3, this.players[this.players.length - 1]);
 
-            if(player.user) this.user = player;
+            if(player.user) this.userTeam = player.team;
         });
 
         WS.on(Message.PlayerLeave, (id) => {
             let index = this.players.findIndex((p) => p.ID3 === id);
             if(index === -1) return;
 
-            if(this.players[index].user) this.user = null;
+            if(this.players[index].user) this.userTeam = -1;
             this.players.splice(index, 1);
             this.playersMap.delete(id);
         });
@@ -49,6 +49,7 @@ export default new class Game {
             }
 
             if(data.kills !== undefined) this.sortPlayers();
+            if(data.user && data.team) this.userTeam = data.team;
         });
 
         WS.on(Message.CurrentServer, ({ server, definitelyNotInGame }) => {

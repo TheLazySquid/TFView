@@ -283,7 +283,7 @@ export default class GameMonitor {
                 
                 Server.send("game", Message.PlayerUpdate, diff);
 
-                if(diff.name && diff.name !== "unconnected") {
+                if(diff.name) {
                     History.updatePlayerName(player.ID3, diff.name);
                 }
             } else {
@@ -310,7 +310,11 @@ export default class GameMonitor {
                 const summaryCallback = (summary: PlayerSummary) => {
                     player.avatarHash = summary.avatarHash;
                     player.createdTimestamp = summary.createdTimestamp;
-                    
+                    if(summary.name && summary.name !== player.name) {
+                        player.name = summary.name;
+                        History.updatePlayerName(player.ID3, summary.name);
+                    }
+
                     Server.send("game", Message.PlayerUpdate, {
                         ID3: player.ID3,
                         ...summary
@@ -412,10 +416,16 @@ export default class GameMonitor {
             }
         }
 
+        // Don't name the person "unconnected" if they already have a name, eg from the steam api or history
+        // Again this raises issues if a person renames themselves to "unconnected" mid-game
+        // But this is such a rare edge case that it doesn't matter
+        if(info.szName !== "unconnected" || !player.name) {
+            copy("name", info.szName);
+        }
+
         copy("ID3", info.iAccountID);
         copy("ID64", id3ToId64(info.iAccountID));
         copy("userId", info.iUserID);
-        copy("name", info.szName);
         copy("ping", parseInt(info.iPing));
         copy("team", parseInt(info.iTeam));
         copy("health", health);

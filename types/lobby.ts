@@ -96,6 +96,7 @@ export interface CurrentServerInfo {
 export interface PlayerSummary {
     avatarHash: string;
     createdTimestamp: number;
+    name?: string;
 }
 
 export type KickReason = "cheating" | "idle" | "scamming" | "other";

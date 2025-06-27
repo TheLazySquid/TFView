@@ -41,7 +41,7 @@
         </div>
     {/if}
     {#each kills.items as kill}
-        <div class="text-zinc-400 content-start"><Time timestamp={kill.timestamp} type="time" /></div>
+        <div class="text-zinc-400 content-center"><Time timestamp={kill.timestamp} type="time" /></div>
         <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill w-fit"
             class:crit={kill.crit}>
             <button class="whitespace-nowrap" onclick={() => Game.openPlayer(kill.killerId)}

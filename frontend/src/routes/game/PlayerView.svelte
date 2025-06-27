@@ -11,13 +11,13 @@
     let { index }: { index: number } = $props();
     let player = $derived(Game.players[index]);
     let color = $derived.by(() => {
-        if(player.ID3 === Game.user?.ID3) return Game.userColor;
+        if(player.user) return Game.userColor;
         for(let tag of Tags.tags) {
             if(player.tags[tag.id]) return tag.color;
         }
         return "";
     });
-    let showHealth = $derived(Game.user?.team === 1 || player.team === Game.user?.team);
+    let showHealth = $derived(Game.userTeam === 1 || player.team === Game.userTeam);
 </script>
 
 <tr style="background-color: {color}">

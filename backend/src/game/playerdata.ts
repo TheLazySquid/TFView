@@ -59,7 +59,8 @@ export default class PlayerData {
 
 					const summary: PlayerSummary = {
 						avatarHash: player.avatarhash,
-						createdTimestamp: player.timecreated
+						createdTimestamp: player.timecreated,
+						name: player.personaname
 					}
 
 					// Update the player data
@@ -126,7 +127,11 @@ export default class PlayerData {
 		let player = HistoryDatabase.getPlayerData(id3);
 
 		if(player && player.avatarHash && player.createdTimestamp) {
-			callback({ avatarHash: player.avatarHash, createdTimestamp: player.createdTimestamp });
+			callback({
+				avatarHash: player.avatarHash,
+				createdTimestamp: player.createdTimestamp,
+				name: player.lastName
+			});
 
 			// Don't actively trigger a query- they happen in batches of 100, this one will happen eventually
 			if(!flags.noSteamApi) this.summaryQueue.push(waitingSummary);

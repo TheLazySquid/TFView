@@ -30,7 +30,7 @@
     }
 
     let tab = $state("info");
-    let showHealth = $derived(Game.user?.team === 1 || player!?.team === Game.user?.team);
+    let showHealth = $derived(Game.userTeam === 1 || player!?.team === Game.userTeam);
     
     const sendNoteFn = () => {
         if(!player) return;
