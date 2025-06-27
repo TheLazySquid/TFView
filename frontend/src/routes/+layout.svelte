@@ -30,11 +30,15 @@
 
 	WS.on(Message.Warning, (message) => toast.warning(message));
 	WS.on(Message.Error, (message) => toast.error(message));
+
+	let unloading = $state(false);
 </script>
+
+<svelte:window onbeforeunload={() => unloading = true} />
 
 <Toaster richColors />
 
-<AlertDialog.Root open={WS.status === "disconnected"}>
+<AlertDialog.Root open={WS.status === "disconnected" && !unloading}>
 	<AlertDialog.Content style="z-index: 100">
 		<h1 class="text-2xl verdana">Connection with backend failed</h1>
 		<p>Please confirm that the backend is running</p>
