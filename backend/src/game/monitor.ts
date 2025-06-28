@@ -29,9 +29,11 @@ export default class GameMonitor {
         listId: "killfeed",
         filter: (item, params) => {
             if(!params.id) return true;
-            return item.killerId === params.id || item.victimId === params.id;
+            if(params.type === "kill") return item.killerId === params.id;
+            if(params.type === "death") return item.victimId === params.id;
+            else return item.killerId === params.id || item.victimId === params.id;
         },
-        getParamsId: (params) => params.id ?? "",
+        getParamsId: (params) => (params.id ?? "") + params.type,
         reverse: true
     });
     static chat = new LoadedInfiniteList<ChatMessage, ChatSearchParams>({

@@ -4,17 +4,19 @@
     interface Props {
         options: Record<string, string>;
         value: string;
+        class?: string;
+        onChange?: () => void;
     }
 
-    let { options, value = $bindable() }: Props = $props();
+    let { options, value = $bindable(), class: className, onChange }: Props = $props();
 </script>
 
 
-<Select.Root type="single" bind:value>
-    <Select.Trigger>
+<Select.Root type="single" bind:value onValueChange={onChange}>
+    <Select.Trigger class={className}>
         {options[value]}
     </Select.Trigger>
-    <Select.Content>
+    <Select.Content class="z-[100]">
         {#each Object.entries(options) as [value, label]}
             <Select.Item {value} {label}>
                 {label}

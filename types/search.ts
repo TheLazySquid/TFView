@@ -23,8 +23,11 @@ export interface EncounterSearchParams {
     before?: number;
 }
 
+export type KillfeedEntryType = "all" | "kill" | "death";
+
 export interface KillfeedSearchParams {
     id?: string;
+    type: KillfeedEntryType;
 }
 
 export interface ChatSearchParams {

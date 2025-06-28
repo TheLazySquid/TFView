@@ -55,7 +55,9 @@
             </div>
         {/if}
         {#each chat.items as message}
-            <div class="text-zinc-400 content-start"><Time timestamp={message.timestamp} type="time" /></div>
+            <div class="text-zinc-400 content-start whitespace-nowrap">
+                <Time timestamp={message.timestamp} type="time" />
+            </div>
             <div class="text-[0px] *:text-base">
                 {#if message.dead}
                     <span class="mr-1">*DEAD*</span>
