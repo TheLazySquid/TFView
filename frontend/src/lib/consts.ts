@@ -28,3 +28,15 @@ export const classIcons = {
     [TF2Class.Sniper]: "Sniper.png",
     [TF2Class.Spy]: "Spy.png"
 }
+
+export const defaultClassHealth = {
+    [TF2Class.Scout]: 125,
+    [TF2Class.Soldier]: 200,
+    [TF2Class.Pyro]: 175,
+    [TF2Class.Demo]: 175,
+    [TF2Class.Heavy]: 300,
+    [TF2Class.Engineer]: 125,
+    [TF2Class.Medic]: 150,
+    [TF2Class.Sniper]: 125,
+    [TF2Class.Spy]: 125
+}

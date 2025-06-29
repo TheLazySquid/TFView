@@ -20,7 +20,7 @@ export const fakePlayers: Player[] = [
         ID3: "1127822620",
         ID64: "76561199088088348",
         alive: true,
-        health: 125,
+        health: 225,
         ping: 33,
         team: 2,
         avatarHash: "a4b63f307e56cd23d448e0447f8e0c4e4f7db387",
@@ -79,6 +79,22 @@ export const fakePlayers: Player[] = [
         tags: {},
         note: "",
         killstreak: 0
+    },
+    {
+        name: "Fruit Shop Owner",
+        userId: "111",
+        ID3: "85698845",
+        ID64: "76561198045964573",
+        alive: true,
+        health: 30,
+        ping: 7,
+        team: 2,
+        kills: 4,
+        deaths: 6,
+        tags: {},
+        note: "",
+        killstreak: 1,
+        class: 0
     }
 ];
 

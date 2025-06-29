@@ -8,7 +8,7 @@ import LogParser from "src/logParser";
 import History from "src/history/history";
 import PlayerData from "./playerdata";
 import Settings from "src/settings/settings";
-import { killClasses, startingAmmo, startingHealths } from "./classConsts";
+import { killClasses, maxClassHealths, startingAmmo, startingHealths } from "./classConsts";
 import { id3ToId64 } from "$shared/steamid";
 import HistoryDatabase from "src/history/database";
 import { fakeChat, fakeKillfeed, fakePlayers } from "src/fakedata/game";
@@ -416,6 +416,11 @@ export default class GameMonitor {
                     copy("class", null);
                 }
             }
+        }
+
+        // Double check if the player's max health is possible
+        if(maxClassHealths[player.class] && health > maxClassHealths[player.class]) {
+            copy("class", null);
         }
 
         // Don't name the person "unconnected" if they already have a name, eg from the steam api or history
