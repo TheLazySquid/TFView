@@ -55,6 +55,7 @@
             </div>
         {/if}
         {#each chat.items as message}
+            {@const player = Game.playersMap.get(message.senderId)}
             <div class="text-zinc-400 content-start whitespace-nowrap">
                 <Time timestamp={message.timestamp} type="time" />
             </div>
@@ -65,8 +66,9 @@
                 {#if message.team}
                     <span class="mr-1">(TEAM)</span>
                 {/if}
-                <button style="color: {nameColors[message.senderTeam]}" onclick={() => Game.openPlayer(message.senderId)}>
-                    {message.name}
+                <button style="color: {nameColors[message.senderTeam]}" class:italic={player?.nickname}
+                    onclick={() => Game.openPlayer(message.senderId)}>
+                    {player?.nickname ?? message.name}
                 </button>
                 <span>: {message.text}</span>
             </div>

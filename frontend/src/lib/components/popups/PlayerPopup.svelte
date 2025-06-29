@@ -58,9 +58,15 @@ style="max-width: min(700px, 85%);" group={0}>
     {#if player}
         <Dialog.Header class="text-2xl flex flex-row items-center">
             <Avatar avatarHash={player.avatarHash} name={player.name} />
-            <div style="color: {nameColors[player.team]};">
-                { player.name }
+            <div style="color: {nameColors[player.team]};"
+                class="-mt-1" class:italic={player.nickname}>
+                { player.nickname ? player.nickname : player.name }
             </div>
+            {#if player.nickname}
+                <div class="-mt-1" style="color: {nameColors[player.team]};">
+                    ({ player.name })
+                </div>
+            {/if}
         </Dialog.Header>
         <Tabs.Root bind:value={tab}>
             <Tabs.List class="w-full">

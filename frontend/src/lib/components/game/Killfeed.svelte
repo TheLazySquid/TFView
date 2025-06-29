@@ -49,17 +49,19 @@
             </div>
         {/if}
         {#each kills.items as kill}
+            {@const killer = Game.playersMap.get(kill.killerId)}
+            {@const victim = Game.playersMap.get(kill.victimId)}
             <div class="text-zinc-400 content-center whitespace-nowrap"><Time timestamp={kill.timestamp} type="time" /></div>
             <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill w-fit"
                 class:crit={kill.crit}>
                 <button class="whitespace-nowrap" onclick={() => Game.openPlayer(kill.killerId)}
-                style="color: {kill.killerTeam === 2 ? killfeedRed : killfeedBlue}">
-                    {kill.killer}
+                style="color: {kill.killerTeam === 2 ? killfeedRed : killfeedBlue}" class:italic={killer?.nickname}>
+                    {killer?.nickname ?? kill.killer}
                 </button>
                 <img class="px-4" src={getWeaponImage(kill.weapon, kill.crit)} alt={kill.weapon} />
                 <button class="whitespace-nowrap" onclick={() => Game.openPlayer(kill.victimId)}
-                style="color: {kill.killerTeam === 2 ? killfeedBlue : killfeedRed}">
-                    {kill.victim}
+                style="color: {kill.killerTeam === 2 ? killfeedBlue : killfeedRed}" class:italic={victim?.nickname}>
+                    {victim?.nickname ?? kill.victim}
                 </button>
             </div>
         {/each}

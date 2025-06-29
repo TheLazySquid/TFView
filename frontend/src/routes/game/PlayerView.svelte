@@ -20,7 +20,7 @@
     let showHealth = $derived(Game.userTeam === 1 || player.team === Game.userTeam);
 </script>
 
-<tr style="background-color: {color}">
+<tr style="background-color: {color}" class:opacity-50={!player.alive}>
     <td>
         <Avatar avatarHash={player.avatarHash} name={player.name} />
     </td>
