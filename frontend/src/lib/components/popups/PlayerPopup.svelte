@@ -22,6 +22,8 @@
     import Skull from "@lucide/svelte/icons/skull";
     import Ping from "@lucide/svelte/icons/chart-no-axes-column-increasing"
     import Eye from "@lucide/svelte/icons/eye";
+    import Time from "../Time.svelte";
+    import * as Tooltip from "$lib/components/ui/tooltip";
 
     let player: Player | null = $state.raw(null);
 
@@ -106,6 +108,20 @@ style="max-width: min(700px, 85%);" group={0}>
                     <div>Ping</div>
                     <div>{player.ping} ms</div>
                 </div>
+                {#if player.createdTimestamp && player.createdTimestamp > 0}
+                    <Tooltip.Provider>
+                        <Tooltip.Root>
+                            <Tooltip.Trigger>
+                                Account created
+                                <!-- Steam's timestamps are in seconds rather than ms -->
+                                <Time type="past" timestamp={player.createdTimestamp * 1000} />
+                            </Tooltip.Trigger>
+                            <Tooltip.Content class="z-[100]">
+                                <Time type="date" timestamp={player.createdTimestamp * 1000} />
+                            </Tooltip.Content>
+                        </Tooltip.Root>
+                    </Tooltip.Provider>
+                {/if}
                 <div>Note:</div>
                 <textarea class="resize-y p-1 h-[150px] w-full outline not-focus:outline-zinc-600"
                 bind:value={player.note} onchange={sendNote}></textarea>

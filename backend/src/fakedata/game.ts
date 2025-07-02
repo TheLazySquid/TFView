@@ -42,6 +42,7 @@ export const fakePlayers: Player[] = [
         health: 0,
         ping: 161,
         team: 2,
+        createdTimestamp: Date.now() / 1000 - 1000,
         kills: 1,
         deaths: 5,
         tags: {},

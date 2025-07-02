@@ -104,7 +104,7 @@
                 <Tooltip.Provider>
                     <Tooltip.Root>
                         <Tooltip.Trigger><UserPen /></Tooltip.Trigger>
-                        <Tooltip.Content class="text-white">Nickname applied, real name is {name}</Tooltip.Content>
+                        <Tooltip.Content>Nickname applied, real name is {name}</Tooltip.Content>
                     </Tooltip.Root>
                 </Tooltip.Provider>
             {/if}
@@ -112,7 +112,7 @@
                 <Tooltip.Provider>
                     <Tooltip.Root>
                         <Tooltip.Trigger class="cursor-pointer" onclick={editNote}><Notepad /></Tooltip.Trigger>
-                        <Tooltip.Content class="text-white">Player has note saved</Tooltip.Content>
+                        <Tooltip.Content>Player has note saved</Tooltip.Content>
                     </Tooltip.Root>
                 </Tooltip.Provider>
             {/if}
@@ -122,7 +122,7 @@
                         <Tooltip.Trigger class="cursor-pointer">
                             <TextCursorInput />
                         </Tooltip.Trigger>
-                        <Tooltip.Content class="text-white">
+                        <Tooltip.Content>
                             Past {player.names.length === 2 ? "name" : "names"}: {player.names.slice(0, -1).join(", ")}
                         </Tooltip.Content>
                     </Tooltip.Root>
