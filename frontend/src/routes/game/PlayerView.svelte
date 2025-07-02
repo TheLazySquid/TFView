@@ -1,6 +1,6 @@
 <script lang="ts">
     import Skull from "@lucide/svelte/icons/skull";
-    import { classIcons, defaultClassHealth, nameColors } from "$lib/consts";
+    import { classIcons, nameColors } from "$lib/consts";
     import Game from "$lib/ws/pages/game.svelte";
     import Avatar from "$lib/components/player/Avatar.svelte";
     import Tags from "$lib/ws/topics/tags.svelte";
@@ -57,8 +57,8 @@
                     {:else}
                         <Skull />
                     {/if}
-                    {#if player.alive && showHealth && typeof player.class === "number"}
-                        {@const fraction = player.health / defaultClassHealth[player.class]}
+                    {#if player.alive && player.maxHealth}
+                        {@const fraction = player.health / player.maxHealth}
                         <div class="relative shrink-0 bg-zinc-700 h-1">
                             <div style="width: {Math.min(fraction, 1) * 100}%;"
                                 class="absolute bg-green-600 h-1 left-0 bottom-0"></div>

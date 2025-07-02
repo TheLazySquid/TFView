@@ -7,8 +7,7 @@ import { flags } from "src/consts";
 import LogParser from "src/logParser";
 import History from "src/history/history";
 import PlayerData from "./playerdata";
-import Settings from "src/settings/settings";
-import { killClasses, maxClassHealths, startingAmmo, startingHealths } from "./classConsts";
+import { killClasses, possibleMaxHps, startingAmmo, startingHealths } from "./classConsts";
 import { id3ToId64 } from "$shared/steamid";
 import HistoryDatabase from "src/history/database";
 import { fakeChat, fakeKillfeed, fakePlayers } from "src/fakedata/game";
@@ -391,9 +390,26 @@ export default class GameMonitor {
         }
 
         // Check if the person just respawned, and then try to infer what class they might be on
+        // And also guess their max hp for the healthbar in the frontend
         const health = parseInt(info.iHealth);
         if(player.alive === false && info.bAlive === "true") {
+            // Guess the player's max health
+            let bestDistance = Infinity;
+            let maxHealth = 0;
+            for(let max of possibleMaxHps) {
+                let distance = Math.abs(health - max);
+                if(distance < bestDistance) {
+                    bestDistance = distance;
+                    maxHealth = max;
+                }
+            }
+
+            copy("maxHealth", maxHealth);
+
+            // Try to guess their class
             const healthClasses = startingHealths[health];
+
+            // This will be undefined in casual, but it seems to work fine in private servers
             const ammoClasses = startingAmmo[parseInt(info.iAmmo)];
 
             let potentialClasses: TF2Class[] = [];
@@ -416,11 +432,6 @@ export default class GameMonitor {
                     copy("class", null);
                 }
             }
-        }
-
-        // Double check if the player's max health is possible
-        if(maxClassHealths[player.class] && health > maxClassHealths[player.class]) {
-            copy("class", null);
         }
 
         // Don't name the person "unconnected" if they already have a name, eg from the steam api or history

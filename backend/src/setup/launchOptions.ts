@@ -50,7 +50,9 @@ export default class LaunchOptionsCheck {
 
         const config = await fsp.readFile(path);
         const vdf = parse<any>(config.toString());
-        const game = vdf.UserLocalConfigStore.Software.Valve.steam.apps["440"];
+        const valve = vdf.UserLocalConfigStore.Software.Valve;
+        const steam = valve.steam ?? valve.Steam;
+        const game = steam.apps["440"];
 
         return game.LaunchOptions;
     }

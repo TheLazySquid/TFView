@@ -14,6 +14,8 @@ export const startingHealths: Record<number, TF2Class[]> = {
     [300]: [TF2Class.Heavy]
 }
 
+export const possibleMaxHps = Object.keys(startingHealths).map(key => parseInt(key));
+
 export const startingAmmo: Record<number, TF2Class[]> = {
     [3]: [TF2Class.Demo], // Persian persuader
     [12]: [TF2Class.Sniper], // Huntsman
@@ -27,18 +29,6 @@ export const startingAmmo: Record<number, TF2Class[]> = {
     [60]: [TF2Class.Soldier], // Rocket jumper
     [150]: [TF2Class.Medic],
     [200]: [TF2Class.Pyro, TF2Class.Heavy]
-}
-
-export const maxClassHealths: Record<TF2Class, number> = {
-    [TF2Class.Scout]: 185,
-    [TF2Class.Soldier]: 330, // Battalion's Backup
-    [TF2Class.Pyro]: 260,
-    [TF2Class.Demo]: 350, // Boots + Max Heads,
-    [TF2Class.Heavy]: 450,
-    [TF2Class.Engineer]: 225, // Gunslinger,
-    [TF2Class.Medic]: 225,
-    [TF2Class.Sniper]: 185,
-    [TF2Class.Spy]: 210 // Kunai
 }
 
 const allClassMelee = [TF2Class.Scout, TF2Class.Soldier, TF2Class.Pyro,

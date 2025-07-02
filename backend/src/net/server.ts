@@ -121,6 +121,8 @@ export default class Server {
             },
             port: networkPort
         });
+
+        Log.info(`Server open on http://localhost:${networkPort}`)
     }
 
     static onConnect<C extends MessageTypes["channel"]>(topic: Topic, callback: (send: (channel: C, data:

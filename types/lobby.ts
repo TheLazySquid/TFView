@@ -50,6 +50,7 @@ export interface Player {
     killstreak: number;
 
     // Estimated based on killfeed and health
+    maxHealth?: number;
     class?: TF2Class;
 
     // Gotten from loginusers.vdf
