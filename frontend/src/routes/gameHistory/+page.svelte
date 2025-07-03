@@ -51,7 +51,7 @@
                 </tr>
             </thead>
             <tbody>
-                {#each GameHistory.games.items as game}
+                {#each GameHistory.games.items as game (game.rowid)}
                     <tr class="border-t-2 *:py-1">
                         <td class="whitespace-nowrap"><Time timestamp={game.start} type="date" /></td>
                         <td><Time timestamp={game.duration} type="duration" /></td>
