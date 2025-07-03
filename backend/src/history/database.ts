@@ -52,6 +52,10 @@ export default class HistoryDatabase {
         });
     }
 
+    static close() {
+        this.db.close();
+    }
+
     static createDb() {
         let newDb = false;
         const dbPath = join(dataPath, flags.fakeData ? "testhistory.sqlite" : "history.sqlite");

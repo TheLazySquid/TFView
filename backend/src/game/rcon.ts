@@ -3,7 +3,7 @@ import Settings from "../settings/settings";
 import History from "src/history/history";
 import Log from "src/log";
 import Server from "src/net/server";
-import { Recieves } from "$types/messages";
+import { Message, Recieves } from "$types/messages";
 
 export default class Rcon {
     static server: RconServer;
@@ -28,11 +28,44 @@ export default class Rcon {
         Server.on(Recieves.KickPlayer, ({ userId, reason }) => {
             this.run(`callvote kick "${userId} ${reason}"`)
         });
+
+        Server.on(Recieves.CloseGame, () => {
+            this.run("quit");
+        });
+
+        Server.onConnect("global", (reply) => {
+            reply(Message.RconConnected, this.connected);
+        });
+    }
+
+    static setConnected(connected: boolean) {
+        if(this.connected === connected) return;
+
+        this.connected = connected;
+        Server.send("global", Message.RconConnected, connected);
+
+        if(connected) {
+            Log.info(`RCON connected`);
+            Server.send("global", Message.Success, "Connected to TF2 console");
+        } else {
+            Log.warning(`RCON disconnected`);
+            Server.send("global", Message.Warning, "Disconnected from TF2 console");
+        }
     }
     
+
+    static isClosed = false;
+    static reconnectTimeout: Timer;
+    static close() {
+        this.server.disconnect();
+        this.isClosed = true;
+        if(this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
+    }
+
     static connect() {
         const pollReconnect = () => {
-            setTimeout(() => this.connect(), this.pollInterval);
+            if(this.isClosed) return;
+            this.reconnectTimeout = setTimeout(() => this.connect(), this.pollInterval);
         }
 
         const password = Settings.get("rconPassword");
@@ -40,14 +73,13 @@ export default class Rcon {
 
         this.server.authenticate(password)
             .then(() => {
-                this.connected = true;
-                Log.info("RCON Connected");
+                this.setConnected(true);
                 
                 this.server.connection.once("close", () => {
-                    this.connected = false;
+                    this.setConnected(false);
+                    
                     this.server.disconnect();
                     History.onGameEnd();
-                    Log.info("RCON Disconnected");
                     pollReconnect();
                 });
             })

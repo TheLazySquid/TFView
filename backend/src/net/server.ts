@@ -125,6 +125,10 @@ export default class Server {
         Log.info(`Server open on http://localhost:${networkPort}`)
     }
 
+    static close() {
+        this.server.stop(true);
+    }
+
     static onConnect<C extends MessageTypes["channel"]>(topic: Topic, callback: (send: (channel: C, data:
         Extract<MessageTypes, SentMessage<C, any>>["data"]) => void) => void) {
         this.events.on(`${topic}-connect`, callback);

@@ -7,12 +7,15 @@
     import WS from '$lib/ws/wsclient.svelte';
 	import { WifiFade } from 'svelte-svg-spinners';
 	import * as AlertDialog from "$lib/components/ui/alert-dialog";
+	import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
 	import Game from "@lucide/svelte/icons/gamepad-2";
 	import FolderSearch from "@lucide/svelte/icons/folder-search";
 	import UserSearch from "@lucide/svelte/icons/user-search";
 	import Settings from "@lucide/svelte/icons/settings";
-    import { Message } from '$types/messages';
+	import Power from "@lucide/svelte/icons/power";
+    import { Message, Recieves } from '$types/messages';
     import { toast } from 'svelte-sonner';
+    import RconConnected from '$lib/ws/topics/rconConnected.svelte';
 	
 	let { children } = $props();
 
@@ -28,8 +31,14 @@
 		easing: quintOut
 	});
 
+	WS.on(Message.Success, (message) => toast.success(message));
 	WS.on(Message.Warning, (message) => toast.warning(message));
 	WS.on(Message.Error, (message) => toast.error(message));
+
+	const closeApp = (closeGame: boolean) => {
+		WS.send(Recieves.CloseApp, closeGame);
+		WS.closed = true;
+	}
 
 	let unloading = $state(false);
 </script>
@@ -38,10 +47,17 @@
 
 <Toaster richColors />
 
-<AlertDialog.Root open={WS.status === "disconnected" && !unloading}>
+<AlertDialog.Root open={WS.status === "disconnected" && !unloading && !WS.closed}>
 	<AlertDialog.Content style="z-index: 100">
-		<h1 class="text-2xl verdana">Connection with backend failed</h1>
+		<AlertDialog.Title>Connection with backend failed</AlertDialog.Title>
 		<p>Please confirm that the backend is running</p>
+	</AlertDialog.Content>
+</AlertDialog.Root>
+
+<AlertDialog.Root open={WS.closed}>
+	<AlertDialog.Content style="z-index: 100">
+		<AlertDialog.Title>Backend Closed</AlertDialog.Title>
+		<p>You may close this page if you wish.</p>
 	</AlertDialog.Content>
 </AlertDialog.Root>
 
@@ -65,6 +81,24 @@
 		{#if WS.status === "connecting" || WS.status === "disconnected"}
 			<WifiFade dur="0.2" />
 		{/if}
+		<DropdownMenu.Root>
+			<DropdownMenu.Trigger class="py-1">
+				<Power size={24} color={RconConnected.connected ? "var(--color-primary)" : "white"} />
+			</DropdownMenu.Trigger>
+			<DropdownMenu.Content>
+				<DropdownMenu.Item onclick={() => closeApp(false)}>
+					Close TFView
+				</DropdownMenu.Item>
+				<DropdownMenu.Item disabled={!RconConnected.connected}
+					onclick={() => WS.send(Recieves.CloseGame, undefined)}>
+					Close TF2
+				</DropdownMenu.Item>
+				<DropdownMenu.Item disabled={!RconConnected.connected}
+					onclick={() => closeApp(true)}>
+					Close All
+				</DropdownMenu.Item>
+			</DropdownMenu.Content>
+		</DropdownMenu.Root>
 	</div>
 	<div class="flex-grow">
 		{@render children()}

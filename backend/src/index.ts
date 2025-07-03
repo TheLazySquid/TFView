@@ -11,14 +11,21 @@ import HistoryDatabase from "./history/database";
 import Directories from "./settings/directories";
 import Autoexec from "./setup/autoexec";
 import LaunchOptionsCheck from "./setup/launchOptions";
+import { Message, Recieves } from "$types/messages";
 
-if(flags.fakeData) Log.info("Using fake data for backend");
-if(flags.noMAC) Log.info("MegaAntiCheat integration disabled");
-if(flags.noSteamApi) Log.info("Steam API usage disabled");
+Server.on(Recieves.CloseApp, async (closeGame) => {
+    if(closeGame) await Rcon.run("quit");
+    close();
+});
+
 init();
 
 async function init() {
     Log.init();
+
+    if(flags.fakeData) Log.info("Using fake data for backend");
+    if(flags.noMAC) Log.info("MegaAntiCheat integration disabled");
+    if(flags.noSteamApi) Log.info("Steam API usage disabled");
 
     try {
         Server.init();
@@ -46,4 +53,25 @@ async function init() {
     HistoryDatabase.init();
     History.init();
     GameMonitor.init();
+}
+
+function close() {
+    Server.close();
+    History.close();
+    HistoryDatabase.close();
+    GameMonitor.close();
+    
+    if(!flags.fakeData) {
+        Rcon.close();
+        LogParser.close();
+        Demos.close();
+    }
+
+    Log.info("Closing backend");
+    setTimeout(forceClose, 2500).unref();
+}
+
+async function forceClose() {
+    await Log.warning("Failed to close gracefully, force closing");
+    process.exit(0);
 }

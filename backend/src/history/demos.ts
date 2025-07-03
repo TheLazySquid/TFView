@@ -1,6 +1,6 @@
 import Settings from "src/settings/settings";
 import { join } from "node:path";
-import { watch } from "node:fs";
+import { watch, type FSWatcher } from "node:fs";
 import fsp from "node:fs/promises";
 import fs from "node:fs";
 import Log from "src/log";
@@ -15,6 +15,7 @@ export default class Demos {
     static events = new EventEmitter();
     static recentDemos: string[] = [];
     static firstDemo = true;
+    static watcher: FSWatcher | null = null;
 
     static init() {
         this.watchDemos();
@@ -25,7 +26,7 @@ export default class Demos {
         this.demosPath = join(Settings.get("tfPath"), "demos");
 
         try {
-            watch(this.demosPath, null, async (event, file) => {
+            this.watcher = watch(this.demosPath, null, async (event, file) => {
                 const name = file.toString();
                 if(event === "change" || !name.endsWith(".dem")) return;
 
@@ -46,6 +47,12 @@ export default class Demos {
             });
         } catch {
             setTimeout(() => this.watchDemos(), this.watchInterval);
+        }
+    }
+
+    static close() {
+        if(this.watcher) {
+            this.watcher.close();
         }
     }
 

@@ -35,7 +35,8 @@ export default class History {
     static pastGamesDir: string;
     static pageSize = 50;
     static events = new EventEmitter();
-    static updateInterval = 10000;
+    static updateInterval: Timer;
+    static updateIntervalTime = 10000;
     static definitelyNotInGame = false;
 
     static init() {        
@@ -67,9 +68,13 @@ export default class History {
         this.listenToLog();
         Demos.events.on("create", (name) => this.addDemo(name));
 
-        setInterval(() => {
+        this.updateInterval = setInterval(() => {
             this.updateCurrentGame();
-        }, this.updateInterval);
+        }, this.updateIntervalTime);
+    }
+
+    static close() {
+        clearInterval(this.updateInterval);
     }
 
     static getCurrentServer() {

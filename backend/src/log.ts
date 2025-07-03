@@ -10,20 +10,20 @@ export default class Log {
         fsp.writeFile(this.logPath, "");
     }
 
-    static addLog(type: string, text: string, logfn: (text: string) => void) {
-        fsp.appendFile(this.logPath, `[${type}] ${text}\n`);
+    static async addLog(type: string, text: string, logfn: (text: string) => void) {
         logfn(text);
+        await fsp.appendFile(this.logPath, `[${type}] ${text}\n`);
     }
 
     static info(...text: any[]) {
-        this.addLog("Info", text.join(" "), console.log);
+        return this.addLog("Info", text.join(" "), console.log);
     }
 
     static warning(...text: any[]) {
-        this.addLog("Warning", text.join(" "), console.warn);
+        return this.addLog("Warning", text.join(" "), console.warn);
     }
 
     static error(...text: any[]) {
-        this.addLog("Error", text.join(" "), console.error);
+        return this.addLog("Error", text.join(" "), console.error);
     }
 }

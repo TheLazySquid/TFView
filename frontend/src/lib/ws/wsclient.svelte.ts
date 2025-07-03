@@ -1,7 +1,7 @@
 import type { MessageTypes, Page, RecievedMessage, RecievesTypes, SentMessage } from "$types/messages";
 import { networkPort } from "$shared/consts";
 
-type Status = "idle" | "connecting" | "connected" | "disconnected";
+type Status = "idle" | "connecting" | "connected" | "disconnected"  ;
 
 class WSClient {
     page = "";
@@ -10,10 +10,11 @@ class WSClient {
     ws?: WebSocket;
     listeners = new Map<any, ((data: any) => void)[]>();
     replies = new Map<string, (data: any) => void>();
-    status: Status = $state("idle");
     switchCallbacks = new Set<() => void>();
     readyRes?: () => void;
     ready = new Promise<void>((res) => this.readyRes = res);
+    status: Status = $state("idle");
+    closed = $state(false);
 
     init(page: Page) {
         this.page = page;
@@ -59,6 +60,7 @@ class WSClient {
         this.ws.addEventListener("open", () => {
             clearTimeout(this.connectTimeout);
             this.status = "connected";
+            this.closed = false;
             this.readyRes?.();
             console.log("Websocket connected");
         }, { once: true });

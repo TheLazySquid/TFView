@@ -12,9 +12,10 @@ export default class LogParser {
     static logFile: Bun.BunFile;
     static logPath: string;
     static readStart = 0;
-    static pollInterval = 1000;
+    static pollIntervalTime = 1000;
     static listeners: LogListener[] = [];
     static shouldRestart = true;
+    static pollInterval: Timer;
 
     static init() {        
         // watch the log for updates
@@ -32,7 +33,11 @@ export default class LogParser {
 
         // fs.watch can't be relied on for log updates, somehow the log
         // doesn't trigger whatever listeners it uses
-        setInterval(() => this.poll(), this.pollInterval);
+        this.pollInterval = setInterval(() => this.poll(), this.pollIntervalTime);
+    }
+
+    static close() {
+        clearInterval(this.pollInterval);
     }
 
     static on(regex: RegExp, callback: (data: RegExpExecArray) => void) {

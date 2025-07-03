@@ -5,6 +5,7 @@ import type { CurrentServerInfo, KickReason, Player } from "./lobby";
 export type SentMessage<Channel, Data> = { channel: Channel, data: Data };
 
 export enum Message {
+    Success,
     Warning,
     Error,
     InitialPlayers,
@@ -16,10 +17,12 @@ export enum Message {
     CurrentServer,
     Tags,
     UserColor,
-    Directories
+    Directories,
+    RconConnected
 }
 
 export type MessageTypes =
+    | SentMessage<Message.Success, string>
     | SentMessage<Message.Warning, string>
     | SentMessage<Message.Error, string>
     | SentMessage<Message.InitialPlayers, Player[]>
@@ -32,6 +35,7 @@ export type MessageTypes =
     | SentMessage<Message.Tags, Tag[]>
     | SentMessage<Message.UserColor, string | undefined>
     | SentMessage<Message.Directories, GameDirectories>
+    | SentMessage<Message.RconConnected, boolean>
     | SentMessage<`list-${string}-addStart`, any>
     | SentMessage<`list-${string}-update`, { id: any, update: any }>
     | SentMessage<`list-${string}-delete`, any>
@@ -57,7 +61,9 @@ export enum Recieves {
     CheckAutoexec,
     ApplyAutoexec,
     FinishSetup,
-    GetSetting
+    GetSetting,
+    CloseGame,
+    CloseApp
 }
 
 export type RecievesTypes = 
@@ -79,6 +85,8 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.CheckAutoexec, boolean, boolean>
     | RecievedMessage<Recieves.ApplyAutoexec, boolean, boolean>
     | RecievedMessage<Recieves.FinishSetup, void, true>
+    | RecievedMessage<Recieves.CloseGame, void>
+    | RecievedMessage<Recieves.CloseApp, boolean>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
 export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup";

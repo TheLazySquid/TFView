@@ -119,11 +119,19 @@ export default class GameMonitor {
         });
     }
 
+    static runTimeout: Timer;
+    static closed = false;
+    static close() {
+        this.closed = true;
+        if(this.runTimeout) clearTimeout(this.runTimeout);
+    }
+
     static gotResponse = false;
     static responseTime = 0;
     static async poll() {
         const runAgain = () => {
-            setTimeout(() => this.poll(), this.pollInterval);
+            if(this.closed) return;
+            this.runTimeout = setTimeout(() => this.poll(), this.pollInterval);
         }
 
         if(!Rcon.connected) return runAgain();
