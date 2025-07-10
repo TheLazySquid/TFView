@@ -13,6 +13,7 @@
 	import UserSearch from "@lucide/svelte/icons/user-search";
 	import Settings from "@lucide/svelte/icons/settings";
 	import Power from "@lucide/svelte/icons/power";
+	import Map from "@lucide/svelte/icons/map";
     import { Message, Recieves } from '$types/messages';
     import { toast } from 'svelte-sonner';
     import RconConnected from '$lib/ws/topics/rconConnected.svelte';
@@ -20,10 +21,11 @@
 	let { children } = $props();
 
 	const links = [
-		{ Icon: Game, href: "/" },
-		{ Icon: UserSearch, href: "/playerHistory" },
-		{ Icon: FolderSearch, href: "/gameHistory" },
-		{ Icon: Settings, href: "/settings" }
+		{ Icon: Game, href: "/", title: "Game View" },
+		{ Icon: UserSearch, href: "/playerHistory", title: "Player History" },
+		{ Icon: FolderSearch, href: "/gameHistory", title: "Game History" },
+		{ Icon: Settings, href: "/settings", title: "Settings" },
+		{ Icon: Map, href: "/casual", title: "Casual Map Selection" }
 	]
 
 	const [send, recieve] = crossfade({
@@ -41,9 +43,15 @@
 	}
 
 	let unloading = $state(false);
+	let title = $derived(links.find(l => l.href === page.url.pathname)?.title);
 </script>
 
 <svelte:window onbeforeunload={() => unloading = true} />
+<svelte:head>
+	{#if title}
+		<title>{title} | TFView</title>
+	{/if}
+</svelte:head>
 
 <Toaster richColors />
 
@@ -63,8 +71,8 @@
 
 <div class="flex h-full">
 	<div class="w-12 border-r-2 flex flex-col items-center py-1 shrink-0">
-		{#each links as { Icon, href }}
-			<div class="relative w-full flex justify-center items-center py-1">
+		{#each links as { Icon, href, title }}
+			<div {title} class="relative w-full flex justify-center items-center py-1">
 				{#if page.url.pathname === href}
 					<div class="absolute top-0 left-0 bg-accent h-full z-0 border-r-2
 					border-primary" style="width: calc(100% + 2px)"

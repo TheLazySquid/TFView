@@ -1,4 +1,4 @@
-import type { GameDir, GameDirectories, PastPlayer, SettingsType, StoredPastGame, Tag } from "./data";
+import type { CasualConfig, CasualProfile, GameDir, GameDirectories, PastPlayer, SettingsType, StoredPastGame, Tag } from "./data";
 import type { CurrentServerInfo, KickReason, Player } from "./lobby";
 
 // Sending messages from the backend
@@ -18,7 +18,8 @@ export enum Message {
     Tags,
     UserColor,
     Directories,
-    RconConnected
+    RconConnected,
+    CasualConfig
 }
 
 export type MessageTypes =
@@ -36,6 +37,7 @@ export type MessageTypes =
     | SentMessage<Message.UserColor, string | undefined>
     | SentMessage<Message.Directories, GameDirectories>
     | SentMessage<Message.RconConnected, boolean>
+    | SentMessage<Message.CasualConfig, CasualConfig>
     | SentMessage<`list-${string}-addStart`, any>
     | SentMessage<`list-${string}-update`, { id: any, update: any }>
     | SentMessage<`list-${string}-delete`, any>
@@ -63,7 +65,9 @@ export enum Recieves {
     FinishSetup,
     GetSetting,
     CloseGame,
-    CloseApp
+    CloseApp,
+    SelectCasualProfile,
+    UpdateCasualProfile
 }
 
 export type RecievesTypes = 
@@ -87,6 +91,8 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.FinishSetup, void, true>
     | RecievedMessage<Recieves.CloseGame, void>
     | RecievedMessage<Recieves.CloseApp, boolean>
+    | RecievedMessage<Recieves.SelectCasualProfile, string>
+    | RecievedMessage<Recieves.UpdateCasualProfile, CasualProfile>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
-export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup";
+export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup" | "casual";

@@ -13,8 +13,6 @@
     WS.init("gamehistory");
 </script>
 
-<title>Game History | TFView</title>
-
 <PastGamePopup />
 <PastPlayerPopup />
 <ConfirmPopup />

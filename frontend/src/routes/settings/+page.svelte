@@ -27,8 +27,6 @@
     let passwordsOpen: Record<string, boolean> = $state({});
 </script>
 
-<title>Settings | TFView</title>
-
 <div class="flex justify-center pt-5">
     <div style="width: min(750px, 60%)">
         <h1 class="text-2xl verdana col-span-2">Settings</h1>

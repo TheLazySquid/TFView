@@ -12,6 +12,7 @@ import Directories from "./settings/directories";
 import Autoexec from "./setup/autoexec";
 import LaunchOptionsCheck from "./setup/launchOptions";
 import { Message, Recieves } from "$types/messages";
+import Casual from "./casual/casual";
 
 Server.on(Recieves.CloseApp, async (closeGame) => {
     if(closeGame) await Rcon.run("quit");
@@ -53,6 +54,7 @@ async function init() {
     HistoryDatabase.init();
     History.init();
     GameMonitor.init();
+    Casual.init();
 }
 
 function close() {

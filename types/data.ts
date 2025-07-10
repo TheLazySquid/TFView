@@ -6,6 +6,17 @@ export interface Tag {
     color?: string;
 }
 
+export interface CasualProfile {
+    name: string;
+    id: string;
+    selection: number[];
+}
+
+export interface CasualConfig {
+    profiles: CasualProfile[];
+    selectedProfile: string;
+}
+
 export interface SettingsType {
     steamPath: string;
     tfPath: string;
@@ -16,6 +27,7 @@ export interface SettingsType {
     userColor: string;
     masterbaseKey?: string;
     userSummary?: PlayerSummary;
+    casual?: CasualConfig;
 }
 
 export type GameDir = "steam" | "tf";

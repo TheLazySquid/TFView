@@ -27,8 +27,6 @@
     }
 </script>
 
-<title>Player History | TFView</title>
-
 <ProfilePicturePopup />
 <PastPlayerPopup />
 <PastGamePopup />

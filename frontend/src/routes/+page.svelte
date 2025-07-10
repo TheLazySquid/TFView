@@ -32,8 +32,6 @@
     }
 </script>
 
-<title>Game View | TFView</title>
-
 <PlayerPopup />
 <PastGamePopup />
 <PastPlayerPopup />

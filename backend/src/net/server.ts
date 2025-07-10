@@ -5,7 +5,7 @@ import { join } from "node:path";
 import Log from "../log";
 import { root } from "src/consts";
 
-export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" | "tags" | "global";
+export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" | "tags" | "casual" | "global";
 export type WS = Bun.ServerWebSocket<{ page: Page }>;
 
 const topics: Record<Page, Topic[]> = {
@@ -13,6 +13,7 @@ const topics: Record<Page, Topic[]> = {
     playerhistory: ["playerhistory", "tags", "global"],
     gamehistory: ["gamehistory", "tags", "global"],
     settings: ["settings", "directories", "global"],
+    casual: ["casual", "global"],
     setup: ["directories", "global"]
 }
 
