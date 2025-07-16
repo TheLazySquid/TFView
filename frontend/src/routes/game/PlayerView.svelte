@@ -57,7 +57,7 @@
                     {:else}
                         <Skull />
                     {/if}
-                    {#if player.alive && player.maxHealth}
+                    {#if player.alive && showHealth && player.maxHealth}
                         {@const fraction = player.health / player.maxHealth}
                         <div class="relative shrink-0 bg-zinc-700 h-1">
                             <div style="width: {Math.min(fraction, 1) * 100}%;"
