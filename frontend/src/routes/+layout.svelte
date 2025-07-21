@@ -108,7 +108,7 @@
 			</DropdownMenu.Content>
 		</DropdownMenu.Root>
 	</div>
-	<div class="flex-grow">
+	<div class="flex-grow max-w-full">
 		{@render children()}
 	</div>
 </div>

@@ -17,9 +17,7 @@ export default new class Casual {
 			this.selectedProfile = selected;
 
 			if(!selected) return;
-			for(let i = 0; i < this.selection.length; i++) {
-				this.selection[i] = BigInt(selected?.selection[i]);
-			}
+			this.selection = selected.selection.map(BigInt);
 		});
 	}
 }

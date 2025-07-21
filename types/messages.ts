@@ -67,7 +67,9 @@ export enum Recieves {
     CloseGame,
     CloseApp,
     SelectCasualProfile,
-    UpdateCasualProfile
+    UpdateCasualProfile,
+    NewCasualProfile,
+    DeleteCasualProfile
 }
 
 export type RecievesTypes = 
@@ -93,6 +95,8 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.CloseApp, boolean>
     | RecievedMessage<Recieves.SelectCasualProfile, string>
     | RecievedMessage<Recieves.UpdateCasualProfile, CasualProfile>
+    | RecievedMessage<Recieves.NewCasualProfile, string>
+    | RecievedMessage<Recieves.DeleteCasualProfile, string>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
 export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup" | "casual";

@@ -35,7 +35,7 @@
     {#if options?.textarea}
         <textarea class="resize-y p-1 h-[200px] outline not-focus:outline-zinc-600" bind:value={value}></textarea>
     {:else}
-        <input class="border-b border-zinc-600 px-2 py-1" bind:value={value} {onkeydown} />
+        <input class="border-b not-focus:border-zinc-600 px-2 py-1" bind:value={value} {onkeydown} />
     {/if}
     <Dialog.Footer>
         <Button class="text-white bg-transparent! underline" onclick={cancel}>Cancel</Button>
