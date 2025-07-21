@@ -24,8 +24,8 @@
 		{ Icon: Game, href: "/", title: "Game View" },
 		{ Icon: UserSearch, href: "/playerHistory", title: "Player History" },
 		{ Icon: FolderSearch, href: "/gameHistory", title: "Game History" },
-		{ Icon: Settings, href: "/settings", title: "Settings" },
-		{ Icon: Map, href: "/casual", title: "Casual Map Selection" }
+		{ Icon: Map, href: "/casual", title: "Casual Map Selection" },
+		{ Icon: Settings, href: "/settings", title: "Settings" }
 	]
 
 	const [send, recieve] = crossfade({
