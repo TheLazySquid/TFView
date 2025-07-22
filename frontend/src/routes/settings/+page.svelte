@@ -8,16 +8,18 @@
     import Tags from "./Tags.svelte";
     import Directory from "$lib/components/setup/Directory.svelte";
     import Directories from "$lib/ws/topics/directories.svelte";
+    import { Switch } from "$lib/components/ui/switch"
 
     WS.init("settings");
     
     interface Setting {
         name: string;
         id: keyof SettingsType;
-        type: "string" | "password" | "number";
+        type: "string" | "password" | "number" | "switch";
     }
 
     const settings: Setting[] = [
+        { name: "Launch TF2 when TFView is opened", id: "launchTf2OnStart", type: "switch" },
         { name: "RCON Port", id: "rconPort", type: "number" },
         { name: "RCON Password", id: "rconPassword", type: "password" },
         { name: "Steam API Key", id: "steamApiKey", type: "password" },
@@ -59,6 +61,8 @@
                             <Eye />
                         </button>
                     </div>
+                {:else if setting.type === "switch"}
+                    <Switch {onchange} bind:checked={Settings.settings[setting.id] as boolean} />
                 {/if}
             {/each}
         </div>

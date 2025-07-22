@@ -8,12 +8,14 @@
 	import { WifiFade } from 'svelte-svg-spinners';
 	import * as AlertDialog from "$lib/components/ui/alert-dialog";
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+	import * as Tooltip from "$lib/components/ui/tooltip";
 	import Game from "@lucide/svelte/icons/gamepad-2";
 	import FolderSearch from "@lucide/svelte/icons/folder-search";
 	import UserSearch from "@lucide/svelte/icons/user-search";
 	import Settings from "@lucide/svelte/icons/settings";
 	import Power from "@lucide/svelte/icons/power";
 	import Map from "@lucide/svelte/icons/map";
+	import Play from "@lucide/svelte/icons/play";
     import { Message, Recieves } from '$types/messages';
     import { toast } from 'svelte-sonner';
     import RconConnected from '$lib/ws/topics/rconConnected.svelte';
@@ -88,6 +90,18 @@
 		<div class="flex-grow"></div>
 		{#if WS.status === "connecting" || WS.status === "disconnected"}
 			<WifiFade dur="0.2" />
+		{/if}
+		{#if !RconConnected.connected}
+			<Tooltip.Provider>
+				<Tooltip.Root>
+					<Tooltip.Trigger class="py-1" onclick={() => WS.send(Recieves.LaunchGame, undefined)}>
+						<Play size={24} />
+					</Tooltip.Trigger>
+					<Tooltip.Content>
+						Launch TF2
+					</Tooltip.Content>
+				</Tooltip.Root>
+			</Tooltip.Provider>
 		{/if}
 		<DropdownMenu.Root>
 			<DropdownMenu.Trigger class="py-1">

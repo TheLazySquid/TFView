@@ -28,6 +28,7 @@ export interface SettingsType {
     masterbaseKey?: string;
     userSummary?: PlayerSummary;
     casual?: CasualConfig;
+    launchTf2OnStart: boolean;
 }
 
 export type GameDir = "steam" | "tf";

@@ -69,7 +69,8 @@ export enum Recieves {
     SelectCasualProfile,
     UpdateCasualProfile,
     NewCasualProfile,
-    DeleteCasualProfile
+    DeleteCasualProfile,
+    LaunchGame
 }
 
 export type RecievesTypes = 
@@ -97,6 +98,7 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.UpdateCasualProfile, CasualProfile>
     | RecievedMessage<Recieves.NewCasualProfile, string>
     | RecievedMessage<Recieves.DeleteCasualProfile, string>
+    | RecievedMessage<Recieves.LaunchGame, void>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
 export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup" | "casual";

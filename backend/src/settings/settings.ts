@@ -26,7 +26,8 @@ const defaultSettings: Partial<SettingsType> = {
             id: "friend"
         }
     ],
-    userColor: "#7a2f00"
+    userColor: "#7a2f00",
+    launchTf2OnStart: false
 }
 
 export default class Settings {
