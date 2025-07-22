@@ -14,11 +14,15 @@ export class InfiniteList<T, Params extends Record<string, any>> {
     items: T[] = $state([]);
     total: number | undefined = $state();
     params: Params = $state({} as Params);
+    usingParams: Params = $state({} as Params);
     identifier = $state(0);
     scrollContainer?: HTMLElement;
 
     constructor(private options: Options<T, Params>) {
-        if(options.params) this.params = options.params;
+        if(options.params) {
+            this.params = options.params;
+            this.usingParams = Object.assign({}, options.params);
+        }
 
         WS.onSwitch(this.destroyBound);
         WS.on(`list-${options.listId}-addStart`, this.onAddStart);
@@ -92,7 +96,7 @@ export class InfiniteList<T, Params extends Record<string, any>> {
     async handleInfinite(e: InfiniteEvent) {
         let res = await WS.sendAndRecieve(`list-${this.options.listId}`, {
             offset: this.items.length,
-            params: this.params
+            params: this.usingParams
         });
         if(res.total !== undefined) this.total = res.total;
 
@@ -103,7 +107,8 @@ export class InfiniteList<T, Params extends Record<string, any>> {
         else e.detail.loaded();
     }
 
-    resetSearch() {
+    updateSearch() {
+        this.usingParams = Object.assign({}, this.params);
         this.total = undefined;
         this.items = [];
         this.identifier++;
@@ -111,7 +116,7 @@ export class InfiniteList<T, Params extends Record<string, any>> {
 
     clearSearch(params = {} as Params) {
         this.params = params;
-        this.resetSearch();
+        this.updateSearch();
     }
 
     setScrollContainer(element: HTMLElement) {

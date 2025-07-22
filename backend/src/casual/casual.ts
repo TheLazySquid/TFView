@@ -23,7 +23,6 @@ export default class Casual {
 			reply(Message.CasualConfig, this.config);
 		});
 
-		// TODO: deleting
 		Server.on(Recieves.UpdateCasualProfile, (data, { ws }) => {
 			const profile = this.config.profiles.find(p => p.id === data.id);
 			if(!profile) return;

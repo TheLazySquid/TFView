@@ -1,14 +1,20 @@
 <script lang="ts">
+    import type { InfiniteList } from "$lib/ws/infiniteList.svelte";
     import * as Select from "$lib/components/ui/select";
+    import { getContext } from "svelte";
 
     interface Props {
         options: Record<string, string>;
         value: string;
         class?: string;
-        onChange?: () => void;
     }
 
-    let { options, value = $bindable(), class: className, onChange }: Props = $props();
+    let { options, value = $bindable(), class: className }: Props = $props();
+    const list = getContext<InfiniteList<any, any>>("searchList");
+
+    const onChange = () => {
+        list.updateSearch();
+    }
 </script>
 
 

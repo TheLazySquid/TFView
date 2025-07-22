@@ -73,7 +73,7 @@
                 all: "All",
                 kill: "Kills",
                 death: "Deaths"
-            }} class="w-[200px]" onChange={() => kills.resetSearch()} />
+            }} class="w-[200px]" onChange={() => kills.updateSearch()} />
         </div>
     {/if}
 </div>

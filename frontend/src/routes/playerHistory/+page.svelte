@@ -14,6 +14,7 @@
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
     import ConfirmPopup from "$lib/components/popups/ConfirmPopup.svelte";
     import WS from "$lib/ws/wsclient.svelte";
+    import { List } from "$lib/components/ui/tabs";
 
     WS.init("playerhistory");
 
@@ -39,7 +40,8 @@
 
 <div class="w-full h-full flex justify-center">
     <div class="overflow-y-auto" style="width: min(1000px, 90%)">
-        <Search.SearchBox title="Search Players" singular="player" plural="players" list={PlayerHistory.players}>
+        <Search.SearchBox title="Search Players" singular="player" plural="players"
+            list={PlayerHistory.players} defaultParams={{ sortBy: "lastSeen" }}>
             <div class="content-center">Name or ID:</div>
             <Search.TextInput bind:value={PlayerHistory.players.params.name} />
 
@@ -50,7 +52,8 @@
             <Search.DateInput bind:timestamp={PlayerHistory.players.params.before} />
 
             <div class="content-center">Tags:</div>
-            <TagSelector bind:tags={PlayerHistory.players.params.tags} />
+            <TagSelector bind:tags={PlayerHistory.players.params.tags}
+                onChange={() => PlayerHistory.players.updateSearch()} />
 
             <div class="content-center">Sort by:</div>
             <Search.Select bind:value={PlayerHistory.players.params.sortBy} options={{
