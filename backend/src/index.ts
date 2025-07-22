@@ -11,7 +11,7 @@ import HistoryDatabase from "./history/database";
 import Directories from "./settings/directories";
 import Autoexec from "./setup/autoexec";
 import LaunchOptionsCheck from "./setup/launchOptions";
-import { Message, Recieves } from "$types/messages";
+import { Recieves } from "$types/messages";
 import Casual from "./casual/casual";
 import Launcher from "./game/launcher";
 
@@ -29,17 +29,14 @@ async function init() {
     if(flags.noMAC) Log.info("MegaAntiCheat integration disabled");
     if(flags.noSteamApi) Log.info("Steam API usage disabled");
 
+    let setupMode = await Settings.init();
+    if(setupMode) Log.info("Running in setup mode");
+
     try {
-        Server.init();
+        Server.init(setupMode);
     } catch {
         Log.error("Failed to start server, is tfview already running?");
         return;
-    }
-
-    let setupMode = await Settings.init();
-    if(setupMode) {
-        Log.info("Running in setup mode");
-        Server.setupMode = true;
     }
 
     Directories.init();

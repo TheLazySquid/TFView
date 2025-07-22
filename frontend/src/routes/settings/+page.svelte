@@ -20,6 +20,7 @@
 
     const settings: Setting[] = [
         { name: "Launch TF2 when TFView is opened", id: "launchTf2OnStart", type: "switch" },
+        { name: "Open TFView UI when TFView is opened", id: "openUiOnStart", type: "switch" },
         { name: "RCON Port", id: "rconPort", type: "number" },
         { name: "RCON Password", id: "rconPassword", type: "password" },
         { name: "Steam API Key", id: "steamApiKey", type: "password" },
@@ -45,24 +46,27 @@
                 {@const onchange = () => WS.send(Recieves.UpdateSetting, { key: setting.id, value: Settings.settings[setting.id]})}
                 <div>{setting.name}</div>
     
-                {#if setting.type === "string"}
-                    <input class="border-b border-zinc-600 outline-none" {onchange}
-                        bind:value={Settings.settings[setting.id]} />
-                {:else if setting.type === "number"}
-                    <input class="border-b border-zinc-600 outline-none" type="number" {onchange}
-                        bind:value={Settings.settings[setting.id]} />
-                {:else if setting.type === "password"}
-                    {@const Eye = passwordsOpen[setting.id] ? EyeOpen : EyeClosed}
-                    <div class="flex items-center gap-2">
-                        <input type={passwordsOpen[setting.id] ? "text" : "password"} {onchange}
-                            class="grow outline-none border-b border-zinc-600"
+                {#if Settings.settings[setting.id] !== undefined}
+                    {#if setting.type === "string"}
+                        <input class="border-b border-zinc-600 outline-none" {onchange}
                             bind:value={Settings.settings[setting.id]} />
-                        <button onclick={() => passwordsOpen[setting.id] = !passwordsOpen[setting.id]}>
-                            <Eye />
-                        </button>
-                    </div>
-                {:else if setting.type === "switch"}
-                    <Switch {onchange} bind:checked={Settings.settings[setting.id] as boolean} />
+                    {:else if setting.type === "number"}
+                        <input class="border-b border-zinc-600 outline-none" type="number" {onchange}
+                            bind:value={Settings.settings[setting.id]} />
+                    {:else if setting.type === "password"}
+                        {@const Eye = passwordsOpen[setting.id] ? EyeOpen : EyeClosed}
+                        <div class="flex items-center gap-2">
+                            <input type={passwordsOpen[setting.id] ? "text" : "password"} {onchange}
+                                class="grow outline-none border-b border-zinc-600"
+                                bind:value={Settings.settings[setting.id]} />
+                            <button onclick={() => passwordsOpen[setting.id] = !passwordsOpen[setting.id]}>
+                                <Eye />
+                            </button>
+                        </div>
+                    {:else if setting.type === "switch"}
+                        <Switch bind:checked={Settings.settings[setting.id] as boolean}
+                            onCheckedChange={onchange}/>
+                    {/if}
                 {/if}
             {/each}
         </div>

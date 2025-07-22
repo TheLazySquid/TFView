@@ -29,6 +29,7 @@ export interface SettingsType {
     userSummary?: PlayerSummary;
     casual?: CasualConfig;
     launchTf2OnStart: boolean;
+    openUiOnStart: boolean;
 }
 
 export type GameDir = "steam" | "tf";

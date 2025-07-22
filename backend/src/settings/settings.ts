@@ -27,7 +27,8 @@ const defaultSettings: Partial<SettingsType> = {
         }
     ],
     userColor: "#7a2f00",
-    launchTf2OnStart: false
+    launchTf2OnStart: false,
+    openUiOnStart: false
 }
 
 export default class Settings {

@@ -4,6 +4,8 @@ import EventEmitter from "node:events";
 import { join } from "node:path";
 import Log from "../log";
 import { root } from "src/consts";
+import Settings from "src/settings/settings";
+import open from "open";
 
 export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" | "tags" | "casual" | "global";
 export type WS = Bun.ServerWebSocket<{ page: Page }>;
@@ -23,7 +25,9 @@ export default class Server {
     static server: Bun.Server;
     static setupMode = false;
 
-    static init() {
+    static init(setupMode: boolean) {
+        this.setupMode = setupMode;
+
         this.on(Recieves.FinishSetup, (_, { reply }) => {
             this.setupMode = false;
             reply(true);
@@ -123,7 +127,10 @@ export default class Server {
             port: networkPort
         });
 
-        Log.info(`Server open on http://localhost:${networkPort}`)
+        const url = `http://localhost:${networkPort}`;
+        if(Settings.get("openUiOnStart")) open(url);
+
+        Log.info(`Server open on ${url}`);
     }
 
     static close() {
