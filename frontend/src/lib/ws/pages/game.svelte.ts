@@ -49,7 +49,7 @@ export default new class Game {
             }
 
             if(data.kills !== undefined) this.sortPlayers();
-            if(data.user && data.team) this.userTeam = data.team;
+            if(player.user && data.team) this.userTeam = data.team;
         });
 
         WS.on(Message.CurrentServer, ({ server, definitelyNotInGame }) => {
