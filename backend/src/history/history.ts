@@ -10,6 +10,7 @@ import Rcon from "src/game/rcon";
 import { fakeCurrentGame } from "src/fakedata/game";
 import HistoryDatabase from "./database";
 import Demos from "./demos";
+import GameMonitor from "src/game/monitor";
 
 export interface CurrentGame {
     map: string;
@@ -90,10 +91,19 @@ export default class History {
     static mapChangeRegex = /(?:\n|^)Team Fortress\r?\nMap: (.+)/g;
     static statusRegex = /(?:\n|^)hostname: (.+)\n.*\nudp\/ip  : (.+)\n.*\n.*\nmap     : (.+) at:/g;
     static listenToLog() {
-        LogParser.on(this.mapChangeRegex, (data) => {
+        LogParser.on(this.mapChangeRegex, async (data) => {
             this.onGameEnd();
 
+            // If ds_status is empty we're replaying a demo
+            // This is only needed here since status does not work in demos
+            let status = await Rcon.run("ds_status");
+            if(status === "") {
+                Log.info("Demo playback detected, not starting game");
+                return;
+            }
+
             this.startGame(data[1]);
+
             // Figure out hostname and ip
             Rcon.run("status");
         });
@@ -116,6 +126,7 @@ export default class History {
     }
 
     static startGame(map: string, hostname?: string, ip?: string) {
+        if(this.currentGame) return;
         this.currentGame = {
             map, hostname, ip,
             startTime: Date.now(),
@@ -125,9 +136,13 @@ export default class History {
 
         this.definitelyNotInGame = false;
         this.currentGame.rowid = HistoryDatabase.createCurrentGame(this.currentGame);
-
         this.events.emit("startGame");
-        this.onGameStart();
+
+        // Track the players currently in game
+        for(let player of GameMonitor.players) {
+            this.addPlayer(player);
+        }
+        this.updateCurrentGame();
 
         if(hostname) Log.info("Game started:", map, hostname, ip);
         else Log.info("Game started:", map, "(hostname pending)");
@@ -145,18 +160,6 @@ export default class History {
         this.currentGame.demos.push(name);
 
         HistoryDatabase.updateCurrentDemos(this.currentGame);
-    }
-
-    static pendingPlayers: Player[] = [];
-    static onGameStart() {
-        if(this.pendingPlayers.length === 0) return;
-        
-        for(let player of this.pendingPlayers) {
-            this.addPlayer(player);
-        }
-        this.pendingPlayers = [];
-
-        this.updateCurrentGame();
     }
 
     static addPlayer(player: Player) {
@@ -204,12 +207,7 @@ export default class History {
     static onJoin(player: Player) {
         // Don't record bots (Technically there's 100 people who this won't track, but they're all valve employees so I don't care)
         // This does raise the question of what if someone with id 1 joins a game with a bot, will they have the same id?
-        if(player.ID3.length <= 2) return;
-
-        if(!this.currentGame) {
-            this.pendingPlayers.push(player);
-            return;
-        }
+        if(player.ID3.length <= 2 || !this.currentGame) return;
 
         this.addPlayer(player);
         this.updateCurrentGame();

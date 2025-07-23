@@ -20,13 +20,13 @@
         localStorage.setItem(splitKey, split ? "true" : "false");
     }
 
-    const spectaorsKey = "game-showSpectators";
-    let showSpectators = $state((localStorage.getItem(spectaorsKey) ?? "true") === "true");
+    const spectatorsKey = "game-showSpectators";
+    let showSpectators = $state((localStorage.getItem(spectatorsKey) ?? "true") === "true");
     let spectators = $derived(Game.players.filter(p => p.team === 1).length);
 
     const toggleShowSpectators = () => {
         showSpectators = !showSpectators;
-        localStorage.setItem(spectaorsKey, showSpectators ? "true" : "false");
+        localStorage.setItem(spectatorsKey, showSpectators ? "true" : "false");
     }
 
     const saveColumns = () => {

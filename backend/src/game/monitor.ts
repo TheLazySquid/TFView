@@ -137,7 +137,7 @@ export default class GameMonitor {
         if(!Rcon.connected) return runAgain();
 
         // This can potentially take a long time when loading into a map
-        let text = await Rcon.run("g15_dumpplayer");
+        let text = await Rcon.run("g15_dumpplayer", 5000);
         runAgain();
 
         // check if the game ended

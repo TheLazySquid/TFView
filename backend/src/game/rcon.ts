@@ -86,15 +86,17 @@ export default class Rcon {
             .catch(pollReconnect);
     }
 
-    static timeout = 5000;
-    static run(command: string) {
+    static run(command: string, timeoutMs?: number) {
         return new Promise<string | null>((res) => {
             // For some reason every hour or two the server won't respond to the command
             // This is technically a memory leak but it's incredibly insignificant
-            let timeout = setTimeout(() => {
-                Log.warning(`RCON command timed out: ${command}`);
-                res(null);
-            }, this.timeout);
+            let timeout: Timer | null = null;
+            if(timeoutMs) {
+                timeout = setTimeout(() => {
+                    Log.warning(`RCON command timed out: ${command}`);
+                    res(null);
+                }, timeoutMs);
+            }
 
             this.server.execute(command)
                 .then((response) => res(response.toString()))
