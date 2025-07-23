@@ -60,11 +60,12 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Install libgtk
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get update && sudo apt-get install libgtk-3-dev
+
       - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install libgtk-3-dev
-          bun i --frozen-lockfile
+        run: bun i --frozen-lockfile
 
       - name: Run Linux Build
         if: matrix.os == 'ubuntu-latest'
