@@ -1,0 +1,71 @@
+# Taken from https://jon.sprig.gs/blog/post/2442
+name: Create Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - package.json
+  workflow_dispatch:
+
+jobs:
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Get package version
+        id: get_version
+        run: bun -e "console.log('VERSION=v'+JSON.parse(fs.readFileSync('package.json')).version)" >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: ${{ steps.get_version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+
+  build_release:
+    name: Build Release
+    needs: create_release
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            release_suffix: linux
+          - os: windows-latest
+            release_suffix: windows
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun i --frozen-lockfile
+
+      - name: Run Linux Build
+        if: matrix.os == 'ubuntu-latest'
+        run: cd backend && bun run compile --zip tfview_linux
+
+      - name: Run Windows Build
+        if: matrix.os == 'windows-latest'
+        run: cd backend && bun run compile --zip tfview_windows
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ needs.create_release.outputs.tag-name }}
+          files: backend/tfview_${{ matrix.release_suffix }}

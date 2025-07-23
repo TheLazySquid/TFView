@@ -2,7 +2,8 @@
   "name": "tfview-backend",
   "module": "index.ts",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "zip-a-folder": "^3.1.9"
   },
   "peerDependencies": {
     "typescript": "^5"
