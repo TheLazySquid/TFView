@@ -391,12 +391,11 @@ export default class HistoryDatabase {
         });
 
         // Add the new name if it doesn't already exist
-        let names: string[] = [player.name];
-        
+        let names: string[] = [];
         let playerData = this.getPlayerData(player.ID3);
-        if(playerData && !playerData.names.includes(player.name)) {
-            playerData.names.push(player.name);
-        }
+        if(playerData) names = playerData.names;
+
+        if(!names.includes(player.name)) names.push(player.name);
 
         const update = { id: player.ID3, lastSeen: now, lastName: player.name, names: JSON.stringify(names), encounters: 1 };
         if(playerData) update.encounters = playerData.encounters + 1;

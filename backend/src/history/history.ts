@@ -154,6 +154,7 @@ export default class History {
         for(let player of this.pendingPlayers) {
             this.addPlayer(player);
         }
+        this.pendingPlayers = [];
 
         this.updateCurrentGame();
     }
