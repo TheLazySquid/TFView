@@ -29,6 +29,7 @@
 
     const onOpen = (openPlayer: Player) => {
         player = openPlayer;
+        console.log(player);
     }
 
     let tab = $state("info");
@@ -73,7 +74,9 @@ style="max-width: min(700px, 85%);" group={0}>
         <Tabs.Root bind:value={tab}>
             <Tabs.List class="w-full">
                 <Tabs.Trigger value="info"><InfoIcon /></Tabs.Trigger>
-                <Tabs.Trigger value="encounters"><HistoryIcon /></Tabs.Trigger>
+                {#if !player.user}
+                    <Tabs.Trigger value="encounters"><HistoryIcon /></Tabs.Trigger>
+                {/if}
                 <Tabs.Trigger value="chat"><ChatIcon /></Tabs.Trigger>
                 <Tabs.Trigger value="kills"><KillfeedIcon /></Tabs.Trigger>
             </Tabs.List>
@@ -135,12 +138,14 @@ style="max-width: min(700px, 85%);" group={0}>
                     {/if}
                 </TagSelector>
             </Tabs.Content>
-            <Tabs.Content value="encounters">
-                <!-- Required for infinite loading for some reason -->
-                {#if tab === "encounters"}
-                    <PastEncounters id={player.ID3} />
-                {/if}
-            </Tabs.Content>
+            {#if !player.user}
+                <Tabs.Content value="encounters">
+                    <!-- Required for infinite loading for some reason -->
+                    {#if tab === "encounters"}
+                        <PastEncounters id={player.ID3} />
+                    {/if}
+                </Tabs.Content>
+            {/if}
             <Tabs.Content value="chat" class="grid max-h-[400px]">
                 {#if tab === "chat"}
                     <Chat id={player.ID3} />

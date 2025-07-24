@@ -163,6 +163,7 @@ export default class History {
     }
 
     static addPlayer(player: Player) {
+        if(player.user) return;
         if(this.currentGame.players.some(p => p.id === player.ID3)) return;
 
         const now = Date.now();
