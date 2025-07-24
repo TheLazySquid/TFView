@@ -14,7 +14,6 @@
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
     import ConfirmPopup from "$lib/components/popups/ConfirmPopup.svelte";
     import WS from "$lib/ws/wsclient.svelte";
-    import { List } from "$lib/components/ui/tabs";
 
     WS.init("playerhistory");
 

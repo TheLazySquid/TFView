@@ -18,7 +18,7 @@ class WSClient {
 
     init(page: Page) {
         this.page = page;
-        
+
         if(this.ws) {
             this.ws.send(JSON.stringify({ navigate: page }));
 
@@ -62,6 +62,12 @@ class WSClient {
             this.status = "connected";
             this.closed = false;
             this.readyRes?.();
+            
+            // Reset infinite lists if we reconnected
+            for(let callback of this.switchCallbacks.values()) {
+                callback();
+            }
+
             console.log("Websocket connected");
         }, { once: true });
 

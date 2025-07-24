@@ -24,7 +24,7 @@ export class InfiniteList<T, Params extends Record<string, any>> {
             this.usingParams = Object.assign({}, options.params);
         }
 
-        WS.onSwitch(this.destroyBound);
+        WS.onSwitch(this.clearBound);
         WS.on(`list-${options.listId}-addStart`, this.onAddStart);
 
         if(options.idKey) {
@@ -33,20 +33,26 @@ export class InfiniteList<T, Params extends Record<string, any>> {
         }
     }
 
-    destroyBound = this.destroy.bind(this);
+    clearBound = this.clear.bind(this);
     onAddStart = this.addStart.bind(this);
     onUpdate = this.update.bind(this);
     onDelete = this.delete.bind(this);
 
+    clear() {
+        this.total = undefined;
+        this.items = [];
+        this.identifier++;
+    }
+
     destroy() {
-        WS.offSwitch(this.destroyBound);
+        this.clear();
+
+        WS.offSwitch(this.clearBound);
         WS.off(`list-${this.options.listId}-addStart`, this.onAddStart);
         if(this.options.idKey) {
             WS.off(`list-${this.options.listId}-update`, this.onUpdate);
             WS.off(`list-${this.options.listId}-delete`, this.onDelete);
         }
-        this.total = undefined;
-        this.items = [];
     }
 
     async addStart(item: T) {
