@@ -128,6 +128,48 @@ export const casualMaps: CasualMapCategory[] = [
 			{ name: "Upward", bit: 31n, number: 0 },
 			{ name: "Venice", bit: 21n, number: 4 }
 		]
+	},
+	{
+		name: "Payload Race",
+		maps: [
+			{ name: "Banana Bay", bit: 8n, number: 3 },
+			{ name: "Hacksaw", bit: 15n, number: 5 },
+			{ name: "Hightower", bit: 0n, number: 1 },
+			{ name: "Nightfall", bit: 7n, number: 1 },
+			{ name: "Pipeline", bit: 22n, number: 0 }
+		]
+	},
+	{
+		name: "Misc",
+		maps: [
+			{ name: "Atom Smash", bit: 28n, number: 5 },
+			{ name: "Burghausen", bit: 30n, number: 5 },
+			{ name: "DeGroot Keep", bit: 4n, number: 1 },
+			{ name: "Distillery", bit: 28n, number: 4 },
+			{ name: "Doomsday", bit: 11n, number: 1 },
+			{ name: "Hydro", bit: 13n, number: 0 },
+			{ name: "Nucleus VSH", bit: 30n, number: 4 },
+			{ name: "Selbyen", bit: 26n, number: 4 },
+			{ name: "Skirmish", bit: 29n, number: 4 },
+			{ name: "Tiny Rock", bit: 27n, number: 4 },
+			{ name: "Watergate", bit: 31n, number: 1 }
+		]
+	},
+	{
+		name: "Mannpower",
+		maps: [
+			{ name: "Foundry", bit: 21n, number: 2 },
+			{ name: "Gorge", bit: 22n, number: 2 },
+			{ name: "Hellfire", bit: 24n, number: 2 },
+			{ name: "Thundermountain", bit: 23n, number: 2 }
+		]
+	},
+	{
+		name: "PASS Time",
+		maps: [
+			{ name: "Brickyard", bit: 18n, number: 1 },
+			{ name: "District", bit: 20n, number: 1 },
+			{ name: "Timbertown", bit: 19n, number: 1 }
+		]
 	}
-	// TODO: Alternate gamemodes
 ]

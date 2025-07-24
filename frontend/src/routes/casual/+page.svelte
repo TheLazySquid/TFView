@@ -73,8 +73,8 @@
 <InputPopup />
 <ConfirmPopup />
 
-<div class="h-full overflow-auto flex">
-	<div class="flex justify-end" style="width: max(270px, calc((100% - 530px) / 2));">
+<div class="max-h-full flex">
+	<div class="flex justify-end" style="width: max(270px, calc((100% - 550px) / 2));">
 		<div class="flex flex-col pt-6 gap-1 w-[230px] pr-10">
 			{#each Casual.profiles as profile}
 				<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
@@ -97,7 +97,7 @@
 			</button>
 		</div>
 	</div>
-	<div class="flex flex-col gap-4 w-[530px] max-w-full">
+	<div class="flex flex-col gap-4 w-[550px] max-w-full max-h-full overflow-y-auto">
 		{#each casualMaps as category}
 			{@const masks = getMasks(category)}
 			<div class="grid gap-x-2 w-full" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));">

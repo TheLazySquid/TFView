@@ -64,10 +64,6 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev
 
-      - name: Check that GTK is installed
-        if: matrix.os == 'ubuntu-latest'
-        run: dpkg -l libgtk-3-dev
-
       - name: Install dependencies
         run: bun i --frozen-lockfile
 
