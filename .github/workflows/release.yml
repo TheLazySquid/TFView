@@ -62,13 +62,10 @@ jobs:
 
       - name: Install GTK development packages
         if: matrix.os == 'ubuntu-latest'
-        run: sudo apt-get update && sudo apt-get install -y libgtk-3-dev
+        run: sudo apt-get update && sudo apt-get install -y make pkg-config libgtk-3-dev
 
       - name: Install dependencies
         run: bun i --frozen-lockfile
-
-      - name: Build frontend
-        run: cd frontend && bun run build
 
       - name: Run Linux Build
         if: matrix.os == 'ubuntu-latest'

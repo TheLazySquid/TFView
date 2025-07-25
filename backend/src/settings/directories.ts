@@ -2,11 +2,13 @@ import { join, basename } from "node:path";
 import os from "node:os";
 import fsp from "node:fs/promises";
 import Settings from "./settings";
-import { pickDirectory } from "node-fs-dialogs";
 import Server from "src/net/server";
 import { Message, Recieves } from "$types/messages";
 import type { GameDirectories } from "$types/data";
 import { parse } from "vdf-parser";
+import { exec } from "node:child_process";
+import { dirpickerCommand, dirpickerPath } from "src/consts";
+import Log from "src/log";
 
 const tfPath = ["steamapps", "common", "Team Fortress 2", "tf"];
 
@@ -57,21 +59,30 @@ export default class Directories {
             reply(Message.Directories, this.getDirectories());
         });
 
-        Server.on(Recieves.UpdateDirectory, async (type) => {
-            let path = await pickDirectory({ defaultPath: type === "steam" ? this.steamDir : this.tfDir });
-            if(!path) return;
+        Server.on(Recieves.UpdateDirectory, async (type, { ws }) => {
+            const defaultPath = type === "steam" ? this.steamDir : this.tfDir;
+            exec(`${dirpickerCommand} "${defaultPath}"`, { cwd: dirpickerPath }, async (err, stdout) => {
+                if(err) {
+                    Server.sendTo(ws, Message.Error, "Failed to open directory picker");
+                    Log.error("Failed to open directory picker", err);
+                    return;
+                }
 
-            if(type === "steam") {
-                this.steamDir = path;
-                this.steamValid = await this.validateSteam();
-                Settings.set("steamPath", this.steamDir);
-            } else {
-                this.tfDir = path;
-                this.tfValid = await this.validateTf();
-                Settings.set("tfPath", this.tfDir);
-            }
+                let path = stdout.trim();
+                if(!path) return;
 
-            Server.send("directories", Message.Directories, this.getDirectories());
+                if(type === "steam") {
+                    this.steamDir = path;
+                    this.steamValid = await this.validateSteam();
+                    Settings.set("steamPath", this.steamDir);
+                } else {
+                    this.tfDir = path;
+                    this.tfValid = await this.validateTf();
+                    Settings.set("tfPath", this.tfDir);
+                }
+
+                Server.send("directories", Message.Directories, this.getDirectories());
+            });
         });
     }
 

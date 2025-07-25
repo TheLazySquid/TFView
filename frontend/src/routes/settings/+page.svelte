@@ -8,7 +8,8 @@
     import Tags from "./Tags.svelte";
     import Directory from "$lib/components/setup/Directory.svelte";
     import Directories from "$lib/ws/topics/directories.svelte";
-    import { Switch } from "$lib/components/ui/switch"
+    import { Switch } from "$lib/components/ui/switch";
+    import { version } from "../../../../package.json";
 
     WS.init("settings");
     
@@ -20,7 +21,7 @@
 
     const settings: Setting[] = [
         { name: "Launch TF2 when TFView is opened", id: "launchTf2OnStart", type: "switch" },
-        { name: "Open TFView UI when TFView is opened", id: "openUiOnStart", type: "switch" },
+        // { name: "Open TFView UI when TFView is opened", id: "openUiOnStart", type: "switch" },
         { name: "RCON Port", id: "rconPort", type: "number" },
         { name: "RCON Password", id: "rconPassword", type: "password" },
         { name: "Steam API Key", id: "steamApiKey", type: "password" },
@@ -32,7 +33,10 @@
 
 <div class="flex justify-center pt-5">
     <div style="width: min(750px, 60%)">
-        <h1 class="text-2xl verdana col-span-2">Settings</h1>
+        <h1 class="text-2xl verdana col-span-2">
+            Settings
+            <span class="text-sm font-normal float-right">TFView v{version}</span>
+        </h1>
         <div>
             Steam Directory
             <Directory dir={Directories.steam} type="steam" />

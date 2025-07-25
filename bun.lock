@@ -8,7 +8,6 @@
       "name": "tfview-backend",
       "dependencies": {
         "find-process": "^1.4.10",
-        "node-fs-dialogs": "^0.1.1",
         "open": "^10.2.0",
         "rcon-srcds": "^2.1.0",
         "throttleit": "^2.1.0",
@@ -58,9 +57,6 @@
       },
     },
   },
-  "trustedDependencies": [
-    "node-fs-dialogs",
-  ],
   "packages": {
     "@ampproject/remapping": ["@ampproject/remapping@2.3.0", "", { "dependencies": { "@jridgewell/gen-mapping": "^0.3.5", "@jridgewell/trace-mapping": "^0.3.24" } }, "sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw=="],
 
@@ -437,10 +433,6 @@
     "ms": ["ms@2.1.3", "", {}, "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA=="],
 
     "nanoid": ["nanoid@3.3.11", "", { "bin": { "nanoid": "bin/nanoid.cjs" } }, "sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w=="],
-
-    "node-addon-api": ["node-addon-api@8.4.0", "", {}, "sha512-D9DI/gXHvVmjHS08SVch0Em8G5S1P+QWtU31appcKT/8wFSPRcdHadIFSAntdMMVM5zz+/DL+bL/gz3UDppqtg=="],
-
-    "node-fs-dialogs": ["node-fs-dialogs@0.1.1", "", { "dependencies": { "node-addon-api": "^8.4.0" } }, "sha512-f2ydHO/+s3zRk+qTpS0y6ZMomj1qMP8zf4G/YQhD7a9OfWP8hwkBU7YpY4GvEEDTmV3lwiyZLxAQEO7dWNRFxg=="],
 
     "normalize-path": ["normalize-path@3.0.0", "", {}, "sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA=="],
 

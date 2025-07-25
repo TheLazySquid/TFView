@@ -5,7 +5,6 @@ import { join } from "node:path";
 import Log from "../log";
 import { root } from "src/consts";
 import Settings from "src/settings/settings";
-import open from "open";
 
 export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" | "tags" | "casual" | "global";
 export type WS = Bun.ServerWebSocket<{ page: Page }>;
@@ -128,7 +127,7 @@ export default class Server {
         });
 
         const url = `http://localhost:${networkPort}`;
-        if(Settings.get("openUiOnStart")) open(url);
+        // if(Settings.get("openUiOnStart")) open(url);
 
         Log.info(`Server open on ${url}`);
     }

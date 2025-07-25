@@ -10,8 +10,11 @@ export default class Rcon {
     static pollInterval = 1000;
     static connected = false;
 
-    static init() {        
-        this.server = new RconServer({
+    static init() {
+        // @ts-ignore for some reason bundlers get confused with the import
+        const Rcon: typeof RconServer = RconServer.default ?? RconServer;
+
+        this.server = new Rcon({
             host: "127.0.0.1",
             port: Settings.get("rconPort"),
             encoding: "utf8"

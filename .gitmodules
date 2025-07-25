@@ -1,0 +1,3 @@
+[submodule "backend/dirpicker/nfd-ext"]
+	path = backend/dirpicker/nfd-ext
+	url = https://github.com/btzy/nativefiledialog-extended
