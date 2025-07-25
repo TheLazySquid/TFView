@@ -5,8 +5,6 @@ type Status = "idle" | "connecting" | "connected" | "disconnected"  ;
 
 class WSClient {
     page = "";
-    pollInterval = 1000;
-    timeout = 5000;
     ws?: WebSocket;
     listeners = new Map<any, ((data: any) => void)[]>();
     replies = new Map<string, (data: any) => void>();
@@ -31,34 +29,16 @@ class WSClient {
         }
     }
 
-    connectTimeout?: Timer;
     connectSocket() {
-        let retried = false;
-        const retry = () => {
-            if(retried) return;
-            retried = true;
-
-            setTimeout(() => this.connectSocket(), this.pollInterval);
-        }
-
         this.ws = new WebSocket(`ws://localhost:${networkPort}/ws/${this.page}`);
 
-        // Kill the connection after 5 seconds
-        this.connectTimeout = setTimeout(() => {
-            this.ws?.close();
-            this.status = "disconnected";
-            retry();
-        }, this.timeout);
-
         this.ws.addEventListener("close", () => {
-            clearTimeout(this.connectTimeout);
+            this.connectSocket();
             this.status = "disconnected";
-            retry();
             this.ready = new Promise<void>((res) => this.readyRes = res);
         }, { once: true });
 
         this.ws.addEventListener("open", () => {
-            clearTimeout(this.connectTimeout);
             this.status = "connected";
             this.closed = false;
             this.readyRes?.();
