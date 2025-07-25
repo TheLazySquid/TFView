@@ -77,8 +77,12 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: cd backend && bun run compile --zip tfview_windows
 
+      - name: Get package version
+        id: get_version
+        run: bun -e "console.log('VERSION=v'+JSON.parse(fs.readFileSync('package.json')).version)" >> "$GITHUB_OUTPUT"
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ needs.create_release.outputs.tag-name }}
-          files: backend/tfview_${{ matrix.release_suffix }}
+          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          files: backend/dist/tfview_${{ matrix.release_suffix }}.zip

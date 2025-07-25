@@ -34,6 +34,7 @@ await cp("../README.md", "dist/unpacked/README.md");
  
 let zipIndex = Bun.argv.indexOf("--zip");
 if(zipIndex !== -1) {
+    console.log("Zipping files...");
     let name = Bun.argv[zipIndex + 1] ?? "tfview";
     await zip("./dist/unpacked", `./dist/${name}.zip`);
 }
