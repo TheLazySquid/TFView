@@ -1,13 +1,10 @@
 import { join } from "node:path";
 import { homedir } from "node:os";
 
-export const onLinux = process.platform === "linux";
 export const dataPath = join(homedir(), ".tfview");
 export const pageSize = 50;
 export const compiled = !process.execPath.replaceAll("\\", "/").includes(".bun/bin/bun");
 export const root = compiled ? join(process.execPath, "..") : join(Bun.main, "..", "..");
-export const dirpickerPath = compiled ? root : join(root, "dirpicker", "dist");
-export const dirpickerCommand = onLinux ? "./dirpicker" : "dirpicker";
 
 // Read flags
 export let flags = {

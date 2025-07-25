@@ -10,6 +10,7 @@
     import Directories from "$lib/ws/topics/directories.svelte";
     import { Switch } from "$lib/components/ui/switch";
     import { version } from "../../../../package.json";
+    import InputPopup from "$lib/components/popups/InputPopup.svelte";
 
     WS.init("settings");
     
@@ -30,6 +31,8 @@
 
     let passwordsOpen: Record<string, boolean> = $state({});
 </script>
+
+<InputPopup />
 
 <div class="flex justify-center pt-5">
     <div style="width: min(750px, 60%)">

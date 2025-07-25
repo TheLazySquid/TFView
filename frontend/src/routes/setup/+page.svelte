@@ -11,6 +11,7 @@
     import { Recieves } from "$types/messages";
     import { goto } from "$app/navigation";
     import Integrations from "./Integrations.svelte";
+    import InputPopup from "$lib/components/popups/InputPopup.svelte";
 
     let step = $state(0);
     const steps = 5;
@@ -40,6 +41,8 @@
 </script>
 
 <title>Setup | TFView</title>
+
+<InputPopup />
 
 <AlertDialog.Root open>
     <AlertDialog.Content class="!max-w-[700px]">

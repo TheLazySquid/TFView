@@ -4,11 +4,9 @@ import fsp from "node:fs/promises";
 import Settings from "./settings";
 import Server from "src/net/server";
 import { Message, Recieves } from "$types/messages";
-import type { GameDirectories } from "$types/data";
+import type { GameDir, GameDirectories } from "$types/data";
 import { parse } from "vdf-parser";
-import { exec } from "node:child_process";
-import { dirpickerCommand, dirpickerPath } from "src/consts";
-import Log from "src/log";
+import { pickDirectory } from "node-fs-dialogs";
 
 const tfPath = ["steamapps", "common", "Team Fortress 2", "tf"];
 
@@ -59,31 +57,30 @@ export default class Directories {
             reply(Message.Directories, this.getDirectories());
         });
 
-        Server.on(Recieves.UpdateDirectory, async (type, { ws }) => {
-            const defaultPath = type === "steam" ? this.steamDir : this.tfDir;
-            exec(`${dirpickerCommand} "${defaultPath}"`, { cwd: dirpickerPath }, async (err, stdout) => {
-                if(err) {
-                    Server.sendTo(ws, Message.Error, "Failed to open directory picker");
-                    Log.error("Failed to open directory picker", err);
-                    return;
-                }
+        Server.on(Recieves.OpenDirectoryPicker, async (type) => {
+            let path = await pickDirectory({ defaultPath: type === "steam" ? this.steamDir : this.tfDir });
+            if(!path) return;
 
-                let path = stdout.trim();
-                if(!path) return;
-
-                if(type === "steam") {
-                    this.steamDir = path;
-                    this.steamValid = await this.validateSteam();
-                    Settings.set("steamPath", this.steamDir);
-                } else {
-                    this.tfDir = path;
-                    this.tfValid = await this.validateTf();
-                    Settings.set("tfPath", this.tfDir);
-                }
-
-                Server.send("directories", Message.Directories, this.getDirectories());
-            });
+            this.updateDirectory(type, path);
         });
+
+        Server.on(Recieves.ChangeDirectory, ({ type, path }) => {
+            this.updateDirectory(type, path);
+        });
+    }
+
+    static async updateDirectory(type: GameDir, path: string) {
+        if(type === "steam") {
+            this.steamDir = path;
+            this.steamValid = await this.validateSteam();
+            Settings.set("steamPath", this.steamDir);
+        } else {
+            this.tfDir = path;
+            this.tfValid = await this.validateTf();
+            Settings.set("tfPath", this.tfDir);
+        }
+
+        Server.send("directories", Message.Directories, this.getDirectories());
     }
 
     static getDirectories(): GameDirectories {

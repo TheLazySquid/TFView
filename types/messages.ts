@@ -56,7 +56,8 @@ export enum Recieves {
     SetTags,
     DeleteGame,
     KickPlayer,
-    UpdateDirectory,
+    OpenDirectoryPicker,
+    ChangeDirectory,
     CheckLaunchOptions,
     ApplyLaunchOptions,
     GetRconPassword,
@@ -85,7 +86,8 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.SetTags, { id: string, tags: Record<string, boolean> }>
     | RecievedMessage<Recieves.DeleteGame, number, true | string>
     | RecievedMessage<Recieves.KickPlayer, { userId: string, reason: KickReason }>
-    | RecievedMessage<Recieves.UpdateDirectory, GameDir>
+    | RecievedMessage<Recieves.OpenDirectoryPicker, GameDir>
+    | RecievedMessage<Recieves.ChangeDirectory, { type: GameDir, path: string }>
     | RecievedMessage<Recieves.CheckLaunchOptions, void, boolean>
     | RecievedMessage<Recieves.ApplyLaunchOptions, void, boolean>
     | RecievedMessage<Recieves.GetRconPassword, boolean, string | undefined>
