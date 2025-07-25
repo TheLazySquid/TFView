@@ -3,11 +3,8 @@ name: Create Release
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - package.json
-  workflow_dispatch:
+    tags:
+      - "v*.*.*"
 
 jobs:
   create_release:
@@ -16,23 +13,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Get package version
-        id: get_version
-        run: bun -e "console.log('VERSION=v'+JSON.parse(fs.readFileSync('package.json')).version)" >> "$GITHUB_OUTPUT"
-
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          name: ${{ github.ref_name }}
           draft: false
           prerelease: false
           generate_release_notes: false
@@ -84,5 +69,5 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
+          tag_name: ${{ needs.create_release.outputs.tag-name }}
           files: backend/dist/tfview_${{ matrix.release_suffix }}.zip
