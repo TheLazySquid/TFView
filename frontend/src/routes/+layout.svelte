@@ -38,6 +38,17 @@
 	WS.on(Message.Success, (message) => toast.success(message));
 	WS.on(Message.Warning, (message) => toast.warning(message));
 	WS.on(Message.Error, (message) => toast.error(message));
+	WS.on(Message.OfferStartMenuShortcut, () => {
+		toast("Would you like to create a start menu shortcut for TFView?", {
+			action: {
+				label: "Create",
+				onClick: () => WS.send(Recieves.WantsStartMenuShortcut, true)
+			},
+			onDismiss: () => WS.send(Recieves.WantsStartMenuShortcut, false),
+			closeButton: true,
+			duration: Number.POSITIVE_INFINITY
+		});
+	});
 
 	const closeApp = (closeGame: boolean) => {
 		WS.send(Recieves.CloseApp, closeGame);

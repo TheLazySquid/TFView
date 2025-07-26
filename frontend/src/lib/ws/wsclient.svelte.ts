@@ -13,6 +13,7 @@ class WSClient {
     ready = new Promise<void>((res) => this.readyRes = res);
     status: Status = $state("idle");
     closed = $state(false);
+    connectTimeout?: Timer;
 
     init(page: Page) {
         this.page = page;
@@ -26,6 +27,10 @@ class WSClient {
         } else {
             this.status = "connecting";
             this.connectSocket();
+
+            this.connectTimeout = setTimeout(() => {
+                this.status = "disconnected";
+            }, 5000);
         }
     }
 
@@ -42,6 +47,7 @@ class WSClient {
             this.status = "connected";
             this.closed = false;
             this.readyRes?.();
+            clearTimeout(this.connectTimeout);
             
             // Reset infinite lists if we reconnected
             for(let callback of this.switchCallbacks.values()) {

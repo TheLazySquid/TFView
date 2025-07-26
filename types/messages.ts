@@ -19,7 +19,8 @@ export enum Message {
     UserColor,
     Directories,
     RconConnected,
-    CasualConfig
+    CasualConfig,
+    OfferStartMenuShortcut
 }
 
 export type MessageTypes =
@@ -38,6 +39,7 @@ export type MessageTypes =
     | SentMessage<Message.Directories, GameDirectories>
     | SentMessage<Message.RconConnected, boolean>
     | SentMessage<Message.CasualConfig, CasualConfig>
+    | SentMessage<Message.OfferStartMenuShortcut, void>
     | SentMessage<`list-${string}-addStart`, any>
     | SentMessage<`list-${string}-update`, { id: any, update: any }>
     | SentMessage<`list-${string}-delete`, any>
@@ -71,7 +73,8 @@ export enum Recieves {
     UpdateCasualProfile,
     NewCasualProfile,
     DeleteCasualProfile,
-    LaunchGame
+    LaunchGame,
+    WantsStartMenuShortcut
 }
 
 export type RecievesTypes = 
@@ -101,6 +104,7 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.NewCasualProfile, string>
     | RecievedMessage<Recieves.DeleteCasualProfile, string>
     | RecievedMessage<Recieves.LaunchGame, void>
+    | RecievedMessage<Recieves.WantsStartMenuShortcut, boolean>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
 export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup" | "casual";

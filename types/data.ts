@@ -30,6 +30,7 @@ export interface SettingsType {
     casual?: CasualConfig;
     launchTf2OnStart: boolean;
     openUiOnStart: boolean;
+    pickedIfShortcut: boolean;
 }
 
 export type GameDir = "steam" | "tf";

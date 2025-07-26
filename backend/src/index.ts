@@ -14,6 +14,7 @@ import LaunchOptionsCheck from "./setup/launchOptions";
 import { Recieves } from "$types/messages";
 import Casual from "./casual/casual";
 import Launcher from "./game/launcher";
+import StartMenu from "./setup/startmenu";
 
 Server.on(Recieves.CloseApp, async (closeGame) => {
     if(closeGame) await Rcon.run("quit");
@@ -54,6 +55,7 @@ async function init() {
     GameMonitor.init();
     Casual.init();
     Launcher.init();
+    StartMenu.init();
 }
 
 function close() {
