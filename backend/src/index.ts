@@ -30,11 +30,11 @@ async function init() {
     if(flags.noMAC) Log.info("MegaAntiCheat integration disabled");
     if(flags.noSteamApi) Log.info("Steam API usage disabled");
 
-    let setupMode = await Settings.init();
-    if(setupMode) Log.info("Running in setup mode");
-
+    await Settings.init();
+    if(!Settings.get("finishedSetup")) Log.info("Running in setup mode");
+    
     try {
-        Server.init(setupMode);
+        Server.init();
     } catch {
         Log.error("Failed to start server, is tfview already running?");
         return;

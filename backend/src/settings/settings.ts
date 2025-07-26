@@ -28,7 +28,8 @@ const defaultSettings: Partial<SettingsType> = {
     ],
     userColor: "#7a2f00",
     launchTf2OnStart: false,
-    openUiOnStart: false
+    openUiOnStart: false,
+    finishedSetup: true
 }
 
 export default class Settings {
@@ -38,13 +39,11 @@ export default class Settings {
 
     static async init() {
         this.file = Bun.file(join(dataPath, "config.json"));
-        let setupMode = false;
 
         try {
             this.config = await this.file.json();
         } catch {
             this.config = defaultSettings as SettingsType;
-            setupMode = true;
         }
 
         Server.onConnect("settings", (reply) => {
@@ -71,8 +70,6 @@ export default class Settings {
         Server.on(Recieves.GetSetting, (key, { reply }) => {
             reply(this.get(key));
         });
-
-        return setupMode;
     }
 
     static get<T extends keyof SettingsType>(key: T): SettingsType[T] {

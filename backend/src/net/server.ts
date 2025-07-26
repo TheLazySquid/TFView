@@ -23,12 +23,13 @@ export default class Server {
     static staticPath = join(root, "static");
     static server: Bun.Server;
     static setupMode = false;
-
-    static init(setupMode: boolean) {
-        this.setupMode = setupMode;
+    
+    static init() {
+        this.setupMode = !Settings.get("finishedSetup");
 
         this.on(Recieves.FinishSetup, (_, { reply }) => {
             this.setupMode = false;
+            Settings.set("finishedSetup", true);
             reply(true);
         });
 
