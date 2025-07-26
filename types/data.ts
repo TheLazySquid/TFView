@@ -31,6 +31,7 @@ export interface SettingsType {
     launchTf2OnStart: boolean;
     openUiOnStart: boolean;
     pickedIfShortcut: boolean;
+    finishedSetup: boolean;
 }
 
 export type GameDir = "steam" | "tf";
