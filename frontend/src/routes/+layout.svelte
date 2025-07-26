@@ -56,15 +56,9 @@
 	}
 
 	let unloading = $state(false);
-	let title = $derived(links.find(l => l.href === page.url.pathname)?.title);
 </script>
 
 <svelte:window onbeforeunload={() => unloading = true} />
-<svelte:head>
-	{#if title}
-		<title>{title} | TFView</title>
-	{/if}
-</svelte:head>
 
 <Toaster richColors />
 

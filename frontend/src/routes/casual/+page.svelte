@@ -70,6 +70,10 @@
 	WS.init("casual");
 </script>
 
+<svelte:head>
+	<title>Casual Map Selection | TFView</title>
+</svelte:head>
+
 <InputPopup />
 <ConfirmPopup />
 

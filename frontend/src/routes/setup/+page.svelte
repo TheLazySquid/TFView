@@ -40,7 +40,9 @@
     WS.init("setup");
 </script>
 
-<title>Setup | TFView</title>
+<svelte:head>
+	<title>Setup | TFView</title>
+</svelte:head>
 
 <InputPopup />
 

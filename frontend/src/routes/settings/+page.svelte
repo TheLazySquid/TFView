@@ -32,6 +32,10 @@
     let passwordsOpen: Record<string, boolean> = $state({});
 </script>
 
+<svelte:head>
+	<title>Settings | TFView</title>
+</svelte:head>
+
 <InputPopup />
 
 <div class="flex justify-center pt-5">

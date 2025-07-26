@@ -13,6 +13,10 @@
     WS.init("gamehistory");
 </script>
 
+<svelte:head>
+	<title>Game History | TFView</title>
+</svelte:head>
+
 <PastGamePopup />
 <PastPlayerPopup />
 <ConfirmPopup />

@@ -32,6 +32,10 @@
     }
 </script>
 
+<svelte:head>
+	<title>Game View | TFView</title>
+</svelte:head>
+
 <PlayerPopup />
 <PastGamePopup />
 <PastPlayerPopup />

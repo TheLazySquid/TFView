@@ -27,6 +27,10 @@
     }
 </script>
 
+<svelte:head>
+	<title>Player History | TFView</title>
+</svelte:head>
+
 <ProfilePicturePopup />
 <PastPlayerPopup />
 <PastGamePopup />
