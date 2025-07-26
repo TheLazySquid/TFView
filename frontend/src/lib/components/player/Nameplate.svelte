@@ -130,7 +130,7 @@
             {/if}
         </div>
     </ContextMenu.Trigger>
-    <ContextMenu.Content>
+    <ContextMenu.Content class="z-[100]">
         <ContextMenu.Sub>
             <ContextMenu.SubTrigger class="p-0">
                 <a class="h-full w-full px-2 py-1.5" href={`https://steamcommunity.com/profiles/${id64}`} target="_blank">

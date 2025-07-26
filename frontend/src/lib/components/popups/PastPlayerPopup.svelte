@@ -10,6 +10,7 @@
     import InfoIcon from "@lucide/svelte/icons/user";
     import HistoryIcon from "@lucide/svelte/icons/folder-clock";
     import throttle from "throttleit";
+    import Nameplate from "../player/Nameplate.svelte";
     import Avatar from "../player/Avatar.svelte";
 
     let player: PastPlayer | null = $state(null);
@@ -43,9 +44,11 @@
 
 <Popup type="openPastPlayerPopup" style="max-width: min(90%, 750px)" {onOpen} group={0}>
     {#if player}
-        <Dialog.Header class="text-2xl flex flex-row items-center">
+        <Dialog.Header class="flex flex-row items-center">
             <Avatar avatarHash={player.avatarHash} name={player.lastName} />
-            { player.lastName }
+            <div class="grow">
+                <Nameplate bind:player current={false} />
+            </div>
         </Dialog.Header>
         <Tabs.Root bind:value={tab}>
             <Tabs.List class="w-full">

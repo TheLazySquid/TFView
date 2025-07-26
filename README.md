@@ -18,9 +18,9 @@ The main appeal behind TFView is that it stores the games you play and the peopl
 
 ### Casual Map Selection
 
-![Map Selection Preview](./images/Map_Selection.png)
-
 TFView lets you create several profiles with different casual map selections, which you can then easily switch between. You need to hit "Load Saved Settings" in-game for the changes to apply if the game is active.
+
+![Map Selection Preview](./images/Map_Selection.png)
 
 ## Installation
 
@@ -37,3 +37,7 @@ You will be walked through setup upon opening TFView for the first time. There a
 2. Add `ip 0.0.0.0`, `rcon_password [your password here]`, and `net_start` to your autoexec.
 3. (Optional, but strongly recommended) Get a [Steam api key](https://steamcommunity.com/dev/apikey). This lets you see the profile pictures of the players in your game.
 4. (Optional) Get a [MegaAntiCheat api key](https://megaanticheat.com/provision) to send demos of games you play to MegaAntiCheat's masterbase. (You will also need to run `ds_enable 2` in the console).
+
+## Storage Usage
+
+TFView uses a really small amount of storage space. Even with 100,000 different players and 6,500 different games recorded the database only uses roughly 42 megabytes.

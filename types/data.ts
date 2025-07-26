@@ -108,3 +108,51 @@ export interface StoredPlayer {
 export type PastPlayer = Omit<StoredPlayer, 'tags'> & {
     tags: Record<string, boolean>;
 }
+
+export interface DemoHeader {
+    demo_type: string;
+    version: number;
+    protocol: number;
+    server: string;
+    nick: string;
+    map: string;
+    game: "tf";
+    duration: number;
+    ticks: number;
+    frames: number;
+    signon: number;
+}
+
+export interface DemoChat {
+    kind: string;
+    from: string;
+    text: string;
+    tick: number;
+}
+
+export interface DemoUser {
+    classes: Record<string, number>;
+    name: string;
+    userId: number;
+    steamId: string;
+    team: string;
+}
+
+interface DemoDeath {
+    weapon: string;
+    victim: number;
+    assister: number | null;
+    killer: number;
+    tick: number;
+}
+
+export interface ParsedDemo {
+    header: DemoHeader;
+    chat: DemoChat[];
+    users: Record<string, DemoUser>;
+    deaths: DemoDeath[];
+    rounds: any[];
+    startTick: number;
+    intervalPerTick: number;
+    pauses: any[];
+}

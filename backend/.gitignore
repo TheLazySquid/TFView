@@ -3,3 +3,4 @@ tfview.log
 dist
 *.exe
 *.res
+demoParseProgress.json
