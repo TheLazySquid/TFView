@@ -76,6 +76,7 @@ export default class History {
 
     static close() {
         clearInterval(this.updateInterval);
+        this.updateCurrentGame();
     }
 
     static getCurrentServer() {
@@ -94,11 +95,9 @@ export default class History {
         LogParser.on(this.mapChangeRegex, async (data) => {
             this.onGameEnd();
 
-            // If ds_status is empty we're replaying a demo
-            // This is only needed here since status does not work in demos
-            let status = await Rcon.run("ds_status");
-            if(status === "") {
-                Log.info("Demo playback detected, not starting game");
+            let start = await this.checkStart();
+            if(!start) {
+                Log.info("Demo playback detected, not recording game");
                 return;
             }
 
@@ -108,10 +107,21 @@ export default class History {
             Rcon.run("status");
         });
 
-        LogParser.on(this.statusRegex, (data) => {      
+        LogParser.on(this.statusRegex, async (data) => {      
             let [_, hostname, ip, map] = data;
             
-            if(!this.currentGame) this.startGame(map, hostname, ip);
+            if(!this.currentGame) {
+                if(this.startPromise) {
+                    // Wait for the game to be created, rather than creating it ourself
+                    let start = await this.checkStart();
+                    if(!start) return;
+                } else {
+                    let start = await this.checkStart();
+                    if(!start) return;
+                    
+                    this.startGame(map, hostname, ip);
+                }
+            }
 
             // update the current game to include hostname/ip
             if(hostname === this.currentGame.hostname && ip === this.currentGame.ip) return; 
@@ -123,6 +133,34 @@ export default class History {
             HistoryDatabase.updateCurrentHostname(this.currentGame);
             Log.info("Updated server with ip", ip, "hostname", hostname);
         });
+    }
+
+    static startPromise: Promise<boolean> | null = null;
+    static checkStart(): Promise<boolean> {
+        if(this.startPromise) return this.startPromise;
+
+        this.startPromise = new Promise(async (res) => {
+            let status = await Rcon.run("ds_status");
+            let fails = 0;
+            
+            while(status === null) {
+                status = await Rcon.run("ds_status");
+                if(status !== null) break;
+
+                fails++;
+                if(fails < 5) continue;
+
+                // It would be more annoying to have a game not recorded than to have one be recorded twice
+                Log.warning("Failed to get ds_status after 5 attempts, recording anyways");
+                res(true);
+                return;
+            }
+
+            res(status !== "");
+        });
+
+        this.startPromise.finally(() => this.startPromise = null);
+        return this.startPromise;
     }
 
     static startGame(map: string, hostname?: string, ip?: string) {

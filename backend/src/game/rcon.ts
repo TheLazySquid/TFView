@@ -56,7 +56,6 @@ export default class Rcon {
         }
     }
     
-
     static isClosed = false;
     static reconnectTimeout: Timer;
     static close() {
@@ -79,8 +78,9 @@ export default class Rcon {
                 this.setConnected(true);
                 
                 this.server.connection.once("close", () => {
+                    if(this.isClosed) return;
+
                     this.setConnected(false);
-                    
                     this.server.disconnect();
                     History.onGameEnd();
                     pollReconnect();
