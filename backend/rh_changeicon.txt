@@ -1,0 +1,8 @@
+[FILENAMES]
+Open=./dist/unpacked/tfview.exe
+Save=./dist/unpacked/tfview_new.exe
+Log=./resourcehacker.log
+
+[COMMANDS]
+-delete ICONGROUP
+-addoverwrite ./resource/icon.ico ICONGROUP,1

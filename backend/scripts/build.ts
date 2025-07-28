@@ -1,6 +1,21 @@
 import { $ } from "bun";
-import { cp, rmdir, exists, readdir } from "node:fs/promises";
+import { cp, rmdir, exists } from "node:fs/promises";
 import { zip } from "zip-a-folder";
+import { parseArgs } from "node:util";
+import { execSync } from "node:child_process";
+
+const args = parseArgs({
+    args: process.argv.slice(2),
+    options: {
+        zip: {
+            type: "string",
+            short: "z"
+        },
+        resourcehacker: {
+            type: "string"
+        }
+    }
+});
 
 if(await exists("dist")) {
     console.log("Clearing dist directory...");
@@ -17,17 +32,22 @@ console.log("Building binary...");
 // await $`bun build ./src/index.ts --compile --minify --bytecode --windows-icon=./resource/icon.ico --windows-hide-console --outfile dist/tfview`.text();
 await $`bun build ./src/index.ts --compile --minify --bytecode --outfile dist/unpacked/tfview`.quiet();
 
+if(args.values.resourcehacker) {
+    console.log("Adding icon with Resource Hacker...");
+    await $`${args.values.resourcehacker} -script rh_changeicon.txt`.quiet();
+    await $`rm dist/unpacked/tfview.exe`.quiet();
+    await $`mv dist/unpacked/tfview_new.exe dist/unpacked/tfview.exe`.quiet();
+}
+
 console.log("Copying static files...");
 await cp("static", "dist/unpacked/static", { recursive: true });
 
 console.log("Copying README.md...");
 await cp("../README.md", "dist/unpacked/README.md");
  
-let zipIndex = Bun.argv.indexOf("--zip");
-if(zipIndex !== -1) {
+if(args.values.zip) {
     console.log("Zipping files...");
-    let name = Bun.argv[zipIndex + 1] ?? "tfview";
-    await zip("./dist/unpacked", `./dist/${name}.zip`);
+    await zip("./dist/unpacked", `./dist/${args.values.zip}.zip`);
 }
 
 console.log("Done!");

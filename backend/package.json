@@ -13,8 +13,7 @@
   "private": true,
   "scripts": {
     "start": "bun run src/index.ts",
-    "compile": "bun run scripts/build.ts",
-    "compilePicker": "cd dirpicker && make"
+    "compile": "bun run scripts/build.ts"
   },
   "type": "module",
   "dependencies": {
