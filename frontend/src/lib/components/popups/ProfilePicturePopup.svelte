@@ -5,13 +5,14 @@
     let avatarHash = $state("");
     let playerName = $state("");
 
-    const onOpen = (hash: string, name: string) => {
+    const onOpen = ({ hash, name }: { hash: string, name: string }) => {
         avatarHash = hash;
         playerName = name;
+        return `${name}'s Profile Picture`;
     }
 </script>
 
-<Popup type="openProfilePicturePopup" {onOpen} style="max-width: fit-content">
+<Popup type="profilePicture" {onOpen} style="max-width: fit-content" overlay={true}>
     <Dialog.Header class="text-2xl verdana whitespace-nowrap">{ playerName }'s Profile Picture</Dialog.Header>
     <div class="w-full h-full flex items-center justify-center">
         <img src={`https://avatars.steamstatic.com/${avatarHash}_full.jpg`}

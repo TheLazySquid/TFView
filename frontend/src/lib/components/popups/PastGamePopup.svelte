@@ -8,6 +8,7 @@
     import Popup from "./Popup.svelte";
     import { toast } from "svelte-sonner";
     import DeleteGame from "../history/DeleteGame.svelte";
+    import { dateFmt } from "$lib/consts";
 
     let rowid: number | null = $state(null);
     let game: StoredPastGame | null = $state.raw(null);
@@ -16,6 +17,7 @@
     const onOpen = async (id: number) => {
         rowid = id;
         game = await WS.sendAndRecieve(Recieves.GetGame, rowid);
+        return `Game on ${game?.map} on ${dateFmt.format(game?.start)}`;
     }
 
     const copyDemoCommand = (demo: string) => {
@@ -26,7 +28,7 @@
     }
 </script>
 
-<Popup type="openGamePopup" {onOpen} group={0} bind:this={popup}>
+<Popup type="game" {onOpen} bind:this={popup}>
     {#if !game}
         <NinetyRingWithBg color="white" />
     {:else}
@@ -59,7 +61,7 @@
                     {#each game.players as player}
                         <tr>
                             <td>
-                                <button onclick={() => Popups.openPastPlayerPopup?.(player.id)} 
+                                <button onclick={() => Popups.open("pastPlayer", player.id)} 
                                     class="underline">
                                     {player.name}
                                 </button>

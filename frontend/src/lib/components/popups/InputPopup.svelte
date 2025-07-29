@@ -9,6 +9,7 @@
     const onOpen = (opts: InputOptions) => {
         options = opts;
         if(opts.defaultValue) value = opts.defaultValue;
+        return opts.title || "Input";
     }
 
     let popup: Popup;
@@ -28,7 +29,7 @@
     }
 </script>
 
-<Popup type="openInputPopup" {onOpen} bind:this={popup}>
+<Popup type="input" {onOpen} overlay={true} bind:this={popup}>
     <Dialog.Header>
         <Dialog.Title>{options?.title}</Dialog.Title>
     </Dialog.Header>

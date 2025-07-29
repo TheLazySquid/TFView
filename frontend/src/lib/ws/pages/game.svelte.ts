@@ -72,9 +72,9 @@ export default new class Game {
     openPlayer(id: string) {
         let player = this.playersMap.get(id);
         if(player) {
-            Popups.openPlayerPopup?.(player);
+            Popups.open("player", player);
         } else {
-            Popups.openPastPlayerPopup?.(id);
+            Popups.open("pastPlayer", id);
         }
     }
 }

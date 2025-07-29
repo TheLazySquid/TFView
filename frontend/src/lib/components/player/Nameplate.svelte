@@ -26,7 +26,7 @@
     let id64 = $derived(id3ToId64(id));
 
     const setNickname = () => {
-        Popups.openInputPopup?.({
+        Popups.open("input", {
             title: `Enter nickname for ${name}`,
             callback: (nickname) => {
                 player.nickname = nickname;
@@ -45,7 +45,7 @@
     }
 
     const editNote = () => {
-        Popups.openInputPopup?.({
+        Popups.open("input", {
             title: `Edit note for ${name}`,
             callback: (note) => {
                 player.note = note;

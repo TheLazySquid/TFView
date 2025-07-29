@@ -42,6 +42,7 @@ export default class Server {
                 // Handle websocket connections
                 if(parts[0] === "ws") {
                     let page = req.url.split("/").pop() as Page;
+                    console.log("Connecting to page", page);
                     if(!topics[page]) return new Response("Invalid page", { status: 400 });
     
                     let data = { page };

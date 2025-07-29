@@ -16,7 +16,7 @@
     const openInput = (e: MouseEvent) => {
         e.stopPropagation();
 
-        Popups.openInputPopup?.({
+        Popups.open("input", {
             title: `Select ${type} directory`,
             defaultValue: dir.path,
             callback: (path) => {

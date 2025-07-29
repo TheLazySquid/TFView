@@ -17,6 +17,7 @@
 
     const onOpen = async (id: string) => {
         player = await WS.sendAndRecieve(Recieves.GetPlayer, id);
+        return player.lastName;
     }
 
     const sendNoteFn = () => {
@@ -42,7 +43,7 @@
     let tab = $state("info");
 </script>
 
-<Popup type="openPastPlayerPopup" style="max-width: min(90%, 750px)" {onOpen} group={0}>
+<Popup type="pastPlayer" style="max-width: min(90%, 750px)" {onOpen}>
     {#if player}
         <Dialog.Header class="flex flex-row items-center">
             <Avatar avatarHash={player.avatarHash} name={player.lastName} />

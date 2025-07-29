@@ -48,7 +48,7 @@
                     <td>{encounter.kills}/{encounter.deaths}</td>
                     <td>
                         <button class="underline"
-                        onclick={() => Popups.openGamePopup?.(encounter.gameId)}>
+                        onclick={() => Popups.open("game", encounter.gameId)}>
                             Details
                         </button>
                     </td>

@@ -171,10 +171,10 @@ export default class HistoryDatabase {
             // Allow searches for id64, id3, or name
             if(params.name.startsWith("[U:1:")) {
                 let id3 = params.name.slice(5, -1);
-                if(!isNaN(parseInt(id3))) {
+                if(!isNaN(Number(id3))) {
                     params.id3 = id3;
                 }
-            } else if(!isNaN(parseInt(params.name))) {
+            } else if(!isNaN(Number(params.name))) {
                 params.id64 = id64ToId3(params.name);
                 params.id3 = params.name;
             }

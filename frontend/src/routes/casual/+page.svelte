@@ -32,7 +32,7 @@
 	}
 
 	const createNewProfile = () => {
-		Popups.openInputPopup?.({
+		Popups.open("input", {
 			title: "Create New Casual Profile",
 			callback: (name) => {
 				WS.send(Recieves.NewCasualProfile, name);
@@ -42,7 +42,7 @@
 
 	const renameProfile = (e: MouseEvent, profile: CasualProfile) => {
 		e.stopPropagation();
-		Popups.openInputPopup?.({
+		Popups.open("input", {
 			title: "Rename Casual Profile",
 			defaultValue: profile.name,
 			callback: (name) => {
@@ -58,7 +58,7 @@
 
 	const deleteProfile = (e: MouseEvent, profile: CasualProfile) => {
 		e.stopPropagation();
-		Popups.openConfirmPopup?.({
+		Popups.open("confirm", {
 			title: "Delete Casual Profile",
 			message: `Are you sure you want to delete the profile "${profile.name}"?`,
 			onConfirm: () => {

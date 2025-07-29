@@ -29,6 +29,10 @@ TFView lets you create several profiles with different casual map selections, wh
 * Run the tfview executable
 * Open the UI at [http://localhost:7523](http://localhost:7523) and follow the setup steps
 
+## Usage
+
+Run the TFView executable, then optionally open the UI at [http://localhost:7523](http://localhost:7523). You can open this in the browser of your choosing or even the steam overlay.
+
 ## Necessary Setup
 
 You will be walked through setup upon opening TFView for the first time. There are a few things that need to be done in order to connect to RCON.
@@ -40,4 +44,4 @@ You will be walked through setup upon opening TFView for the first time. There a
 
 ## Storage Usage
 
-TFView uses a really small amount of storage space. Even with 100,000 different players and 6,500 different games recorded the database only uses roughly 42 megabytes.
+TFView uses a surprisngly small amount of storage space. Even with 100,000 different players and 6,500 different games recorded the database only uses roughly 42 megabytes.

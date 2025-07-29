@@ -29,7 +29,7 @@
 
     const onOpen = (openPlayer: Player) => {
         player = openPlayer;
-        console.log(player);
+        return player.name;
     }
 
     let tab = $state("info");
@@ -56,8 +56,8 @@
     }
 </script>
 
-<Popup type="openPlayerPopup" {onOpen} class="min-h-[450px] flex flex-col *:nth-[2]:flex-grow"
-style="max-width: min(700px, 85%);" group={0}>
+<Popup type="player" {onOpen} class="min-h-[450px] flex flex-col *:nth-[2]:flex-grow"
+style="max-width: min(700px, 85%);">
     {#if player}
         <Dialog.Header class="text-2xl flex flex-row items-center">
             <Avatar avatarHash={player.avatarHash} name={player.name} />

@@ -5,7 +5,7 @@
 </script>
 
 {#if avatarHash}
-    <button onclick={() => Popups.openProfilePicturePopup?.(avatarHash!, name)}
+    <button onclick={() => Popups.open("profilePicture", { hash: avatarHash!, name })}
     class="contents">
         <img src="https://avatars.steamstatic.com/{avatarHash}_medium.jpg"
         class="w-8 h-8" alt="Avatar" />

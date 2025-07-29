@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { dateFmt, killfeedBlue, timeFmt } from "$lib/consts";
+    import { dateFmt, timeFmt } from "$lib/consts";
 
     type Type = "date" | "duration" | "time" | "past";
     let { timestamp, type }: { timestamp: number, type: Type } = $props();

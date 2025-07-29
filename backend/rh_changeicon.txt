@@ -1,7 +1,7 @@
 [FILENAMES]
 Open=./dist/unpacked/tfview.exe
 Save=./dist/unpacked/tfview_new.exe
-Log=./resourcehacker.log
+Log=CONSOLE
 
 [COMMANDS]
 -delete ICONGROUP

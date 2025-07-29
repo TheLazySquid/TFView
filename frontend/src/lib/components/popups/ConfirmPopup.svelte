@@ -7,10 +7,10 @@
     let options: ConfirmOptions | null = $state.raw(null);
     const onOpen = (opts: ConfirmOptions) => {
         options = opts;
+        return opts.title || "Confirm";
     }
 
     let popup: Popup;
-
     const onCancel = () => {
         options?.onCancel?.();
         popup.closePopup();
@@ -22,7 +22,7 @@
     }
 </script>
 
-<Popup type="openConfirmPopup" {onOpen} bind:this={popup}>
+<Popup type="confirm" {onOpen} overlay={true} bind:this={popup}>
     <Dialog.Header>
         <Dialog.Title>{options?.title}</Dialog.Title>
     </Dialog.Header>

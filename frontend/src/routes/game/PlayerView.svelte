@@ -26,7 +26,7 @@
     </td>
     <td>
         <Nameplate current={true} bind:player style="color: {nameColors[player.team]}"
-            onclick={() => Popups.openPlayerPopup?.(player)} />
+            onclick={() => Popups.open("player", player)} />
     </td>
     {#if player.team !== 1}
         {#if columns.class}

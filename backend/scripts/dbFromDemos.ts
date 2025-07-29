@@ -54,12 +54,16 @@ function recordDemo(name: string) {
         const output: ParsedDemo = JSON.parse(execSync(command).toString());
     
         let players: Record<number, PastGamePlayer> = {};
+        let seenIds = new Set<string>();
         let playerId = 0;
         let playerKills = 0;
         let playerDeaths = 0;
 
         for(let player of Object.values(output.users)) {
             let id3 = player.steamId.slice(5, -1); // Remove [U:1: and ]
+            if(seenIds.has(id3)) continue;
+            seenIds.add(id3);
+
             if(id3 === steamId) playerId = player.userId;
 
             // Ignore bots

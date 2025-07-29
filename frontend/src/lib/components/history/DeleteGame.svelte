@@ -15,7 +15,7 @@
     let { class: className, game, onSuccess }: Props = $props();
 
     const deleteGame = () => {
-        Popups.openConfirmPopup?.({
+        Popups.open("confirm", {
             title: `Really delete game on ${game.map}?`,
             message: "This cannot be undone.",
             onConfirm: async () => {
