@@ -25,6 +25,8 @@ export default class Directories {
             this.steamDir = process.platform === "win32" ?
                 "C:\\Program Files (x86)\\Steam" :
                 os.homedir() + "/.local/share/Steam";
+
+            Settings.set("steamPath", this.steamDir);
         }
 
         if(!this.tfDir) {
@@ -45,6 +47,8 @@ export default class Directories {
             } catch {                
                 this.tfDir = join(this.steamDir, ...tfPath);
             }
+
+            Settings.set("tfPath", this.tfDir);
         }
 
         Settings.set("steamPath", this.steamDir);

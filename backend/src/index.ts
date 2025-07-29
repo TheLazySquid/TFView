@@ -27,6 +27,7 @@ async function init() {
 
     process.on("unhandledRejection", (reason) => {
         Log.error("Unhandled rejection:", reason);
+        console.trace(reason);
     });
 
     if(flags.fakeData) Log.info("Using fake data for backend");
@@ -35,7 +36,7 @@ async function init() {
 
     await Settings.init();
     if(!Settings.get("finishedSetup")) Log.info("Running in setup mode");
-    
+
     try {
         Server.init();
     } catch {

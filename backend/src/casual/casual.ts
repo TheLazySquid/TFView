@@ -91,12 +91,13 @@ export default class Casual {
 	}
 
 	static getCriteriaPath() {
+		if(!Settings.get("tfPath")) return null;
 		return join(Settings.get("tfPath"), "casual_criteria.vdf");
 	}
 
 	static async readCasualCriteria() {
 		const path = this.getCriteriaPath();
-		if(!await fsp.exists(path)) return;
+		if(!path || !await fsp.exists(path)) return;
 
 		const data = await fsp.readFile(path);
 		const lines = data.toString().replaceAll("\r\n", "\n").split("\n").filter(l => l);

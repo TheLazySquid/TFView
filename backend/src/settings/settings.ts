@@ -4,6 +4,7 @@ import { dataPath } from "../consts";
 import Server from "src/net/server";
 import { Recieves, Message } from "$types/messages";
 import EventEmitter from "node:events";
+import { readFile } from "node:fs/promises";
 
 // Fixed ids rather than random ones since if settings somehow get reset
 // This means that there's a chance that some tags will be saved
@@ -29,7 +30,7 @@ const defaultSettings: Partial<SettingsType> = {
     userColor: "#7a2f00",
     launchTf2OnStart: false,
     openUiOnStart: false,
-    finishedSetup: true
+    finishedSetup: false
 }
 
 export default class Settings {
@@ -38,10 +39,14 @@ export default class Settings {
     static events = new EventEmitter();
 
     static async init() {
-        this.file = Bun.file(join(dataPath, "config.json"));
+        const filePath = join(dataPath, "config.json");
+        this.file = Bun.file(filePath);
 
         try {
-            this.config = await this.file.json();
+            // Can't use this.file.json() because if it fails bun will quietly exit the process
+            // Rather than throw an error normally for some reason
+            const contents = await readFile(filePath);
+            this.config = JSON.parse(contents.toString());
         } catch {
             this.config = defaultSettings as SettingsType;
         }

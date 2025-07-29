@@ -20,9 +20,16 @@ export default class Demos {
     static init() {
         this.watchDemos();
         History.events.on("endGame", () => this.closeDemo());
+
+        Settings.on("tfPath", () => {
+            this.close();
+            this.watchDemos();
+        });
     }
 
+    static watchTimeout: Timer;
     static watchDemos() {
+        if(!Settings.get("tfPath")) return;
         this.demosPath = join(Settings.get("tfPath"), "demos");
 
         try {
@@ -46,7 +53,7 @@ export default class Demos {
                 this.startSession(name);
             });
         } catch {
-            setTimeout(() => this.watchDemos(), this.watchInterval);
+            this.watchTimeout = setTimeout(() => this.watchDemos(), this.watchInterval);
         }
     }
 
@@ -54,6 +61,7 @@ export default class Demos {
         if(this.watcher) {
             this.watcher.close();
         }
+        clearTimeout(this.watchTimeout);
     }
 
     static masterbaseUrl = "megaanticheat.com";

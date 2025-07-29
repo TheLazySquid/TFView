@@ -53,11 +53,11 @@
             <Directory dir={Directories.tf} type="tf" />
         </div>
         <div class="grid gap-y-2" style="grid-template-columns: 1fr 300px;">
-            {#each settings as setting}
-                {@const onchange = () => WS.send(Recieves.UpdateSetting, { key: setting.id, value: Settings.settings[setting.id]})}
-                <div>{setting.name}</div>
-    
-                {#if Settings.settings[setting.id] !== undefined}
+            {#if Settings.settingsLoaded}
+                {#each settings as setting}
+                    {@const onchange = () => WS.send(Recieves.UpdateSetting, { key: setting.id, value: Settings.settings[setting.id]})}
+                    <div>{setting.name}</div>
+        
                     {#if setting.type === "string"}
                         <input class="border-b border-zinc-600 outline-none" {onchange}
                             bind:value={Settings.settings[setting.id]} />
@@ -78,8 +78,8 @@
                         <Switch bind:checked={Settings.settings[setting.id] as boolean}
                             onCheckedChange={onchange}/>
                     {/if}
-                {/if}
-            {/each}
+                {/each}
+            {/if}
         </div>
         <Tags />
     </div>
