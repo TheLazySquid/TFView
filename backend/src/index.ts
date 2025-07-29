@@ -16,15 +16,18 @@ import Casual from "./casual/casual";
 import Launcher from "./game/launcher";
 import StartMenu from "./setup/startmenu";
 
-Server.on(Recieves.CloseApp, async (closeGame) => {
-    if(closeGame) await Rcon.run("quit");
-    close();
-});
-
 init();
 
 async function init() {
     Log.init();
+
+    process.on("uncaughtException", (err) => {
+        Log.error("Uncaught exception:", err.stack);
+    });
+
+    process.on("unhandledRejection", (reason) => {
+        Log.error("Unhandled rejection:", reason);
+    });
 
     if(flags.fakeData) Log.info("Using fake data for backend");
     if(flags.noMAC) Log.info("MegaAntiCheat integration disabled");
@@ -56,6 +59,11 @@ async function init() {
     Casual.init();
     Launcher.init();
     StartMenu.init();
+
+    Server.on(Recieves.CloseApp, async (closeGame) => {
+        if(closeGame) await Rcon.run("quit");
+        close();
+    });
 }
 
 function close() {
