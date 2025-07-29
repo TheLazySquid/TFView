@@ -40,6 +40,9 @@ async function init() {
         Server.init();
     } catch {
         Log.error("Failed to start server, is tfview already running?");
+
+        // Leave the console open so the user can see the error
+        setInterval(() => {}, 999999);
         return;
     }
 
