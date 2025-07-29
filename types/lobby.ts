@@ -57,7 +57,7 @@ export interface Player {
     user?: boolean;
 
     // From history
-    names?: string[];
+    names: string[];
     encounters?: number;
 
     // user-generated

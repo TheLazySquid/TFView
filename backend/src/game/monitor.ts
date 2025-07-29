@@ -272,7 +272,8 @@ export default class GameMonitor {
                 kills: 0,
                 deaths: 0,
                 tags: {},
-                killstreak: 0
+                killstreak: 0,
+                names: []
             }
 
             if(playerInfo.iAccountID === this.userAccountID3) player.user = true;
@@ -290,11 +291,12 @@ export default class GameMonitor {
                     diff.killstreak = 0;
                 }
                 
-                Server.send("game", Message.PlayerUpdate, diff);
-
                 if(diff.name) {
-                    History.updatePlayerName(player.ID3, diff.name);
+                    History.updatePlayerName(player as Player);
+                    diff.names = player.names;
                 }
+
+                Server.send("game", Message.PlayerUpdate, diff);
             } else {
                 // Get any stored user-generated data
                 const playerData = HistoryDatabase.getPlayerData(player.ID3);
@@ -303,14 +305,13 @@ export default class GameMonitor {
                     if(playerData.nickname) player.nickname = playerData.nickname;
                     if(playerData.note) player.note = playerData.note;
                     if(playerData.encounters) player.encounters = playerData.encounters;
-                    player.names = playerData.names ?? [];
-                    if(!player.names.includes(player.name)) {
-                        player.names.push(player.name);
-                    }
+                    if(playerData.names) player.names = playerData.names;
                 }
 
                 // track the player in the game history
                 History.onJoin(player as Player);
+                
+                if(!player.names.includes(player.name)) player.names.push(player.name);
 
                 Server.send("game", Message.PlayerJoin, player as Player);
                 this.players.push(player as Player);
@@ -322,13 +323,16 @@ export default class GameMonitor {
                 const summaryCallback = (summary: PlayerSummary) => {
                     player.avatarHash = summary.avatarHash;
                     player.createdTimestamp = summary.createdTimestamp;
+
                     if(summary.name && summary.name !== player.name) {
                         player.name = summary.name;
-                        History.updatePlayerName(player.ID3, summary.name);
+
+                        History.updatePlayerName(player as Player);
                     }
 
                     Server.send("game", Message.PlayerUpdate, {
                         ID3: player.ID3,
+                        names: player.names,
                         ...summary
                     });
                 }

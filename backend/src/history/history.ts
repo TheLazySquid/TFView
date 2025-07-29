@@ -39,6 +39,7 @@ export default class History {
     static updateInterval: Timer;
     static updateIntervalTime = 10000;
     static definitelyNotInGame = false;
+    static joinedUnconnected: string[] = [];
 
     static init() {        
         Server.onConnect("game", (send) => {
@@ -248,19 +249,30 @@ export default class History {
         // This does raise the question of what if someone with id 1 joins a game with a bot, will they have the same id?
         if(player.ID3.length <= 2 || !this.currentGame) return;
 
+        if(!player.names.includes("unconnected") && player.name === "unconnected") {
+            this.joinedUnconnected.push(player.ID3);
+        }
+
         this.addPlayer(player);
         this.updateCurrentGame();
     }
 
-    static updatePlayerName(id3: string, name: string) {
-        if(!this.currentGame || !this.currentPlayers.has(id3)) return;
+    static updatePlayerName(player: Player) {
+        if(!this.currentGame || !this.currentPlayers.has(player.ID3)) return;
 
-        let player = this.currentPlayers.get(id3);
-        if(!player) return;
+        let gamePlayer = this.currentPlayers.get(player.ID3);
+        gamePlayer.info.name = player.name;
 
-        player.info.name = name;
-        HistoryDatabase.updatePlayerName(id3, name);
-        HistoryDatabase.updatePlayerEncounterName(player.rowid, name);
+        // If needed remove "unconnected" from the player's names
+        let joinedUnconnectedIndex = this.joinedUnconnected.indexOf(player.ID3);
+        if(joinedUnconnectedIndex !== -1) {
+            this.joinedUnconnected.splice(joinedUnconnectedIndex, 1);
+            player.names = player.names.filter(name => name !== "unconnected");
+        }
+        if(!player.names.includes(player.name)) player.names.push(player.name);
+
+        HistoryDatabase.updatePlayerName(player.ID3, player.name, player.names);
+        HistoryDatabase.updatePlayerEncounterName(gamePlayer.rowid, player.name);
     }
 
     static onGameEnd() {
@@ -274,5 +286,6 @@ export default class History {
         Log.info(`Recorded game: ${this.currentGame.map}`);
         this.currentGame = null;
         this.currentPlayers.clear();
+        this.joinedUnconnected = [];
     }
 }

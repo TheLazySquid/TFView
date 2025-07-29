@@ -305,21 +305,7 @@ export default class HistoryDatabase {
         }
     }
 
-    static updatePlayerName(id: string, name: string) {
-        // There's a small chance that someone's name was accidentally saved as "unconnected"
-        // This does mean that if someone switches their name to "unconnected" mid-game it won't be saved
-        // Or if they are named unconnected and then change it that alias will be wiped
-        // But casual doesn't even allow changing names mid-game so it shouldn't be an issue
-        let playerData = this.getPlayerData(id);
-        if(!playerData) {
-            Log.error(`Tried to update name for player ${id} that doesn't exist`);
-            return;
-        }
-
-        let names = playerData.names;
-        if(names[names.length - 1] === "unconnected") names.pop();
-        if(!names.includes(name)) names.push(name);
-
+    static updatePlayerName(id: string, name: string, names: string[]) {
         this.db.query(`UPDATE players SET lastName = $lastName, names = $names WHERE id = $id`)
             .run({ id, lastName: name, names: JSON.stringify(names) });
     }
