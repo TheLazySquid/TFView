@@ -404,7 +404,12 @@ export default class HistoryDatabase {
             this.db.query(`UPDATE players SET lastSeen = $lastSeen, lastName = $lastName, names = $names, encounters = $encounters WHERE id = $id`)
                 .run(update);
 
-            this.pastPlayers.update(player.ID3, { lastSeen: now, lastName: player.name });
+            this.pastPlayers.update(player.ID3, {
+                lastSeen: now,
+                lastName: player.name,
+                encounters: update.encounters,
+                names
+            });
         } else {
             this.db.query(`INSERT INTO players (id, lastSeen, lastName, names, encounters) VALUES($id, $lastSeen, $lastName, $names, $encounters)`)
                 .run(update);
@@ -413,7 +418,7 @@ export default class HistoryDatabase {
                 id: player.ID3,
                 lastSeen: now,
                 lastName: player.name,
-                names: [player.name],
+                names,
                 tags: {},
                 encounters: update.encounters
             });

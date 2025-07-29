@@ -303,7 +303,10 @@ export default class GameMonitor {
                     if(playerData.nickname) player.nickname = playerData.nickname;
                     if(playerData.note) player.note = playerData.note;
                     if(playerData.encounters) player.encounters = playerData.encounters;
-                    player.names = playerData.names;
+                    player.names = playerData.names ?? [];
+                    if(!player.names.includes(player.name)) {
+                        player.names.push(player.name);
+                    }
                 }
 
                 // track the player in the game history
