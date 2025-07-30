@@ -61,7 +61,7 @@ jobs:
 
       - name: Run Linux Build
         if: matrix.os == 'ubuntu-latest'
-        run: cd backend && bun run compile --zip tfview_linux
+        run: cd backend && bun run compile --zip tfview_${{ github.ref_name }}_linux
 
       - name: Download ResourceHacker
         if: matrix.os == 'windows-latest'
@@ -71,10 +71,10 @@ jobs:
 
       - name: Run Windows Build
         if: matrix.os == 'windows-latest'
-        run: cd backend && bun run compile --zip tfview_windows --resourcehacker "C:\resource_hacker\ResourceHacker.exe"
+        run: cd backend && bun run compile --zip tfview_${{ github.ref_name }}_windows --resourcehacker "C:\resource_hacker\ResourceHacker.exe"
 
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          files: backend/dist/tfview_${{ matrix.release_suffix }}.zip
+          files: backend/dist/tfview_${{ github.ref_name }}_${{ matrix.release_suffix }}.zip
