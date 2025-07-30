@@ -8,6 +8,7 @@ const critRemaps: Record<string, string> = {
     shooting_star: 'headshot',
     awper_hand: 'headshot',
     ambassador: 'headshot',
+    machina: 'headshot',
     knife: 'backstab',
     eternal_reward: 'backstab',
     kunai: 'backstab',
@@ -51,7 +52,7 @@ const knownIcons = [
     'bread_bite',
     'bushwacka',
     'candy_cane',
-    'claidheamhmor',
+    'claidheamohmor',
     'compound_bow',
     'cow_mangler',
     'crossing_guard',
@@ -86,12 +87,13 @@ const knownIcons = [
     'gas_blast',
     'gloves',
     'gloves_running_urgently',
+    'golden_fryingpan',
     'guillotine',
     'ham_shank',
     'headshot',
     'headtaker',
     'holiday_punch',
-    'holy_mackerel',
+    'holymackerel',
     'hot_hand',
     'huntsman_flyingburn',
     'huntsman_headshot',
@@ -131,6 +133,7 @@ const knownIcons = [
     'persian_persuader',
     'phlogistinator',
     'pistol',
+    'pistol_scout',
     'player',
     'player_penetration',
     'player_penetration_headshot',
@@ -166,6 +169,7 @@ const knownIcons = [
     'shotgun_primary',
     'shotgun_pyro',
     'shotgun_soldier',
+    'shotgun_hwg',
     'shovel',
     'skullbat',
     'sledgehammer',
@@ -232,4 +236,24 @@ export function getWeaponImage(weapon: string, crit: boolean) {
         return `/killfeed/Killicon_${backupIcon}.png`;
     }
     return `/killfeed/Killicon_${weapon}.png`;
+}
+
+export const mergeWith: Record<string, string[]> = {
+    "machina": ["player_penetration"],
+    "ullapool_caber": ["ullapool_caber_explosion"],
+    "dragons_fury": ["dragons_fury_bonus"],
+    "short_circuit": ["tf_projectile_mechanicalarmorb"],
+    "loose_cannon": ["loose_cannon_impact"],
+    "robot_arm": ["robot_arm_combo_kill", "robot_arm_blender_kill"],
+    // For  some reason compound_bow is for arrow afterburn kills
+    "tf_projectile_arrow": ["taunt_sniper", "huntsman_flyingburn", "compound_bow"],
+    "ubersaw": ["taunt_medic"],
+    "frontier_justice": ["taunt_guitar_kill"]
+}
+
+export const mergedWeapons: Record<string, string> = {};
+for(let weapon in mergeWith) {
+    for(let merge of mergeWith[weapon]) {
+        mergedWeapons[merge] = weapon;
+    }
 }

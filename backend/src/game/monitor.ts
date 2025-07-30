@@ -225,7 +225,11 @@ export default class GameMonitor {
                 }
             }
 
-            if(killer.user) KillTracker.onKill(match[3], match[4] !== undefined);
+            // Ignore bots
+            if(killer.user && victim.ID3.length > 2) {
+                KillTracker.onKill(match[3], match[4] !== undefined);
+            }
+
             Server.send("game", Message.PlayerUpdate, message);
         });
 
