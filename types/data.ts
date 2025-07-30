@@ -26,12 +26,16 @@ export interface SettingsType {
     tags: Tag[];
     userColor: string;
     masterbaseKey?: string;
-    userSummary?: PlayerSummary;
     casual?: CasualConfig;
     launchTf2OnStart: boolean;
     openUiOnStart: boolean;
     pickedIfShortcut: boolean;
     finishedSetup: boolean;
+}
+
+export interface ValuesType {
+    userSummary?: PlayerSummary;
+    killCounts?: Record<string, [number, number]>;
 }
 
 export type GameDir = "steam" | "tf";

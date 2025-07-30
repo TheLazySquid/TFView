@@ -6,7 +6,8 @@ import Log from "../log";
 import { root } from "src/consts";
 import Settings from "src/settings/settings";
 
-export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" | "tags" | "casual" | "global";
+export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" |
+    "tags" | "casual" | "global" | "killcounts";
 export type WS = Bun.ServerWebSocket<{ page: Page }>;
 
 const topics: Record<Page, Topic[]> = {
@@ -15,7 +16,8 @@ const topics: Record<Page, Topic[]> = {
     gamehistory: ["gamehistory", "tags", "global"],
     settings: ["settings", "directories", "global"],
     casual: ["casual", "global"],
-    setup: ["directories", "global"]
+    setup: ["directories", "global"],
+    killcounts: ["killcounts", "global"]
 }
 
 export default class Server {

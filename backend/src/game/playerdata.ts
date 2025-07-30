@@ -5,6 +5,7 @@ import Settings from "src/settings/settings";
 import Log from "src/log";
 import HistoryDatabase from "src/history/database";
 import { flags } from "src/consts";
+import Values from "src/settings/values";
 
 interface WaitingSummary {
 	id3: string;
@@ -65,7 +66,7 @@ export default class PlayerData {
 
 					// Update the player data
 					if(waiting.user) {
-						Settings.set("userSummary", summary);
+						Values.set("userSummary", summary);
 					} else {
 						HistoryDatabase.setPlayerSummary(waiting.id3, summary);
 					}
@@ -144,7 +145,7 @@ export default class PlayerData {
 	}
 
 	static getUserSummary(id3: string, callback: (summary: PlayerSummary) => void) {
-		const summary = Settings.get("userSummary");
+		const summary = Values.get("userSummary");
 		if(summary) callback(summary);
 		if(!Settings.get("steamApiKey")) return;
 

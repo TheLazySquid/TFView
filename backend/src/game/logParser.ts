@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import { join } from "node:path";
-import Settings from "./settings/settings";
-import Log from "./log";
+import Settings from "../settings/settings";
+import Log from "../log";
 
 interface LogListener {
     regex: RegExp;

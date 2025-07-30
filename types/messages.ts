@@ -20,7 +20,9 @@ export enum Message {
     Directories,
     RconConnected,
     CasualConfig,
-    OfferStartMenuShortcut
+    OfferStartMenuShortcut,
+    KillCounts,
+    KillCountUpdate
 }
 
 export type MessageTypes =
@@ -40,6 +42,8 @@ export type MessageTypes =
     | SentMessage<Message.RconConnected, boolean>
     | SentMessage<Message.CasualConfig, CasualConfig>
     | SentMessage<Message.OfferStartMenuShortcut, void>
+    | SentMessage<Message.KillCounts, Record<string, [number, number]>>
+    | SentMessage<Message.KillCountUpdate, { weapon: string, count: [number, number] }>
     | SentMessage<`list-${string}-addStart`, any>
     | SentMessage<`list-${string}-update`, { id: any, update: any }>
     | SentMessage<`list-${string}-delete`, any>
@@ -107,4 +111,4 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.WantsStartMenuShortcut, boolean>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
-export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup" | "casual";
+export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup" | "casual" | "killcounts";

@@ -4,7 +4,7 @@ import { Recieves, Message } from "$types/messages";
 import Server, { type WS } from "../net/server";
 import Rcon from "./rcon";
 import { flags } from "src/consts";
-import LogParser from "src/logParser";
+import LogParser from "./logParser";
 import History from "src/history/history";
 import PlayerData from "./playerdata";
 import { killClasses, possibleMaxHps, startingAmmo, startingHealths } from "./classConsts";
@@ -13,6 +13,7 @@ import HistoryDatabase from "src/history/database";
 import { fakeChat, fakeKillfeed, fakePlayers } from "src/fakedata/game";
 import { LoadedInfiniteList } from "src/net/infiniteList";
 import { getCurrentUserId } from "src/util";
+import KillTracker from "src/history/killTracker";
 
 export default class GameMonitor {
     static logPath: string;
@@ -224,6 +225,7 @@ export default class GameMonitor {
                 }
             }
 
+            if(killer.user) KillTracker.onKill(match[3], match[4] !== undefined);
             Server.send("game", Message.PlayerUpdate, message);
         });
 

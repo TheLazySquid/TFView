@@ -35,7 +35,7 @@ const defaultSettings: Partial<SettingsType> = {
 
 export default class Settings {
     static file: Bun.BunFile;
-    static config: SettingsType;
+    static settings: SettingsType;
     static events = new EventEmitter();
 
     static async init() {
@@ -46,21 +46,21 @@ export default class Settings {
             // Can't use this.file.json() because if it fails bun will quietly exit the process
             // Rather than throw an error normally for some reason
             const contents = await readFile(filePath);
-            this.config = JSON.parse(contents.toString());
+            this.settings = JSON.parse(contents.toString());
         } catch {
-            this.config = defaultSettings as SettingsType;
+            this.settings = defaultSettings as SettingsType;
         }
 
         Server.onConnect("settings", (reply) => {
-            reply(Message.InitialSettings, this.config);
+            reply(Message.InitialSettings, this.settings);
         });
 
         Server.onConnect("game", (reply) => {
-            reply(Message.UserColor, this.config.userColor);
+            reply(Message.UserColor, this.settings.userColor);
         });
 
         Server.onConnect("tags", (reply) => {
-            reply(Message.Tags, this.config.tags);
+            reply(Message.Tags, this.settings.tags);
         });
 
         Server.on(Recieves.UpdateSetting, ({ key, value }, { ws }) => {
@@ -78,12 +78,12 @@ export default class Settings {
     }
 
     static get<T extends keyof SettingsType>(key: T): SettingsType[T] {
-        return this.config[key];
+        return this.settings[key];
     }
 
     static set<T extends keyof SettingsType>(key: T, value: SettingsType[T]) {
-        this.config[key] = value;
-        this.file.write(JSON.stringify(this.config, null, 4));
+        this.settings[key] = value;
+        this.file.write(JSON.stringify(this.settings, null, 4));
     }
 
     static randomPassword() {

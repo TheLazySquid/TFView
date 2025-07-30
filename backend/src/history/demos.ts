@@ -8,6 +8,7 @@ import { EventEmitter } from "node:events";
 import History from "./history";
 import Rcon from "src/game/rcon";
 import { flags } from "src/consts";
+import { createWatcher } from "src/util";
 
 export default class Demos {
     static demosPath: string;
@@ -15,53 +16,32 @@ export default class Demos {
     static events = new EventEmitter();
     static recentDemos: string[] = [];
     static firstDemo = true;
-    static watcher: FSWatcher | null = null;
+    static closeWatcher: () => void;
 
     static init() {
-        this.watchDemos();
-        History.events.on("endGame", () => this.closeDemo());
+        this.closeWatcher = createWatcher("demos", async (event, file) => {
+            if(event === "change" || !file.endsWith(".dem")) return;
 
-        Settings.on("tfPath", () => {
-            this.close();
-            this.watchDemos();
+            this.demosPath = join(Settings.get("tfPath"), "demos");
+            let exists = await fsp.exists(join(this.demosPath, file));
+            if(!exists) return;
+            
+            // fs.watch often fires multiple times for the same file
+            if(this.recentDemos.includes(file)) return;
+
+            this.recentDemos.push(file);
+            if(this.recentDemos.length > 10) this.recentDemos.shift();
+
+            this.closeDemo();
+
+            Log.info("Demo created:", file);
+            this.events.emit("create", file);
+            this.startSession(file);
         });
     }
 
-    static watchTimeout: Timer;
-    static watchDemos() {
-        if(!Settings.get("tfPath")) return;
-        this.demosPath = join(Settings.get("tfPath"), "demos");
-
-        try {
-            this.watcher = watch(this.demosPath, null, async (event, file) => {
-                const name = file.toString();
-                if(event === "change" || !name.endsWith(".dem")) return;
-
-                let exists = await fsp.exists(join(this.demosPath, name));
-                if(!exists) return;
-                
-                // fs.watch often fires multiple times for the same file
-                if(this.recentDemos.includes(name)) return;
-
-                this.recentDemos.push(name);
-                if(this.recentDemos.length > 10) this.recentDemos.shift();
-
-                this.closeDemo();
-
-                Log.info("Demo created:", name);
-                this.events.emit("create", name);
-                this.startSession(name);
-            });
-        } catch {
-            this.watchTimeout = setTimeout(() => this.watchDemos(), this.watchInterval);
-        }
-    }
-
     static close() {
-        if(this.watcher) {
-            this.watcher.close();
-        }
-        clearTimeout(this.watchTimeout);
+        this.closeWatcher();
     }
 
     static masterbaseUrl = "megaanticheat.com";

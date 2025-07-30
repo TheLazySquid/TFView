@@ -3,7 +3,7 @@ import { flags } from "./consts";
 import GameMonitor from "./game/monitor";
 import Rcon from "./game/rcon";
 import History from "./history/history";
-import LogParser from "./logParser";
+import LogParser from "./game/logParser";
 import Server from "./net/server";
 import Log from "./log";
 import Demos from "./history/demos";
@@ -15,6 +15,8 @@ import { Recieves } from "$types/messages";
 import Casual from "./casual/casual";
 import Launcher from "./game/launcher";
 import StartMenu from "./setup/startmenu";
+import Values from "./settings/values";
+import KillTracker from "./history/killTracker";
 
 init();
 
@@ -34,7 +36,7 @@ async function init() {
     if(flags.noMAC) Log.info("MegaAntiCheat integration disabled");
     if(flags.noSteamApi) Log.info("Steam API usage disabled");
 
-    await Settings.init();
+    await Promise.all([ Settings.init(), Values.init() ]);
     if(!Settings.get("finishedSetup")) Log.info("Running in setup mode");
 
     try {
@@ -63,6 +65,7 @@ async function init() {
     Casual.init();
     Launcher.init();
     StartMenu.init();
+    KillTracker.init();
 
     Server.on(Recieves.CloseApp, async (closeGame) => {
         if(closeGame) await Rcon.run("quit");

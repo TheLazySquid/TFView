@@ -2,7 +2,7 @@ import type { PastGamePlayer } from "$types/data";
 import type { Player } from "$types/lobby";
 import { Message, Recieves } from "$types/messages";
 import { flags } from "src/consts";
-import LogParser from "src/logParser";
+import LogParser from "../game/logParser";
 import Server from "src/net/server";
 import EventEmitter from "node:events";
 import Log from "src/log";

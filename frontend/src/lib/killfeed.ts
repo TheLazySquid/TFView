@@ -15,7 +15,7 @@ const critRemaps: Record<string, string> = {
     voodoo_pin: 'backstab',
     sharp_dresser: 'backstab',
     spy_cicle: 'backstab',
-    black_rose: 'backstab',
+    black_rose: 'backstab'
 };
 
 const knownIcons = [

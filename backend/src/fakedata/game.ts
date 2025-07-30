@@ -16,6 +16,7 @@ export const fakeCurrentGame: CurrentGame = {
 export const fakePlayers: Player[] = [
     {
         name: "Grim Bloody Fable",
+        names: ["Grim Bloody Fable"],
         userId: "105",
         ID3: "1127822620",
         ID64: "76561199088088348",
@@ -35,6 +36,7 @@ export const fakePlayers: Player[] = [
     },
     {
         name: "Screamin' Eagles",
+        names: ["Screamin' Eagles"],
         userId: "106",
         ID3: "10403381",
         ID64: "76561197970669109",
@@ -53,6 +55,7 @@ export const fakePlayers: Player[] = [
     },
     {
         name: "Still Alive",
+        names: ["No Big Surprise", "Still Alive"],
         userId: "109",
         ID3: "97733808",
         ID64: "76561198057999536",
@@ -68,6 +71,7 @@ export const fakePlayers: Player[] = [
     },
     {
         name: "Mentlegen",
+        names: ["Mentlegen"],
         userId: "110",
         ID3: "83927554",
         ID64: "76561198044193282",
@@ -83,6 +87,7 @@ export const fakePlayers: Player[] = [
     },
     {
         name: "Fruit Shop Owner",
+        names: ["Fruit Shop Owner"],
         userId: "111",
         ID3: "85698845",
         ID64: "76561198045964573",
