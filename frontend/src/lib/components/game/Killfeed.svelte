@@ -73,7 +73,7 @@
                 all: "All",
                 kill: "Kills",
                 death: "Deaths"
-            }} class="w-[200px]" />
+            }} class="w-[200px]" list={kills} />
         </div>
     {/if}
 </div>

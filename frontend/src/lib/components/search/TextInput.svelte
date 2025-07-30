@@ -2,11 +2,16 @@
     import type { InfiniteList } from "$lib/ws/infiniteList.svelte";
     import { getContext } from "svelte";
 
-    let { value = $bindable() }: { value?: string } = $props();
-    const list = getContext<InfiniteList<any, any>>("searchList");
+    interface Props {
+        value?: string;
+        list?: InfiniteList<any, any>;
+    }
+
+    let { value = $bindable(), list }: Props = $props();
+    const searchList = list ?? getContext<InfiniteList<any, any>>("searchList");
 
     const onKeydown = (e: KeyboardEvent) => {
-        if(e.key === "Enter") list.updateSearch();
+        if(e.key === "Enter") searchList.updateSearch();
     }
 </script>
 

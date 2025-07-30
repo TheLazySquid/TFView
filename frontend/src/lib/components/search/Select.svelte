@@ -7,13 +7,14 @@
         options: Record<string, string>;
         value: string;
         class?: string;
+        list?: InfiniteList<any, any>;
     }
 
-    let { options, value = $bindable(), class: className }: Props = $props();
-    const list = getContext<InfiniteList<any, any>>("searchList");
+    let { options, value = $bindable(), class: className, list }: Props = $props();
+    const searchList = list ?? getContext<InfiniteList<any, any>>("searchList");
 
     const onChange = () => {
-        list.updateSearch();
+        searchList.updateSearch();
     }
 </script>
 

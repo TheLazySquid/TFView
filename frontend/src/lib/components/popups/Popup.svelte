@@ -18,7 +18,7 @@
 
     let { type, onOpen, onClose, children, class: className = "", style = "", overlay = false, ...restProps }: Props = $props();
     let modalOpen = $state(false);
-    let zIndex = $state(50);
+    let zIndex = $derived(overlay ? 51 : 50);
     let backName: string | null = $state(null);
 
     export function closePopup() {
@@ -30,7 +30,6 @@
         let name = await onOpen(args);
         
         modalOpen = true;
-        zIndex = Popups.openPopups + 50;
         backName = Popups.popupStack.length > 0 ? Popups.popupStack[Popups.popupStack.length - 1].name : null;
     
         return {

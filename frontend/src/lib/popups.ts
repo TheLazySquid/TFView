@@ -34,10 +34,8 @@ interface Popup {
 }
 
 export default new class Popups {
-    lastPopupType?: keyof PopupArguments;
     closePopup?: () => void;
     callbacks: Record<string, Popup> = {};
-    openPopups = 0;
     popupStack: { type: any, args: any, name: string }[] = [];
 
     register<T extends keyof PopupArguments>(type: T, overlay: boolean, callback: (args: PopupArguments[T]) => Promise<PopupReturned>) {
@@ -50,15 +48,13 @@ export default new class Popups {
             return;
         }
 
-        this.openPopups++;
-        
         let popup = this.callbacks[type];
+        if(!popup.overlay) this.closePopup?.();
+
         let { close, name } = await popup.callback(args);
 
         if(!popup.overlay) {
-            if(this.lastPopupType !== type) this.closePopup?.();
             this.closePopup = close;
-            this.lastPopupType = type;
 
             this.popupStack.push({ type, args, name });
         }
@@ -67,14 +63,11 @@ export default new class Popups {
     onClose(overlay: boolean) {
         if(overlay) return;
 
-        this.openPopups--;
-        this.lastPopupType = undefined;
         this.closePopup = undefined;
         this.popupStack = [];
     }
 
     goBack() {
-        this.openPopups--;
         this.closePopup?.();
 
         this.popupStack.pop();

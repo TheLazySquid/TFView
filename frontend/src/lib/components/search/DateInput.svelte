@@ -1,10 +1,15 @@
 <script lang="ts">
-    import { InfiniteList } from "$lib/ws/infiniteList.svelte";
+    import type { InfiniteList } from "$lib/ws/infiniteList.svelte";
     import { watch } from "runed";
     import { getContext } from "svelte";
 
-    let { timestamp = $bindable() }: { timestamp: number | undefined } = $props();
-    const list = getContext<InfiniteList<any, any>>("searchList");
+    interface Props {
+        timestamp?: number;
+        list: InfiniteList<any, any>;
+    }
+
+    let { timestamp = $bindable(), list }: Props = $props();
+    const searchList = list ?? getContext<InfiniteList<any, any>>("searchList");
 
     let input: HTMLInputElement;
     let valid = $derived(timestamp !== undefined);
@@ -24,7 +29,7 @@
         if(isNaN(input.valueAsNumber)) timestamp = undefined;
         else timestamp = input.valueAsNumber;
 
-        list.updateSearch();
+        searchList.updateSearch();
     }
 </script>
 
