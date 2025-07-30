@@ -56,7 +56,7 @@
     }
 </script>
 
-<Popup type="player" {onOpen} class="min-h-[450px] flex flex-col *:nth-[2]:flex-grow"
+<Popup type="player" {onOpen} class="min-h-[450px] flex flex-col *:[[data-tabs-root]]:flex-grow"
 style="max-width: min(700px, 85%);">
     {#if player}
         <Dialog.Header class="text-2xl flex flex-row items-center">

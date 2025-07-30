@@ -21,7 +21,7 @@
     }
 
     const spectatorsKey = "game-showSpectators";
-    let showSpectators = $state((localStorage.getItem(spectatorsKey) ?? "true") === "true");
+    let showSpectators = $state(localStorage.getItem(spectatorsKey)=== "true");
     let spectators = $derived(Game.players.filter(p => p.team === 1).length);
 
     const toggleShowSpectators = () => {
