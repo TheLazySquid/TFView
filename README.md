@@ -22,6 +22,12 @@ TFView lets you create several profiles with different casual map selections, wh
 
 ![Map Selection Preview](./images/Map_Selection.png)
 
+### Weapon Kill Count Tracker
+
+TFView tracks the number of kills you get with each weapon, letting you see how much you've used them. It also displays special kill types, showing you backstabs, headshots, penetration kills, taunt kills, and more.
+
+![Weapon Kill Count Tracker Preview](./images/Weapon_Kill_Counts.png)
+
 ## Installation
 
 * Download the windows or linux zip from [the latest release](https://github.com/TheLazySquid/TFView/releases/latest)

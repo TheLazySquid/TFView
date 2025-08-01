@@ -11,12 +11,13 @@ interface Weapon {
 }
 
 export default new class KillTracker {
-    // counts: Record<string, [number, number]> = $state({});
     weapons: Weapon[] = $state([]);
+    weaponsLoaded = $state(false);
 
     constructor() {
         WS.on(Message.KillCounts, (data) => {
-            this.weapons = []
+            this.weaponsLoaded = true;
+            this.weapons = [];
 
             for(let id in data) {
                 if(id in mergedWeapons) continue;

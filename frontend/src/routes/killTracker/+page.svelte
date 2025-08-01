@@ -24,40 +24,48 @@
 {/snippet}
 
 <div class="flex flex-col items-center max-h-full overflow-y-auto gap-2">
-    {#each KillTracker.weapons as weapon}
-        {@const total = KillTracker.getTotal(weapon)}
-        <button class="weapon rounded-md px-2 relative" title={weapon.id}
-            onclick={() => weapon.expanded = !weapon.expanded}>
-            <div class="flex items-center h-[35px]">
-                <div class="w-[200px]">
-                    <img alt={weapon.id} src={getWeaponImage(weapon.id, false)} />
+    {#if KillTracker.weaponsLoaded}
+        {#if KillTracker.weapons.length === 0}
+            <h2 class="text-zinc-50 text-3xl pt-3">No kills recorded!</h2>
+            <h3 class="text-zinc-50 text-xl">Play some games with TFView active to record your weapon usage.</h3>
+        {/if}
+        {#each KillTracker.weapons as weapon}
+            {@const total = KillTracker.getTotal(weapon)}
+            <button class="weapon rounded-md px-2 relative" title={weapon.id}
+                onclick={() => weapon.expanded = !weapon.expanded}>
+                <div class="flex items-center h-[35px]">
+                    <div class="w-[200px]">
+                        <img alt={weapon.id} src={getWeaponImage(weapon.id, false)} />
+                    </div>
+                    <div class="text-zinc-900 w-[150px] text-left">
+                        {weapon.expanded ? weapon.noncrit : total}
+                    </div>
+                    <div>
+                        {#if weapon.expanded}
+                            <ChevronDown color="black" />
+                        {:else}
+                            <ChevronRight color="black" />
+                        {/if}
+                    </div>
                 </div>
-                <div class="text-zinc-900 w-[150px] text-left">
-                    {weapon.expanded ? weapon.noncrit : total}
-                </div>
-                <div>
-                    {#if weapon.expanded}
-                        <ChevronDown color="black" />
-                    {:else}
-                        <ChevronRight color="black" />
+                {#if weapon.expanded}
+                    {@render iconCount(weapon.id, true, weapon.crit)}
+                    {#if weapon.merge}
+                        {#each weapon.merge as merge}
+                            {@render iconCount(merge.id, false, merge.noncrit)}
+                            {@render iconCount(merge.id, true, merge.crit)}
+                        {/each}
                     {/if}
-                </div>
-            </div>
-            {#if weapon.expanded}
-                {@render iconCount(weapon.id, true, weapon.crit)}
-                {#if weapon.merge}
-                    {#each weapon.merge as merge}
-                        {@render iconCount(merge.id, false, merge.noncrit)}
-                        {@render iconCount(merge.id, true, merge.crit)}
-                    {/each}
+    
+                    <div class="absolute bottom-2 right-2 text-zinc-900">
+                        = {total}
+                    </div>
                 {/if}
-
-                <div class="absolute bottom-2 right-2 text-zinc-900">
-                    = {total}
-                </div>
-            {/if}
-        </button>
-    {/each}
+            </button>
+        {/each}
+    {:else}
+        <h2 class="text-zinc-50 text-2xl pt-3">Loading...</h2>
+    {/if}
 </div>
 
 <style>
