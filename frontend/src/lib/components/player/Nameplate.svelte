@@ -142,6 +142,7 @@
                 {@render link("Steam Community", `https://steamcommunity.com/profiles/${id64}`)}
                 {@render link("Steamid.io", `https://steamid.io/lookup/${id64}`)}
                 {@render link("Backpack.tf", `https://backpack.tf/profiles/${id64}`)}
+                {@render link("Steamhistory.net", `https://steamhistory.net/id/${id64}`)}
                 {@render link("RGL", `https://rgl.gg/Public/PlayerProfile?p=${id64}`)}
                 {@render link("ETF2L", `https://etf2l.org/search/${id64}`)}
                 {@render link("Logs.tf", `https://logs.tf/profile/${id64}`)}
