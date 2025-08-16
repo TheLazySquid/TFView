@@ -1,4 +1,4 @@
-import type { ChatMessage, KillfeedEntry, Player } from "$types/lobby";
+import type { ChatEntry, KillfeedEntry, Player } from "$types/lobby";
 import type { CurrentGame } from "src/history/history";
 
 export const fakeCurrentGame: CurrentGame = {
@@ -116,6 +116,10 @@ export const fakeKillfeed: KillfeedEntry[] = [
         timestamp: Date.now() - 90000
     },
     {
+        type: "event",
+        text: "Game started on pl_wutville"
+    },
+    {
         killer: "Grim Bloody Fable",
         victim: "Still Alive",
         killerTeam: 2,
@@ -127,7 +131,7 @@ export const fakeKillfeed: KillfeedEntry[] = [
     }
 ]
 
-export const fakeChat: ChatMessage[] = [
+export const fakeChat: ChatEntry[] = [
     {
         name: "Still Alive",
         text: "I'm not even angry",
@@ -145,6 +149,10 @@ export const fakeChat: ChatMessage[] = [
         team: true,
         senderId: "10403381",
         timestamp: Date.now() - 130000
+    },
+    {
+        type: "event",
+        text: "Game started on pl_wutville"
     },
     {
         name: "Mentlegen",

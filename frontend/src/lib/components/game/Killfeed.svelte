@@ -9,13 +9,14 @@
     import Time from "$lib/components/Time.svelte";
     import Game from "$lib/ws/pages/game.svelte";
     import Select from "../search/Select.svelte";
+    import Separator from "./Separator.svelte";
     
     let { id }: { id?: string } = $props();
 
     const kills = new InfiniteList<KillfeedEntry, KillfeedSearchParams>({
         listId: "killfeed",
         filter: (item, params) => {
-            if(!params.id) return true;
+            if(item.type === "event" || !params.id) return true;
             return item.killerId === params.id || item.victimId === params.id;
         },
         params: { id, type: "all" },
@@ -48,22 +49,28 @@
                 {/if}
             </div>
         {/if}
-        {#each kills.items as kill}
-            {@const killer = Game.playersMap.get(kill.killerId)}
-            {@const victim = Game.playersMap.get(kill.victimId)}
-            <div class="text-zinc-400 content-center whitespace-nowrap"><Time timestamp={kill.timestamp} type="time" /></div>
-            <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill w-fit"
-                class:crit={kill.crit}>
-                <button class="whitespace-nowrap" onclick={() => Game.openPlayer(kill.killerId)}
-                style="color: {kill.killerTeam === 2 ? killfeedRed : killfeedBlue}" class:italic={killer?.nickname}>
-                    {killer?.nickname ?? kill.killer}
-                </button>
-                <img class="px-4" src={getWeaponImage(kill.weapon, kill.crit)} alt={kill.weapon} />
-                <button class="whitespace-nowrap" onclick={() => Game.openPlayer(kill.victimId)}
-                style="color: {kill.killerTeam === 2 ? killfeedBlue : killfeedRed}" class:italic={victim?.nickname}>
-                    {victim?.nickname ?? kill.victim}
-                </button>
-            </div>
+        {#each kills.items as item, i}
+            {#if item.type === "event"}
+                {#if kills.items[i + 1] && kills.items[i + 1].type !== "event"}
+                    <Separator class="col-span-2">{item.text}</Separator>
+                {/if}
+            {:else}
+                {@const killer = Game.playersMap.get(item.killerId)}
+                {@const victim = Game.playersMap.get(item.victimId)}
+                <div class="text-zinc-400 content-center whitespace-nowrap"><Time timestamp={item.timestamp} type="time" /></div>
+                <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill w-fit"
+                    class:crit={item.crit}>
+                    <button class="whitespace-nowrap" onclick={() => Game.openPlayer(item.killerId)}
+                    style="color: {item.killerTeam === 2 ? killfeedRed : killfeedBlue}" class:italic={killer?.nickname}>
+                        {killer?.nickname ?? item.killer}
+                    </button>
+                    <img class="px-4" src={getWeaponImage(item.weapon, item.crit)} alt={item.weapon} />
+                    <button class="whitespace-nowrap" onclick={() => Game.openPlayer(item.victimId)}
+                    style="color: {item.killerTeam === 2 ? killfeedBlue : killfeedRed}" class:italic={victim?.nickname}>
+                        {victim?.nickname ?? item.victim}
+                    </button>
+                </div>
+            {/if}
         {/each}
     </div>
     {#if id}

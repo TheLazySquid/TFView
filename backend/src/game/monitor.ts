@@ -1,4 +1,4 @@
-import type { ChatMessage, G15Player, KillfeedEntry, Player, PlayerSummary, TF2Class } from "$types/lobby";
+import type { ChatEntry, ChatMessage, G15Player, KillfeedEntry, ListEvent, Player, PlayerSummary, TF2Class } from "$types/lobby";
 import type { ChatSearchParams, KillfeedSearchParams } from "$types/search";
 import { Recieves, Message } from "$types/messages";
 import Server, { type WS } from "../net/server";
@@ -28,7 +28,7 @@ export default class GameMonitor {
         topic: "game",
         listId: "killfeed",
         filter: (item, params) => {
-            if(!params.id) return true;
+            if(item.type === "event" || !params.id) return true;
             if(params.type === "kill") return item.killerId === params.id;
             if(params.type === "death") return item.victimId === params.id;
             else return item.killerId === params.id || item.victimId === params.id;
@@ -36,15 +36,15 @@ export default class GameMonitor {
         getParamsId: (params) => (params.id ?? "") + params.type,
         reverse: true
     });
-    static chat = new LoadedInfiniteList<ChatMessage, ChatSearchParams>({
+    static chat = new LoadedInfiniteList<ChatEntry, ChatSearchParams>({
         topic: "game",
         listId: "chat",
-        filter: (item, params) => !params.id || item.senderId === params.id,
+        filter: (item, params) => item.type === "event" || !params.id || item.senderId === params.id,
         getParamsId: (params) => params.id ?? "",
         reverse: true
     });
 
-    static init() {
+    static init() {       
         Server.onConnect("game", (respond) => {
             respond(Message.InitialPlayers, this.players);
         });
@@ -107,8 +107,15 @@ export default class GameMonitor {
         this.listenToLog();
         this.poll();
 
-        History.events.on("startGame", () => {
+        History.events.on("startGame", (map) => {
             this.gotResponse = false;
+            const event: ListEvent = {
+                type: "event",
+                text: `Game started on ${map}`
+            }
+
+            this.killfeed.push(event);
+            this.chat.push(event);
         });
         
         // When the game ends make all players ready to be removed
@@ -381,7 +388,8 @@ export default class GameMonitor {
 
         // remove old chat messages
         for(let i = start; i < this.chat.items.length; i++) {
-            if(!this.playerMap.has(this.chat.items[i].senderId)) {
+            let item = this.chat.items[i];
+            if(item.type !== "event" && !this.playerMap.has(item.senderId)) {
                 this.chat.items.splice(i, 1);
                 i--;
             }
@@ -390,7 +398,7 @@ export default class GameMonitor {
         // remove old killfeed entries
         for(let i = start; i < this.killfeed.items.length; i++) {
             const entry = this.killfeed.items[i];
-            if(!this.playerMap.has(entry.killerId) && !this.playerMap.has(entry.victimId)) {
+            if(entry.type !== "event" && !this.playerMap.has(entry.killerId) && !this.playerMap.has(entry.victimId)) {
                 this.killfeed.items.splice(i, 1);
                 i--;
             }

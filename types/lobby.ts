@@ -66,7 +66,14 @@ export interface Player {
     note: string;
 }
 
-export interface KillfeedEntry {
+export interface ListEvent {
+    type: "event";
+    text: string;
+}
+
+export interface KillfeedKill {
+    // Can be left blank to save a few bytes, assumed to be the default
+    type?: "kill";
     killer: string;
     victim: string;
     weapon: string;
@@ -77,7 +84,10 @@ export interface KillfeedEntry {
     timestamp: number;
 }
 
+export type KillfeedEntry = KillfeedKill | ListEvent;
+
 export interface ChatMessage {
+    type?: "message";
     name: string;
     text: string;
     senderTeam: number;
@@ -86,6 +96,8 @@ export interface ChatMessage {
     senderId: string;
     timestamp: number;
 }
+
+export type ChatEntry = ChatMessage | ListEvent;
 
 export interface CurrentServerInfo {
     start: number;

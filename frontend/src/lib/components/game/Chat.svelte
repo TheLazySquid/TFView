@@ -2,7 +2,7 @@
     import { nameColors } from "$lib/consts";
     import { InfiniteList } from "$lib/ws/infiniteList.svelte";
     import WS from "$lib/ws/wsclient.svelte";
-    import type { ChatMessage } from "$types/lobby";
+    import type { ChatEntry } from "$types/lobby";
     import { Recieves } from "$types/messages";
     import type { ChatSearchParams } from "$types/search";
     import Send from "@lucide/svelte/icons/send";
@@ -10,6 +10,7 @@
     import InfiniteLoading from "svelte-infinite-loading";
     import Time from "../Time.svelte";
     import Game from "$lib/ws/pages/game.svelte";
+    import Separator from "./Separator.svelte";
 
     let { id }: { id?: string } = $props();
     let team = $state(false);
@@ -27,9 +28,9 @@
         message = "";
     }
 
-    const chat = new InfiniteList<ChatMessage, ChatSearchParams>({
+    const chat = new InfiniteList<ChatEntry, ChatSearchParams>({
         listId: "chat",
-        filter: (item, params) => !params.id || item.senderId === params.id,
+        filter: (item, params) => item.type === "event" || !params.id || item.senderId === params.id,
         params: { id },
         reverse: true
     });
@@ -54,24 +55,30 @@
                 No Chat Messages Recorded
             </div>
         {/if}
-        {#each chat.items as message}
-            {@const player = Game.playersMap.get(message.senderId)}
-            <div class="text-zinc-400 content-start whitespace-nowrap">
-                <Time timestamp={message.timestamp} type="time" />
-            </div>
-            <div class="text-[0px] *:text-base">
-                {#if message.dead}
-                    <span class="mr-1">*DEAD*</span>
+        {#each chat.items as item, i}
+            {#if item.type === "event"}
+                {#if chat.items[i - 1] && chat.items[i - 1].type !== "event"}
+                    <Separator class="col-span-2">{item.text}</Separator>
                 {/if}
-                {#if message.team}
-                    <span class="mr-1">(TEAM)</span>
-                {/if}
-                <button style="color: {nameColors[message.senderTeam]}" class:italic={player?.nickname}
-                    onclick={() => Game.openPlayer(message.senderId)}>
-                    {player?.nickname ?? message.name}
-                </button>
-                <span>: {message.text}</span>
-            </div>
+            {:else}
+                {@const player = Game.playersMap.get(item.senderId)}
+                <div class="text-zinc-400 content-start whitespace-nowrap">
+                    <Time timestamp={item.timestamp} type="time" />
+                </div>
+                <div class="text-[0px] *:text-base">
+                    {#if item.dead}
+                        <span class="mr-1">*DEAD*</span>
+                    {/if}
+                    {#if item.team}
+                        <span class="mr-1">(TEAM)</span>
+                    {/if}
+                    <button style="color: {nameColors[item.senderTeam]}" class:italic={player?.nickname}
+                        onclick={() => Game.openPlayer(item.senderId)}>
+                        {player?.nickname ?? item.name}
+                    </button>
+                    <span>: {item.text}</span>
+                </div>
+            {/if}
         {/each}
     </div>
     {#if !id}

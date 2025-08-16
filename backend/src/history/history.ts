@@ -175,7 +175,7 @@ export default class History {
 
         this.definitelyNotInGame = false;
         this.currentGame.rowid = HistoryDatabase.createCurrentGame(this.currentGame);
-        this.events.emit("startGame");
+        this.events.emit("startGame", map);
 
         // Track the players currently in game
         for(let player of GameMonitor.players) {
