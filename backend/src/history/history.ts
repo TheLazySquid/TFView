@@ -110,6 +110,7 @@ export default class History {
 
         LogParser.on(this.statusRegex, async (data) => {      
             let [_, hostname, ip, map] = data;
+            if(ip.includes("?.?.?.?")) ip = "Local Server";
             
             if(!this.currentGame) {
                 if(this.startPromise) {
