@@ -153,7 +153,7 @@ style="max-width: min(700px, 85%);">
             </Tabs.Content>
             <Tabs.Content value="kills" class="grid max-h-[400px]">
                 {#if tab === "kills"}
-                    <Killfeed id={player.ID3} />
+                    <Killfeed id={player.ID3} class="max-h-[400px]" />
                 {/if}
             </Tabs.Content>
         </Tabs.Root>

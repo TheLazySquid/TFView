@@ -11,7 +11,7 @@
     import Select from "../search/Select.svelte";
     import Separator from "./Separator.svelte";
     
-    let { id }: { id?: string } = $props();
+    let { id, class: className = "" }: { id?: string, class?: string } = $props();
 
     const kills = new InfiniteList<KillfeedEntry, KillfeedSearchParams>({
         listId: "killfeed",
@@ -28,7 +28,7 @@
     onDestroy(() => kills.destroy());
 </script>
 
-<div class="h-full flex flex-col min-h-0">
+<div class="h-full flex flex-col min-h-0 {className}">
     <div class="grow min-h-0 overflow-y-auto grid auto-rows-max gap-2" bind:this={scrollContainer}
         style="grid-template-columns: auto 1fr">
         <div class="col-span-2">
@@ -74,7 +74,7 @@
         {/each}
     </div>
     {#if id}
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 pt-2">
             Type:
             <Select bind:value={kills.params.type} options={{
                 all: "All",
