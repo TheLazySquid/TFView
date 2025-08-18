@@ -36,6 +36,7 @@ export interface SettingsType {
 export interface ValuesType {
     userSummary?: PlayerSummary;
     killCounts?: Record<string, [number, number]>;
+    skippedVersion?: string;
 }
 
 export type GameDir = "steam" | "tf";

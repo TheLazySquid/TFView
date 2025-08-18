@@ -5,13 +5,15 @@ export const dataPath = join(homedir(), ".tfview");
 export const pageSize = 50;
 export const compiled = !process.execPath.replaceAll("\\", "/").includes(".bun/bin/bun");
 export const root = compiled ? join(process.execPath, "..") : join(Bun.main, "..", "..");
+export const isLinux = process.platform === "linux";
 
 // Read flags
 export let flags = {
     fakeData: false,
     noNet: false,
     noMAC: false,
-    noSteamApi: false
+    noSteamApi: false,
+    noUpdateCheck: false
 }
 
 for(const arg of Bun.argv) {
@@ -26,4 +28,5 @@ for(const arg of Bun.argv) {
 if(flags.noNet) {
     flags.noMAC = true;
     flags.noSteamApi = true;
+    flags.noUpdateCheck = true;
 }

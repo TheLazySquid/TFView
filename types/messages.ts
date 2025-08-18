@@ -22,7 +22,8 @@ export enum Message {
     CasualConfig,
     OfferStartMenuShortcut,
     KillCounts,
-    KillCountUpdate
+    KillCountUpdate,
+    UpdateAvailable
 }
 
 export type MessageTypes =
@@ -44,6 +45,7 @@ export type MessageTypes =
     | SentMessage<Message.OfferStartMenuShortcut, void>
     | SentMessage<Message.KillCounts, Record<string, [number, number]>>
     | SentMessage<Message.KillCountUpdate, { weapon: string, count: [number, number] }>
+    | SentMessage<Message.UpdateAvailable, string>
     | SentMessage<`list-${string}-addStart`, any>
     | SentMessage<`list-${string}-update`, { id: any, update: any }>
     | SentMessage<`list-${string}-delete`, any>
@@ -78,7 +80,8 @@ export enum Recieves {
     NewCasualProfile,
     DeleteCasualProfile,
     LaunchGame,
-    WantsStartMenuShortcut
+    WantsStartMenuShortcut,
+    WantsToUpdate
 }
 
 export type RecievesTypes = 
@@ -109,6 +112,7 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.DeleteCasualProfile, string>
     | RecievedMessage<Recieves.LaunchGame, void>
     | RecievedMessage<Recieves.WantsStartMenuShortcut, boolean>
+    | RecievedMessage<Recieves.WantsToUpdate, string>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
 export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup" | "casual" | "killcounts";

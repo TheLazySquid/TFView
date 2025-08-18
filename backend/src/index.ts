@@ -17,6 +17,8 @@ import Launcher from "./game/launcher";
 import StartMenu from "./setup/startmenu";
 import Values from "./settings/values";
 import KillTracker from "./history/killTracker";
+import Updater from "./net/updater";
+import { close } from "./close";
 
 init();
 
@@ -57,6 +59,7 @@ async function init() {
         Rcon.init();
         LogParser.init();
         Demos.init();
+        Updater.init();
     }
     
     HistoryDatabase.init();
@@ -71,25 +74,4 @@ async function init() {
         if(closeGame) await Rcon.run("quit");
         close();
     });
-}
-
-function close() {
-    Server.close();
-    History.close();
-    HistoryDatabase.close();
-    GameMonitor.close();
-    
-    if(!flags.fakeData) {
-        Rcon.close();
-        LogParser.close();
-        Demos.close();
-    }
-
-    Log.info("Closing backend");
-    setTimeout(forceClose, 2500).unref();
-}
-
-async function forceClose() {
-    await Log.warning("Failed to close gracefully, force closing");
-    process.exit(0);
 }

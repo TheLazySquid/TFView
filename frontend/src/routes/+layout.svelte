@@ -20,6 +20,7 @@
     import { Message, Recieves } from '$types/messages';
     import { toast } from 'svelte-sonner';
     import RconConnected from '$lib/ws/topics/rconConnected.svelte';
+    import { createActionToast } from '$lib/components/toasts/actions';
 	
 	let { children } = $props();
 
@@ -41,15 +42,17 @@
 	WS.on(Message.Warning, (message) => toast.warning(message));
 	WS.on(Message.Error, (message) => toast.error(message));
 	WS.on(Message.OfferStartMenuShortcut, () => {
-		toast("Would you like to create a start menu shortcut for TFView?", {
-			action: {
-				label: "Create",
-				onClick: () => WS.send(Recieves.WantsStartMenuShortcut, true)
-			},
-			onDismiss: () => WS.send(Recieves.WantsStartMenuShortcut, false),
-			closeButton: true,
-			duration: Number.POSITIVE_INFINITY
-		});
+		createActionToast("Would you like to create a start menu shortcut for TFView?",[
+			{ label: "Create", onClick: () => WS.send(Recieves.WantsStartMenuShortcut, true) },
+			{ label: "Ignore", onClick: () => WS.send(Recieves.WantsStartMenuShortcut, false) }
+		]);
+	});
+	WS.on(Message.UpdateAvailable, (change) => {
+		createActionToast(`An update for TFView is available! (${change})`, [
+			{ label: "Update Now", onClick: () => WS.send(Recieves.WantsToUpdate, "now") },
+			{ label: "Later", onClick: () => WS.send(Recieves.WantsToUpdate, "later") },
+			{ label: "Skip Update", onClick: () => WS.send(Recieves.WantsToUpdate, "skip") }
+		]);
 	});
 
 	const closeApp = (closeGame: boolean) => {

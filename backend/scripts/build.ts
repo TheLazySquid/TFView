@@ -39,6 +39,9 @@ if(args.values.resourcehacker) {
     await $`mv dist/unpacked/tfview_new.exe dist/unpacked/tfview.exe`.quiet();
 }
 
+console.log("Compiling updater...");
+await $`cd updater && make`.quiet();
+
 console.log("Copying static files...");
 await cp("static", "dist/unpacked/static", { recursive: true });
 
