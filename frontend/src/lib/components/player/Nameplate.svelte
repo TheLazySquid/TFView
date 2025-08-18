@@ -123,7 +123,7 @@
                             <TextCursorInput />
                         </Tooltip.Trigger>
                         <Tooltip.Content>
-                            Past {player.names.length === 2 ? "name" : "names"}: {player.names.slice(0, -1).join(", ")}
+                            Past {player.names.length === 2 ? "name" : "names"}: {player.names.filter(n => n !== name).join(", ")}
                         </Tooltip.Content>
                     </Tooltip.Root>
                 </Tooltip.Provider>

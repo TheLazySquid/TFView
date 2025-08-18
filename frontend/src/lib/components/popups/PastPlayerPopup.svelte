@@ -58,7 +58,7 @@
             </Tabs.List>
             <Tabs.Content value="info">
                 {#if player.names.length > 1}
-                    <div>Past names: {player.names.join(", ")}</div>
+                    <div>Past names: {player.names.filter(n => n !== player!.lastName).join(", ")}</div>
                 {/if}
                 <div>Note:</div>
                 <textarea class="resize-y p-1 h-[150px] w-full outline not-focus:outline-zinc-600 mb-3"
