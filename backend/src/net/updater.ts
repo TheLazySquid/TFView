@@ -56,6 +56,7 @@ export default class Updater {
             this.updateInfo = await this.checkForUpdate();
         } catch(e) {
             Log.error("Failed to check for updates", e);
+            this.checkFailed = true;
         }
     }
 
@@ -64,6 +65,8 @@ export default class Updater {
         if(!res.ok) throw new Error("Api request failed");
 
         let data = await res.json();
+        Log.info(`Latest release: ${data.tag_name} (using v${version})`);
+
         if(Values.get("skippedVersion") === data.tag_name) return null;
         if(Bun.semver.order(data.tag_name, version) <= 0) return null;
     
