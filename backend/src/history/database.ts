@@ -182,7 +182,7 @@ export default class HistoryDatabase {
             let clause = `(names LIKE "%${this.escapeLike(params.name, true)}%" ESCAPE '\\'` +
                 ` OR nickname LIKE "%${this.escapeLike(params.name)}%" ESCAPE '\\'`;
             if(params.id3) clause += ` OR id = $id3`;
-            else if(params.id64) clause += ` OR id = $id64`;
+            if(params.id64) clause += ` OR id = $id64`;
             clause += ")";
 
             whereClauses.push(clause);
