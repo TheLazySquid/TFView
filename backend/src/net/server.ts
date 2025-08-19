@@ -5,6 +5,7 @@ import { join } from "node:path";
 import Log from "../log";
 import { root } from "src/consts";
 import Settings from "src/settings/settings";
+import { exists } from "node:fs/promises";
 
 export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" |
     "tags" | "casual" | "global" | "killcounts";
@@ -37,7 +38,7 @@ export default class Server {
 
         // listen for websocket connections
         this.server = Bun.serve({
-            fetch: (req, server) => {
+            fetch: async (req, server) => {
                 const url = new URL(req.url);
                 const parts = url.pathname.split("/").slice(1);
 
@@ -66,8 +67,10 @@ export default class Server {
                     path = join(this.staticPath, "index.html");
                 } else {
                     path = join(this.staticPath, ...parts.slice(0, -1), `${parts.at(-1)}.html`);
+
+                    if(!await exists(path)) return Response.redirect("/", 303);
                 }
-                
+
                 return new Response(Bun.file(path));
             },
             error() {
