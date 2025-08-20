@@ -22,7 +22,7 @@
         }
 
         input.valueAsNumber = timestamp ?? NaN;
-    }, { lazy: true });
+    });
 
     const update = () => {
         ignoreNext = true;
