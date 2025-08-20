@@ -8,13 +8,13 @@ import Settings from "src/settings/settings";
 import { exists } from "node:fs/promises";
 
 export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" |
-    "tags" | "casual" | "global" | "killcounts";
+    "tags" | "casual" | "global" | "killcounts" | "pastplayer";
 export type WS = Bun.ServerWebSocket<{ page: Page }>;
 
 const topics: Record<Page, Topic[]> = {
-    game: ["game", "tags", "global"],
-    playerhistory: ["playerhistory", "tags", "global"],
-    gamehistory: ["gamehistory", "tags", "global"],
+    game: ["game", "tags", "pastplayer", "global"],
+    playerhistory: ["playerhistory", "tags", "pastplayer", "global"],
+    gamehistory: ["gamehistory", "tags", "pastplayer", "global"],
     settings: ["settings", "directories", "global"],
     casual: ["casual", "global"],
     setup: ["directories", "global"],

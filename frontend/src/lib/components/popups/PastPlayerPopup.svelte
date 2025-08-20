@@ -3,7 +3,7 @@
     import * as Tabs from "$lib/components/ui/tabs";
     import WS from "$lib/ws/wsclient.svelte";
     import type { PastPlayer } from "$types/data";
-    import { Recieves } from "$types/messages";
+    import { Message, Recieves } from "$types/messages";
     import PastEncounters from "../history/PastEncounters.svelte";
     import TagSelector from "../history/TagSelector.svelte";
     import Popup from "./Popup.svelte";
@@ -12,8 +12,20 @@
     import throttle from "throttleit";
     import Nameplate from "../player/Nameplate.svelte";
     import Avatar from "../player/Avatar.svelte";
+    import { onDestroy } from "svelte";
 
     let player: PastPlayer | null = $state(null);
+    const onUpdate = (data: Partial<PastPlayer> & { id: string }) => {
+        if(data.id !== player?.id) return;
+    
+        for(let key in data) {
+            // @ts-ignore
+            player[key] = data[key];
+        }
+    }
+
+    WS.on(Message.PastPlayerUpdate, onUpdate);
+    onDestroy(() => WS.off(Message.PastPlayerUpdate, onUpdate));
 
     const onOpen = async (id: string) => {
         player = await WS.sendAndRecieve(Recieves.GetPlayer, id);

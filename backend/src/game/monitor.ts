@@ -6,7 +6,7 @@ import Rcon from "./rcon";
 import { flags } from "src/consts";
 import LogParser from "./logParser";
 import History from "src/history/history";
-import PlayerData from "./playerdata";
+import SteamApi from "../net/steamApi";
 import { killClasses, possibleMaxHps, startingAmmo, startingHealths } from "./classConsts";
 import { id3ToId64 } from "$shared/steamid";
 import HistoryDatabase from "src/history/database";
@@ -350,8 +350,8 @@ export default class GameMonitor {
                     });
                 }
 
-                if(player.user) PlayerData.getUserSummary(player.ID3, summaryCallback);
-                else PlayerData.getSummary(player.ID3, summaryCallback);
+                if(player.user) SteamApi.getUserSummary(player.ID3, summaryCallback);
+                else SteamApi.getSummary(player.ID3, summaryCallback);
             }
         }
 

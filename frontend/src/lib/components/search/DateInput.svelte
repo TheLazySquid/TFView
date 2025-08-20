@@ -5,7 +5,7 @@
 
     interface Props {
         timestamp?: number;
-        list: InfiniteList<any, any>;
+        list?: InfiniteList<any, any>;
     }
 
     let { timestamp = $bindable(), list }: Props = $props();

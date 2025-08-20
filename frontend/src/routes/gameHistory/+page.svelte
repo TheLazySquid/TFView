@@ -9,6 +9,7 @@
     import ConfirmPopup from "$lib/components/popups/ConfirmPopup.svelte";
     import DeleteGame from "$lib/components/history/DeleteGame.svelte";
     import WS from "$lib/ws/wsclient.svelte";
+    import ProfilePicturePopup from "$lib/components/popups/ProfilePicturePopup.svelte";
 
     WS.init("gamehistory");
 </script>
@@ -17,6 +18,7 @@
 	<title>Game History | TFView</title>
 </svelte:head>
 
+<ProfilePicturePopup />
 <PastGamePopup />
 <PastPlayerPopup />
 <ConfirmPopup />

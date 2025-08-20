@@ -15,7 +15,7 @@ interface WaitingSummary {
 	user?: boolean;
 }
 
-export default class PlayerData {
+export default class SteamApi {
 	static apiBase = "https://api.steampowered.com/"
 	static summaryQueue: WaitingSummary[] = [];
 	static maxSummaries = 150;

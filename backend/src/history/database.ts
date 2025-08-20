@@ -9,9 +9,10 @@ import Log from "src/log";
 import { createFakeHistory } from "src/fakedata/history";
 import { InfiniteList } from "src/net/infiniteList";
 import Server from "src/net/server";
-import { Recieves } from "$types/messages";
+import { Message, Recieves } from "$types/messages";
 import type { Player, PlayerSummary } from "$types/lobby";
 import { id64ToId3 } from "$shared/steamid";
+import SteamApi from "src/net/steamApi";
 
 export default class HistoryDatabase {
     static db: Database;
@@ -48,7 +49,18 @@ export default class HistoryDatabase {
         });
 
         Server.on(Recieves.GetPlayer, (id, { reply }) => {
-            reply(this.getPlayerData(id));
+            let data = this.getPlayerData(id);
+            reply(data);
+
+            // Try to update their avatarHash
+            if(data?.avatarHash) return;
+
+            SteamApi.getSummary(id, (summary) => {
+                this.pastPlayers.update(id, summary);
+                Server.send("pastplayer", Message.PastPlayerUpdate, {
+                    id, ...summary
+                });
+            });
         });
     }
 

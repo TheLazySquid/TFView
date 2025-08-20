@@ -23,7 +23,8 @@ export enum Message {
     OfferStartMenuShortcut,
     KillCounts,
     KillCountUpdate,
-    UpdateAvailable
+    UpdateAvailable,
+    PastPlayerUpdate
 }
 
 export type MessageTypes =
@@ -46,6 +47,7 @@ export type MessageTypes =
     | SentMessage<Message.KillCounts, Record<string, [number, number]>>
     | SentMessage<Message.KillCountUpdate, { weapon: string, count: [number, number] }>
     | SentMessage<Message.UpdateAvailable, string>
+    | SentMessage<Message.PastPlayerUpdate, Partial<PastPlayer> & { id: string }>
     | SentMessage<`list-${string}-addStart`, any>
     | SentMessage<`list-${string}-update`, { id: any, update: any }>
     | SentMessage<`list-${string}-delete`, any>
