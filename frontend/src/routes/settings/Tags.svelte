@@ -50,7 +50,7 @@
     }
 
     const createTag = () => {
-        let color = "#" + Math.floor(Math.random() * 0xffffff).toString(16);
+        let color = "#" + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0");
         items.push({ id: crypto.randomUUID(), name: "New Tag", color });
         onupdate();
     }

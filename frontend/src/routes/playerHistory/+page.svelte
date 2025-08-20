@@ -41,8 +41,8 @@
     No more players recorded
 {/snippet}
 
-<div class="w-full h-full flex justify-center">
-    <div class="overflow-y-auto" style="width: min(1000px, 90%)">
+<div class="w-full h-full flex justify-center overflow-y-auto">
+    <div style="width: min(1000px, 90%)">
         <Search.SearchBox title="Search Players" singular="player" plural="players"
             list={PlayerHistory.players} defaultParams={{ sortBy: "lastSeen" }}>
             <div class="content-center">Name or ID:</div>

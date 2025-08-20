@@ -27,8 +27,8 @@
     End of history
 {/snippet}
 
-<div class="w-full h-full flex justify-center">
-    <div class="overflow-y-auto" style="width: min(1000px, 90%)">
+<div class="w-full h-full flex justify-center overflow-y-auto">
+    <div style="width: min(1000px, 90%)">
         <Search.SearchBox title="Search Games" singular="game" plural="games" list={GameHistory.games}>
             <div class="content-center">Map:</div>
             <Search.TextInput bind:value={GameHistory.games.params.map} />

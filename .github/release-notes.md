@@ -3,3 +3,4 @@
 * Added second attempt to load avatar when viewing past player
 * Fixed date search not visually updating when switching pages
 * Fixed popups sometimes not fully being placed in front of other popups
+* Cleaned up scrollbars
