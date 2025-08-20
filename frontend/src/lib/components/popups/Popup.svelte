@@ -4,7 +4,6 @@
     import Popups from "$lib/popups";
     import * as Dialog from "$lib/components/ui/dialog";
     import type { Snippet } from "svelte";
-    import popups from "$lib/popups";
 
     interface Props extends DialogPrimitive.ContentProps {
         type: keyof PopupArguments;
@@ -49,6 +48,7 @@
 </script>
 
 <Dialog.Root bind:open={modalOpen} {onOpenChange}>
+    <Dialog.Overlay style="z-index: {zIndex}" />
     <Dialog.Content style="z-index: {zIndex}; {style}" class={className} {...restProps}>
         {#if !overlay && backName}
             <button class="text-xs absolute top-1 left-6 text-gray-400" onclick={() => Popups.goBack()}>
