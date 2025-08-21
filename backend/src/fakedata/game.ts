@@ -106,9 +106,17 @@ export const fakePlayers: Player[] = [
 
 export const fakeKillfeed: KillfeedEntry[] = [
     {
+        victim: "Fruit Shop Owner",
+        victimTeam: 2,
+        weapon: "suicide",
+        crit: false,
+        victimId: "85698845",
+        timestamp: Date.now() - 200000
+    },
+    {
         killer: "Still Alive",
         victim: "Screamin' Eagles",
-        killerTeam: 3,
+        victimTeam: 2,
         weapon: "tf_projectile_rocket",
         crit: true,
         killerId: "97733808",
@@ -122,7 +130,7 @@ export const fakeKillfeed: KillfeedEntry[] = [
     {
         killer: "Grim Bloody Fable",
         victim: "Still Alive",
-        killerTeam: 2,
+        victimTeam: 3,
         weapon: "scattergun",
         crit: false,
         killerId: "1127822620",

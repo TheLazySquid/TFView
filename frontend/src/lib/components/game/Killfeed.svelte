@@ -55,18 +55,20 @@
                     <Separator class="col-span-2">{item.text}</Separator>
                 {/if}
             {:else}
-                {@const killer = Game.playersMap.get(item.killerId)}
+                {@const killer = item.killerId ? Game.playersMap.get(item.killerId) : null}
                 {@const victim = Game.playersMap.get(item.victimId)}
                 <div class="text-zinc-400 content-center whitespace-nowrap"><Time timestamp={item.timestamp} type="time" /></div>
                 <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill w-fit"
                     class:crit={item.crit}>
-                    <button class="whitespace-nowrap" onclick={() => Game.openPlayer(item.killerId)}
-                    style="color: {item.killerTeam === 2 ? killfeedRed : killfeedBlue}" class:italic={killer?.nickname}>
-                        {killer?.nickname ?? item.killer}
-                    </button>
+                    {#if killer}
+                        <button class="whitespace-nowrap" onclick={() => Game.openPlayer(killer.ID3)}
+                        style="color: {item.victimTeam === 3 ? killfeedRed : killfeedBlue}" class:italic={killer?.nickname}>
+                            {killer?.nickname ?? item.killer}
+                        </button>
+                    {/if}
                     <img class="px-4" src={getWeaponImage(item.weapon, item.crit)} alt={item.weapon} />
                     <button class="whitespace-nowrap" onclick={() => Game.openPlayer(item.victimId)}
-                    style="color: {item.killerTeam === 2 ? killfeedBlue : killfeedRed}" class:italic={victim?.nickname}>
+                    style="color: {item.victimTeam === 3 ? killfeedBlue : killfeedRed}" class:italic={victim?.nickname}>
                         {victim?.nickname ?? item.victim}
                     </button>
                 </div>

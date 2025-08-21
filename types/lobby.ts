@@ -74,12 +74,12 @@ export interface ListEvent {
 export interface KillfeedKill {
     // Can be left blank to save a few bytes, assumed to be the default
     type?: "kill";
-    killer: string;
+    killer?: string;
     victim: string;
     weapon: string;
     crit: boolean;
-    killerTeam: number;
-    killerId: string;
+    victimTeam: number;
+    killerId?: string;
     victimId: string;
     timestamp: number;
 }

@@ -175,35 +175,52 @@ export default class GameMonitor {
         this.parseG15(text);
     }
 
-    // Doesn't handle suicides
-    static killfeedRegex = /(?:\n|^)(.+) killed (.+) with (.+)\.( \(crit\))?/g;
+    static killfeedRegex = /(?:\n|^)(.+) (?:killed (.+) with (.+)\.( \(crit\))?|(suicided\.))/g;
     static chatRegex = /(?:\n|^)(?:\*SPEC\* )?(\*DEAD\* ?)?(\(TEAM\) |\(Spectator\) )?(.+) :  (.+)/g;
     static listenToLog() {
         // parse the killfeed
         LogParser.on(this.killfeedRegex, (match) => {
-            let killer = this.players.find(p => p.name === match[1]);
-            let victim = this.players.find(p => p.name === match[2]);
-            if(!killer || !victim) return;
+            let [_, firstName, secondName, weapon, crit, suicide] = match;
+        
+            let killerName = suicide === undefined ? firstName : undefined;
+            let victimName = suicide === undefined ? secondName : firstName;
 
-            let entry: KillfeedEntry = {
-                killer: match[1],
-                victim: match[2],
-                weapon: match[3],
-                crit: match[4] !== undefined,
-                killerTeam: killer.team,
-                killerId: killer.ID3,
-                victimId: victim.ID3,
-                timestamp: Date.now()
+            let killer = this.players.find(p => p.name === killerName);
+            let victim = this.players.find(p => p.name === victimName);
+            if((suicide === undefined && !killer) || !victim) return;
+
+            let entry: KillfeedEntry;
+            if(suicide) {
+                entry = {
+                    victim: victimName,
+                    weapon: "suicide",
+                    crit: false,
+                    victimTeam: victim.team,
+                    victimId: victim.ID3,
+                    timestamp: Date.now()
+                }
+            } else {
+                entry = {
+                    killer: killerName,
+                    victim: victimName,
+                    weapon,
+                    crit: crit !== undefined,
+                    victimTeam: victim.team,
+                    killerId: killer.ID3,
+                    victimId: victim.ID3,
+                    timestamp: Date.now()
+                }
             }
 
             this.killfeed.push(entry);
 
             // Deaths are handled in the player update
+            if(!killer) return;
             killer.killstreak++;
             let message: Partial<Player> & { ID3: string } = { ID3: killer.ID3, killstreak: killer.killstreak };
 
             // See if we can guess the player's class
-            const classes = killClasses[match[3]];
+            const classes = killClasses[weapon];
             if(classes) {
                 const options = this.potentialClasses.get(killer.ID3);
 
@@ -234,7 +251,7 @@ export default class GameMonitor {
 
             // Ignore bots
             if(killer.user && victim.ID3.length > 2) {
-                KillTracker.onKill(match[3], match[4] !== undefined);
+                KillTracker.onKill(weapon, crit !== undefined);
             }
 
             Server.send("game", Message.PlayerUpdate, message);
