@@ -1,11 +1,9 @@
 import Settings from "src/settings/settings";
 import { join } from "node:path";
-import { watch, type FSWatcher } from "node:fs";
 import fsp from "node:fs/promises";
 import fs from "node:fs";
 import Log from "src/log";
 import { EventEmitter } from "node:events";
-import History from "./history";
 import Rcon from "src/game/rcon";
 import { flags } from "src/consts";
 import { createWatcher } from "src/util";

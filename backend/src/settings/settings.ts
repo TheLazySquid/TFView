@@ -84,6 +84,7 @@ export default class Settings {
     static set<T extends keyof SettingsType>(key: T, value: SettingsType[T]) {
         this.settings[key] = value;
         this.file.write(JSON.stringify(this.settings, null, 4));
+        this.events.emit(key, value);
     }
 
     static randomPassword() {

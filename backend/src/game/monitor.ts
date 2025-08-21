@@ -14,6 +14,8 @@ import { fakeChat, fakeKillfeed, fakePlayers } from "src/fakedata/game";
 import { LoadedInfiniteList } from "src/net/infiniteList";
 import { getCurrentUserId } from "src/util";
 import KillTracker from "src/history/killTracker";
+import Settings from "src/settings/settings";
+import Log from "src/log";
 
 export default class GameMonitor {
     static logPath: string;
@@ -101,8 +103,19 @@ export default class GameMonitor {
             return;
         }
 
-        // TODO: Error handling
-        getCurrentUserId().then((id3) => this.userAccountID3 = id3);
+        const getId = () => {
+            getCurrentUserId().then((id3) => {
+                if(!id3) {
+                    Log.warning("Failed to get current user ID, steam path may not be correct");
+                    return;
+                }
+
+                this.userAccountID3 = id3;
+            });
+        }
+
+        Settings.on("steamPath", getId);
+        getId();
 
         this.listenToLog();
         this.poll();
