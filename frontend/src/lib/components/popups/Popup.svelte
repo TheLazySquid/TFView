@@ -3,7 +3,7 @@
     import type { PopupArguments } from "$lib/popups";
     import Popups from "$lib/popups";
     import * as Dialog from "$lib/components/ui/dialog";
-    import type { Snippet } from "svelte";
+    import { setContext, type Snippet } from "svelte";
 
     interface Props extends DialogPrimitive.ContentProps {
         type: keyof PopupArguments;
@@ -17,8 +17,10 @@
 
     let { type, onOpen, onClose, children, class: className = "", style = "", overlay = false, ...restProps }: Props = $props();
     let modalOpen = $state(false);
-    let zIndex = $derived(overlay ? 51 : 50);
+    let zIndex = overlay ? 51 : 50;
     let backName: string | null = $state(null);
+    
+    setContext("inPopup", true);
 
     export function closePopup() {
         modalOpen = false;
