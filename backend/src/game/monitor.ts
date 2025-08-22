@@ -365,7 +365,10 @@ export default class GameMonitor {
 
                 const summaryCallback = (summary: PlayerSummary) => {
                     player.avatarHash = summary.avatarHash;
+                    player.avatars = summary.avatars;
                     player.createdTimestamp = summary.createdTimestamp;
+
+                    History.updatePlayerAvatar(player as Player);
 
                     if(summary.name && summary.name !== player.name) {
                         player.name = summary.name;
@@ -376,6 +379,7 @@ export default class GameMonitor {
                     Server.send("game", Message.PlayerUpdate, {
                         ID3: player.ID3,
                         names: player.names,
+                        avatars: player.avatars,
                         ...summary
                     });
                 }

@@ -58,6 +58,7 @@ export interface Player {
 
     // From history
     names: string[];
+    avatars: string[];
     encounters?: number;
 
     // user-generated
@@ -108,6 +109,7 @@ export interface CurrentServerInfo {
 
 export interface PlayerSummary {
     avatarHash: string;
+    avatars: string[]
     createdTimestamp: number;
     name?: string;
 }

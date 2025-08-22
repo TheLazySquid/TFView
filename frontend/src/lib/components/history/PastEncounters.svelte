@@ -6,6 +6,7 @@
     import { InfiniteList } from "$lib/ws/infiniteList.svelte";
     import type { EncounterSearchParams } from "$types/search";
     import { onDestroy } from "svelte";
+    import Avatar from "../player/Avatar.svelte";
 
     let { id }: { id: string } = $props();
 
@@ -33,6 +34,7 @@
         <thead class="sticky top-0 bg-background">
             <tr class="*:text-left">
                 <th>Time</th>
+                <th></th>
                 <th>Name</th>
                 <th>Map</th>
                 <th>K/D</th>
@@ -43,6 +45,7 @@
             {#each encounters.items as encounter}
                 <tr>
                     <td><Time timestamp={encounter.time} type="date" /></td>
+                    <td><Avatar avatarHash={encounter.avatarHash} name={encounter.name} /></td>
                     <td>{encounter.name}</td>
                     <td>{encounter.map}</td>
                     <td>{encounter.kills}/{encounter.deaths}</td>

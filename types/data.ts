@@ -91,6 +91,7 @@ export interface PlayerEncounter {
     playerId: string;
     map: string;
     name: string;
+    avatarHash?: string;
     gameId: number;
     time: number;
     kills: number;
@@ -101,6 +102,7 @@ export interface StoredPlayer {
     id: string;
     lastName: string;
     names: string[];
+    avatars: string[];
     lastSeen: number;
     encounters: number;
     avatarHash?: string;

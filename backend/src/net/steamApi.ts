@@ -58,8 +58,20 @@ export default class SteamApi {
 					let waiting = summaries.find((s) => s.id64 === player.steamid);
 					if(!waiting) continue;
 
+					// Get the stored avatars
+					let playerData = HistoryDatabase.getPlayerData(waiting.id3);
+					let avatars = playerData ? playerData.avatars : [];
+
+					if(playerData) {
+						if(!avatars.includes(player.avatarhash)) avatars.push(player.avatarhash);
+						if(playerData.avatarHash && !avatars.includes(playerData.avatarHash)) {
+							avatars.push(playerData.avatarHash);
+						}
+					}
+
 					const summary: PlayerSummary = {
 						avatarHash: player.avatarhash,
+						avatars,
 						createdTimestamp: player.timecreated,
 						name: player.personaname
 					}
@@ -125,13 +137,21 @@ export default class SteamApi {
 		const waitingSummary = { id3, id64, callback, failedQueries: 0 };
 
 		// Check if we have the summary stored
-		let player = HistoryDatabase.getPlayerData(id3);
+		let playerData = HistoryDatabase.getPlayerData(id3);
+		let avatars = playerData ? playerData.avatars : [];
 
-		if(player && player.avatarHash && player.createdTimestamp) {
+		if(playerData) {
+			if(playerData.avatarHash && !avatars.includes(playerData.avatarHash)) {
+				avatars.push(playerData.avatarHash);
+			}
+		}
+
+		if(playerData && playerData.avatarHash && playerData.createdTimestamp) {
 			callback({
-				avatarHash: player.avatarHash,
-				createdTimestamp: player.createdTimestamp,
-				name: player.lastName
+				avatarHash: playerData.avatarHash,
+				avatars,
+				createdTimestamp: playerData.createdTimestamp,
+				name: playerData.lastName
 			});
 
 			// Don't actively trigger a query- they happen in batches of 100, this one will happen eventually

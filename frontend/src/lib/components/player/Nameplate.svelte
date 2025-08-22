@@ -8,12 +8,14 @@
     import Notepad from "@lucide/svelte/icons/notepad-text";
     import Check from "@lucide/svelte/icons/check";
     import TextCursorInput from "@lucide/svelte/icons/text-cursor-input";
+    import Images from "@lucide/svelte/icons/images";
     import Popups from "$lib/popups";
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
     import { id3ToId64 } from "$shared/steamid";
     import Tags from "$lib/ws/topics/tags.svelte";
     import { toast } from "svelte-sonner";
+    import Avatar from "./Avatar.svelte";
 
     interface PastProps { player: PastPlayer; current: false }
     interface CurrentProps { player: Player; current: true }
@@ -95,7 +97,7 @@
 
 <ContextMenu.Root>
     <ContextMenu.Trigger>
-        <div class="flex items-center pr-2">
+        <div class="flex items-center pr-2 gap-1">
             <button class="grow text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
             class:italic={player.nickname} {...restProps}>
                 {player.nickname ? player.nickname : name}
@@ -113,6 +115,25 @@
                     <Tooltip.Root>
                         <Tooltip.Trigger class="cursor-pointer" onclick={editNote}><Notepad /></Tooltip.Trigger>
                         <Tooltip.Content>Player has note saved</Tooltip.Content>
+                    </Tooltip.Root>
+                </Tooltip.Provider>
+            {/if}
+            {#if player.avatars && player.avatars.length > 1}
+                <Tooltip.Provider>
+                    <Tooltip.Root>
+                        <Tooltip.Trigger class="cursor-pointer">
+                            <Images />
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>
+                            <div class="w-full text-center">Past profile pictures</div>
+                            <div class="flex items-center justify-center gap-1">
+                                {#each player.avatars as avatarHash}
+                                    {#if avatarHash !== player.avatarHash}
+                                        <Avatar {avatarHash} {name} />
+                                    {/if}
+                                {/each}
+                            </div>
+                        </Tooltip.Content>
                     </Tooltip.Root>
                 </Tooltip.Provider>
             {/if}

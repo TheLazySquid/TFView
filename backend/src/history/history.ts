@@ -272,10 +272,16 @@ export default class History {
         }
         if(!player.names.includes(player.name)) player.names.push(player.name);
 
-        HistoryDatabase.updatePlayerName(player.ID3, player.name, player.names);
-        HistoryDatabase.updatePlayerEncounterName(gamePlayer.rowid, player.name);
+        HistoryDatabase.updatePlayerName(player.ID3, gamePlayer.rowid, player.name, player.names);
     }
 
+    static updatePlayerAvatar(player: Player) {
+        if(!this.currentGame || !this.currentPlayers.has(player.ID3)) return;
+
+        let gamePlayer = this.currentPlayers.get(player.ID3);
+        HistoryDatabase.updatePlayerAvatar(gamePlayer.rowid, player.avatarHash);
+    }
+    
     static onGameEnd() {
         if(!this.currentGame || flags.fakeData) return;
 

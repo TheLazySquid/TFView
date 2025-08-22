@@ -13,6 +13,7 @@
     import Nameplate from "../player/Nameplate.svelte";
     import Avatar from "../player/Avatar.svelte";
     import { onDestroy } from "svelte";
+    import PastInfo from "../player/PastInfo.svelte";
 
     let player: PastPlayer | null = $state(null);
     const onUpdate = (data: Partial<PastPlayer> & { id: string }) => {
@@ -69,9 +70,10 @@
                 <Tabs.Trigger value="encounters"><HistoryIcon /></Tabs.Trigger>
             </Tabs.List>
             <Tabs.Content value="info">
-                {#if player.names.length > 1}
-                    <div>Past names: {player.names.filter(n => n !== player!.lastName).join(", ")}</div>
-                {/if}
+                <div class="grid gap-x-2" style="grid-template-columns: auto auto 1fr">
+                    <PastInfo names={player.names} avatars={player.avatars} 
+                        name={player.lastName} avatarHash={player.avatarHash} />
+                </div>
                 <div>Note:</div>
                 <textarea class="resize-y p-1 h-[150px] w-full outline not-focus:outline-zinc-600 mb-3"
                 bind:value={player.note} onchange={sendNote}></textarea>

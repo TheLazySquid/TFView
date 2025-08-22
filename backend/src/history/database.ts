@@ -4,7 +4,6 @@ import type { CurrentGame } from "./history";
 import { Database } from "bun:sqlite";
 import { flags, dataPath, pageSize } from "src/consts";
 import { join } from "node:path";
-import fs from "fs";
 import Log from "src/log";
 import { createFakeHistory } from "src/fakedata/history";
 import { InfiniteList } from "src/net/infiniteList";
@@ -68,12 +67,12 @@ export default class HistoryDatabase {
         this.db.close();
     }
 
+    static version = 1;
     static createDb() {
-        let newDb = false;
         const dbPath = join(dataPath, flags.fakeData ? "testhistory.sqlite" : "history.sqlite");
-        if(flags.fakeData && !fs.existsSync(dbPath)) newDb = true;
-
+        
         this.db = new Database(dbPath, { strict: true });
+        const newDb = this.db.prepare(`SELECT name FROM sqlite_master WHERE type='table' AND name='games';`).get() === null;
 
         this.db.run(`CREATE TABLE IF NOT EXISTS main.games (
             map TEXT NOT NULL,
@@ -89,6 +88,7 @@ export default class HistoryDatabase {
             playerId TEXT NOT NULL,
             map TEXT NOT NULL,
             name TEXT NOT NULL,
+            avatarHash TEXT,
             gameId INTEGER NOT NULL,
             time INTEGER NOT NULL,
             kills INTEGER NOT NULL,
@@ -100,11 +100,24 @@ export default class HistoryDatabase {
             names TEXT NOT NULL,
             encounters INTEGER NOT NULL,
             avatarHash TEXT,
+            avatars TEXT,
             createdTimestamp INTEGER,
             tags TEXT,
             nickname TEXT,
             note TEXT
         )`);
+
+        const dbVersion = this.db.prepare<{ "user_version": number }, []>(`PRAGMA main.user_version;`)
+            .get().user_version;
+
+        // Add the players.avatars and encounters.avatarHash columns if they don't exist
+        if(!newDb && dbVersion < 1) {
+            Log.info("Migrating history database to version 1");
+            this.db.run(`ALTER TABLE players ADD COLUMN avatars TEXT NOT NULL DEFAULT '[]';`);
+            this.db.run(`ALTER TABLE encounters ADD COLUMN avatarHash TEXT;`);
+        }
+
+        this.db.prepare(`PRAGMA main.user_version = ${this.version};`).run();
 
         if(newDb) {
             Log.info("Generating fake history data");
@@ -224,7 +237,7 @@ export default class HistoryDatabase {
     }
 
     static parsePlayerRow(row: Stored<StoredPlayer>): PastPlayer {
-        let parsed = this.parseRow(row, ["names", "tags"]);
+        let parsed = this.parseRow(row, ["names", "avatars", "tags"]);
 
         let tags: Record<string, boolean> = {};
         if(parsed.tags) {
@@ -308,8 +321,9 @@ export default class HistoryDatabase {
             // We can't see the createdTimestamp of private profiles
             let createdTimestamp = summary.createdTimestamp ?? -1;
 
-            this.db.query(`UPDATE players SET avatarHash = $avatarHash, createdTimestamp = $createdTimestamp WHERE id = $id`)
-                .run({ id, avatarHash, createdTimestamp });
+            this.db.query(`UPDATE players SET avatarHash = $avatarHash, createdTimestamp = $createdTimestamp, 
+                avatars = $avatars WHERE id = $id`)
+                .run({ id, avatarHash, createdTimestamp, avatars: JSON.stringify(summary.avatars) });
 
             this.pastPlayers.update(id, { avatarHash, createdTimestamp });
         } catch {
@@ -317,9 +331,17 @@ export default class HistoryDatabase {
         }
     }
 
-    static updatePlayerName(id: string, name: string, names: string[]) {
+    static updatePlayerName(id: string, encounterRowid: number, name: string, names: string[]) {
         this.db.query(`UPDATE players SET lastName = $lastName, names = $names WHERE id = $id`)
             .run({ id, lastName: name, names: JSON.stringify(names) });
+
+        this.db.query(`UPDATE encounters SET name = $name WHERE rowid = $rowid`)
+            .run({ name, rowid: encounterRowid });
+    }
+
+    static updatePlayerAvatar(encounterRowid: number, avatarHash: string) {
+        this.db.query(`UPDATE encounters SET avatarHash = $avatarHash WHERE rowid = $rowid`)
+            .run({ avatarHash, rowid: encounterRowid });
     }
 
     static createCurrentGame(game: CurrentGame) {
@@ -417,6 +439,7 @@ export default class HistoryDatabase {
                 lastSeen: now,
                 lastName: player.name,
                 names,
+                avatars: player.avatars,
                 tags: {},
                 encounters: update.encounters
             });
@@ -428,11 +451,6 @@ export default class HistoryDatabase {
     static updatePlayerEncounter(rowid: number, info: PastGamePlayer) {
         this.db.query(`UPDATE encounters SET kills = $kills, deaths = $deaths WHERE rowid = $rowid`)
             .run({ kills: info.kills, deaths: info.deaths, rowid });
-    }
-
-    static updatePlayerEncounterName(rowid: number, name: string) {
-        this.db.query(`UPDATE encounters SET name = $name WHERE rowid = $rowid`)
-            .run({ name, rowid });
     }
 
     // Deleting games

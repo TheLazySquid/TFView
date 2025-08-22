@@ -17,6 +17,7 @@ export const fakePlayers: Player[] = [
     {
         name: "Grim Bloody Fable",
         names: ["Grim Bloody Fable"],
+        avatars: ["a4b63f307e56cd23d448e0447f8e0c4e4f7db387"],
         userId: "105",
         ID3: "1127822620",
         ID64: "76561199088088348",
@@ -37,6 +38,7 @@ export const fakePlayers: Player[] = [
     {
         name: "Screamin' Eagles",
         names: ["Screamin' Eagles"],
+        avatars: ["9ed36beb5d09f2eafba210f988322cf050f1eb08", "c110fd9fdea2504d7c3009b49b6719297663f08d", "3968104f2133d94d57773bdd874be2e5efa71160"],
         userId: "106",
         ID3: "10403381",
         ID64: "76561197970669109",
@@ -44,6 +46,7 @@ export const fakePlayers: Player[] = [
         health: 0,
         ping: 161,
         team: 2,
+        avatarHash: "3968104f2133d94d57773bdd874be2e5efa71160",
         createdTimestamp: Date.now() / 1000 - 1000,
         kills: 1,
         deaths: 5,
@@ -56,6 +59,7 @@ export const fakePlayers: Player[] = [
     {
         name: "Still Alive",
         names: ["No Big Surprise", "Still Alive"],
+        avatars: [],
         userId: "109",
         ID3: "97733808",
         ID64: "76561198057999536",
@@ -72,6 +76,7 @@ export const fakePlayers: Player[] = [
     {
         name: "Mentlegen",
         names: ["Mentlegen"],
+        avatars: [],
         userId: "110",
         ID3: "83927554",
         ID64: "76561198044193282",
@@ -88,6 +93,7 @@ export const fakePlayers: Player[] = [
     {
         name: "Fruit Shop Owner",
         names: ["Fruit Shop Owner"],
+        avatars: [],
         userId: "111",
         ID3: "85698845",
         ID64: "76561198045964573",

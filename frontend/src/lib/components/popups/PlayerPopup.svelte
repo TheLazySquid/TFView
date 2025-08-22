@@ -24,7 +24,7 @@
     import Eye from "@lucide/svelte/icons/eye";
     import Time from "../Time.svelte";
     import * as Tooltip from "$lib/components/ui/tooltip";
-    import TextCursorInput from "@lucide/svelte/icons/text-cursor-input";
+    import PastInfo from "../player/PastInfo.svelte";
 
     let player: Player | null = $state.raw(null);
 
@@ -112,9 +112,8 @@ style="max-width: min(700px, 85%);">
                     <div>Ping</div>
                     <div>{player.ping} ms</div>
 
-                    <TextCursorInput />
-                    <div>Past names</div>
-                    <div>{player.names.filter(n => n !== player!.name).join(", ")}</div>
+                    <PastInfo names={player.names} avatars={player.avatars} 
+                        name={player.name} avatarHash={player.avatarHash} />
                 </div>
                 {#if player.createdTimestamp && player.createdTimestamp > 0}
                     <Tooltip.Provider>
