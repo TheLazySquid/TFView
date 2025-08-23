@@ -70,7 +70,7 @@ export const fakePlayers: Player[] = [
         kills: 5,
         deaths: 2,
         tags: {},
-        note: "",
+        note: "Awesome\nJust kidding",
         killstreak: 2
     },
     {

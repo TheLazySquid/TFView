@@ -114,7 +114,9 @@
                 <Tooltip.Provider>
                     <Tooltip.Root>
                         <Tooltip.Trigger class="cursor-pointer" onclick={editNote}><Notepad /></Tooltip.Trigger>
-                        <Tooltip.Content>Player has note saved</Tooltip.Content>
+                        <Tooltip.Content>
+                            <div class="max-w-[600px] whitespace-pre-line">{player.note}</div>
+                        </Tooltip.Content>
                     </Tooltip.Root>
                 </Tooltip.Provider>
             {/if}
