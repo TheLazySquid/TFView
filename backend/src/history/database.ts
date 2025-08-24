@@ -397,6 +397,9 @@ export default class HistoryDatabase {
     }
 
     static recordPlayerEncounter(player: Player, game: CurrentGame) {
+        // Ignore unconnected/bots
+        if(player.ID3.length <= 2) return;
+        
         const now = Date.now();
 
         let val = this.db.query(`INSERT INTO encounters (playerId, map, name, gameId, time, kills, deaths)

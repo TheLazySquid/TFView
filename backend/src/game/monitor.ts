@@ -316,7 +316,8 @@ export default class GameMonitor {
                 deaths: 0,
                 tags: {},
                 killstreak: 0,
-                names: []
+                names: [],
+                avatars: []
             }
 
             if(playerInfo.iAccountID === this.userAccountID3) player.user = true;

@@ -91,7 +91,7 @@ export default class History {
     }
 
     static mapChangeRegex = /(?:\n|^)Team Fortress\r?\nMap: (.+)/g;
-    static statusRegex = /(?:\n|^)hostname: (.+)\n.*\nudp\/ip  : (.+)\n.*\n.*\nmap     : (.+) at:/g;
+    static statusRegex = /(?:\n|^)hostname: (.+)\n.*\nudp\/ip  : (.+)\n[\S\s]+\nmap     : (.+) at:/g;
     static listenToLog() {
         LogParser.on(this.mapChangeRegex, async (data) => {
             this.onGameEnd();
