@@ -1,6 +1,7 @@
 {
   "name": "tfview",
   "version": "0.3.2",
+  "author": "TheLazySquid",
   "private": true,
   "trustedDependencies": [
     "node-fs-dialogs"
