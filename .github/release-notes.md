@@ -1,2 +1,1 @@
-* Fixed SourceTV interfering with monitoring
-* Set windows executable metadata
+* Added display for number of players on each team

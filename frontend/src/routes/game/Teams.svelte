@@ -9,6 +9,7 @@
     import TV from "@lucide/svelte/icons/tv";
     import Game from "$lib/ws/pages/game.svelte";
     import { columns } from "./state.svelte";
+    import TeamsViewCombined from "./TeamsViewCombined.svelte";
 
     let { children }: { children?: Snippet } = $props();
 
@@ -49,15 +50,15 @@
                     {#if split}
                         <Resizable.PaneGroup direction="horizontal" autoSaveId="teams-split">
                             <Resizable.Pane>
-                                <TeamView ids={[3]} name="Blue" inSplit={true} />
+                                <TeamView id={3} name="Blue" />
                             </Resizable.Pane>
                             <Resizable.Handle />
                             <Resizable.Pane>
-                                <TeamView ids={[2]} name="Red" inSplit={true} />
+                                <TeamView id={2} name="Red" />
                             </Resizable.Pane>
                         </Resizable.PaneGroup>
                     {:else}
-                        <TeamView name="Players" />
+                        <TeamsViewCombined />
                     {/if}
                     {@render children?.()}
                 </div>
@@ -65,7 +66,7 @@
             {#if showSpectators}
                 <Resizable.Handle />
                 <Resizable.Pane defaultSize={40}>
-                    <TeamView ids={[1]} name="Spectators" spectator={true} />
+                    <TeamView id={1} name="Spectators" spectator={true} />
                 </Resizable.Pane>
             {/if}
         </Resizable.PaneGroup>

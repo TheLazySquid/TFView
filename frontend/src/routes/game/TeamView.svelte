@@ -8,25 +8,27 @@
     import { columns } from "./state.svelte";
 
     interface Props {
-        ids?: number[];
+        id: number;
         name: string;
         spectator?: boolean;
         inSplit?: boolean;
     }
 
-    let { ids = [2, 3], name, spectator = false, inSplit = false }: Props = $props();
+    let { id, name, spectator = false }: Props = $props();
 
     // Nasty hack to get around some warnings
-    let playerIndexes = $derived(Game.players.map((p, i) => ({ p, i })).filter(({ p }) => ids.includes(p.team)).map(({ i }) => i));
+    let playerIndexes = $derived(Game.players.map((p, i) => ({ p, i })).filter(({ p }) => id === p.team).map(({ i }) => i));
 </script>
 
 <div class="w-full h-full flex flex-col items-center">
-    <h2 class="w-full text-center text-5xl pb-2" style={inSplit ? `color: ${nameColors[ids[0]]}` : ""}>{name}</h2>
-    <table class="overflow-y-auto block" style={ inSplit ? "width: 100%" : "width: min(100%, 900px)" }>
+    <h2 class="w-full text-center text-5xl pb-2" style="color: {nameColors[id]}">{name}</h2>
+    <table class="overflow-y-auto block w-full">
         <thead class="sticky top-0 bg-background">
             <tr class="*:pr-1.5">
                 <th class="min-w-10"></th> 
-                <th class="w-full"></th>
+                <th class="w-full text-left font-semibold">
+                    {playerIndexes.length} total
+                </th>
                 {#if !spectator}
                     {#if columns.class}
                         <th class="min-w-8"></th>
