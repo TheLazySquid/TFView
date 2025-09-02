@@ -51,14 +51,6 @@ export interface GameDirectories {
     tf: GameDirInfo;
 }
 
-export interface PastGamePlayer {
-    id: string;
-    name: string;
-    time: number;
-    kills: number;
-    deaths: number;
-}
-
 // What's stored in the database
 export interface StoredPastGame {
     start: number;
@@ -66,7 +58,6 @@ export interface StoredPastGame {
     map: string;
     hostname?: string;
     ip?: string;
-    players: PastGamePlayer[];
     kills: number;
     deaths: number;
     demos?: string[];

@@ -1,4 +1,4 @@
-import type { StoredPlayer, PastGame, Stored, PlayerEncounter, StoredPastGame, PastGamePlayer, PastPlayer } from "$types/data";
+import type { StoredPlayer, PastGame, Stored, PlayerEncounter, StoredPastGame, PastPlayer } from "$types/data";
 import type { EncounterSearchParams, GameSearchParams, PlayerSearchParams } from "$types/search";
 import type { CurrentGame } from "./history";
 import { Database } from "bun:sqlite";
@@ -67,7 +67,7 @@ export default class HistoryDatabase {
         this.db.close();
     }
 
-    static version = 1;
+    static version = 2;
     static createDb() {
         const dbPath = join(dataPath, flags.fakeData ? "testhistory.sqlite" : "history.sqlite");
         
@@ -80,7 +80,6 @@ export default class HistoryDatabase {
             ip TEXT,
             start INTEGER NOT NULL,
             duration INTEGER NOT NULL,
-            players TEXT NOT NULL,
             kills INTEGER NOT NULL,
             deaths INTEGER NOT NULL,
             demos TEXT
@@ -115,6 +114,12 @@ export default class HistoryDatabase {
             Log.info("Migrating history database to version 1");
             this.db.run(`ALTER TABLE players ADD COLUMN avatars TEXT NOT NULL DEFAULT '[]';`);
             this.db.run(`ALTER TABLE encounters ADD COLUMN avatarHash TEXT;`);
+        }
+
+        // Remove the games.players column
+        if(!newDb && dbVersion < 2) {
+            Log.info("Migrating history database to version 2");
+            this.db.run(`ALTER TABLE games DROP COLUMN players`);
         }
 
         this.db.prepare(`PRAGMA main.user_version = ${this.version};`).run();
@@ -175,7 +180,7 @@ export default class HistoryDatabase {
     static getGame(id: number): StoredPastGame {
         let game = this.db.query<Stored<StoredPastGame>, {}>(`SELECT *, rowid FROM games WHERE rowid = $rowid`)
             .get({ rowid: id });
-        return this.parseRow(game, ["players", "demos"]);
+        return this.parseRow(game, ["demos"]);
     }
 
     static countGames(params: GameSearchParams) {
@@ -258,7 +263,8 @@ export default class HistoryDatabase {
     // Queries for past encounters
     static getEncountersQuery(query: string, params: EncounterSearchParams, offset?: number) {
         let whereClauses: string[] = [];
-        whereClauses.push("playerId = $id");
+        if(params.id) whereClauses.push("playerId = $id");
+        if(params.gameId) whereClauses.push("gameId = $gameId");
         if(params.map) whereClauses.push(`map LIKE "%${this.escapeLike(params.map)}%" ESCAPE '\\'`);
         if(params.name) whereClauses.push(`name LIKE "%${this.escapeLike(params.name)}%" ESCAPE '\\'`);
         if(params.after) whereClauses.push("time >= $after");
@@ -339,18 +345,12 @@ export default class HistoryDatabase {
             .run({ name, rowid: encounterRowid });
     }
 
-    static updatePlayerAvatar(encounterRowid: number, avatarHash: string) {
-        this.db.query(`UPDATE encounters SET avatarHash = $avatarHash WHERE rowid = $rowid`)
-            .run({ avatarHash, rowid: encounterRowid });
-    }
-
     static createCurrentGame(game: CurrentGame) {
-        let val = this.db.query(`INSERT INTO games (map, hostname, ip, start, duration, players, kills, deaths)
-            VALUES($map, $hostname, $ip, $start, $duration, $players, $kills, $deaths)`).run({
+        let val = this.db.query(`INSERT INTO games (map, hostname, ip, start, duration, kills, deaths)
+            VALUES($map, $hostname, $ip, $start, $duration, $kills, $deaths)`).run({
             map: game.map,
             hostname: game.hostname,
             ip: game.ip,
-            players: JSON.stringify(game.players),
             start: game.startTime,
             duration: 0, kills: 0, deaths: 0
         });
@@ -370,9 +370,8 @@ export default class HistoryDatabase {
     }
 
     static updateCurrentGame(game: CurrentGame) {
-        this.db.query(`UPDATE games SET duration = $duration, players = $players,
-            kills = $kills, deaths = $deaths WHERE rowid = $rowid`).run({
-            players: JSON.stringify(game.players),
+        this.db.query(`UPDATE games SET duration = $duration, kills = $kills,
+            deaths = $deaths WHERE rowid = $rowid`).run({
             duration: Date.now() - game.startTime,
             kills: game.kills,
             deaths: game.deaths,
@@ -402,15 +401,16 @@ export default class HistoryDatabase {
         
         const now = Date.now();
 
-        let val = this.db.query(`INSERT INTO encounters (playerId, map, name, gameId, time, kills, deaths)
-            VALUES($playerId, $map, $name, $gameId, $time, $kills, $deaths)`).run({
+        let val = this.db.query(`INSERT INTO encounters (playerId, map, name, gameId, time, kills, deaths, avatarHash)
+            VALUES($playerId, $map, $name, $gameId, $time, $kills, $deaths, $avatarHash)`).run({
             playerId: player.ID3,
             map: game.map,
             name: player.name,
             gameId: game.rowid,
             time: now,
             kills: player.kills,
-            deaths: player.deaths
+            deaths: player.deaths,
+            avatarHash: player.avatarHash
         });
 
         // Add the new name if it doesn't already exist
@@ -451,9 +451,14 @@ export default class HistoryDatabase {
         return val.lastInsertRowid as number;
     }
 
-    static updatePlayerEncounter(rowid: number, info: PastGamePlayer) {
-        this.db.query(`UPDATE encounters SET kills = $kills, deaths = $deaths WHERE rowid = $rowid`)
-            .run({ kills: info.kills, deaths: info.deaths, rowid });
+    static updateEncounter(rowid: number, info: Partial<PlayerEncounter>) {
+        const fields = [];
+        for(let key in info) {
+            fields.push(`${key} = $${key}`);
+        }
+
+        this.db.query(`UPDATE encounters SET ${fields.join(", ")} WHERE rowid = $rowid`)
+            .run({ rowid, ...info });
     }
 
     // Deleting games

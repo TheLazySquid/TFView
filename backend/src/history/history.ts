@@ -1,4 +1,3 @@
-import type { PastGamePlayer } from "$types/data";
 import type { Player } from "$types/lobby";
 import { Message, Recieves } from "$types/messages";
 import { flags } from "src/consts";
@@ -15,7 +14,6 @@ import GameMonitor from "src/game/monitor";
 export interface CurrentGame {
     map: string;
     startTime: number;
-    players: PastGamePlayer[];
     rowid: number;
     kills: number;
     deaths: number;
@@ -24,14 +22,9 @@ export interface CurrentGame {
     demos: string[];
 }
 
-interface CurrentPlayer {
-    info: PastGamePlayer;
-    rowid: number;
-}
-
 export default class History {
     static currentGame: CurrentGame | null = null;
-    static currentPlayers = new Map<string, CurrentPlayer>();
+    static activeEncounters = new Map<string, number>();
     static gamesFile: Bun.BunFile;
     static pastGamesDir: string;
     static pageSize = 50;
@@ -170,7 +163,7 @@ export default class History {
         this.currentGame = {
             map, hostname, ip,
             startTime: Date.now(),
-            players: [], demos: [],
+            demos: [],
             rowid: 0, kills: 0, deaths: 0
         }
 
@@ -203,27 +196,13 @@ export default class History {
     }
 
     static addPlayer(player: Player) {
-        if(player.user) return;
-        if(this.currentGame.players.some(p => p.id === player.ID3)) return;
+        if(player.user || this.activeEncounters.has(player.ID3)) return;
 
-        const now = Date.now();
-        let playerInfo: PastGamePlayer = {
-            id: player.ID3,
-            name: player.name,
-            time: now,
-            kills: player.kills,
-            deaths: player.deaths
-        }
-        this.currentGame.players.push(playerInfo);
-
-        // Don't record encounters with ourself
-        if(player.user) return;
         let rowid = HistoryDatabase.recordPlayerEncounter(player, this.currentGame);
-
-        this.currentPlayers.set(player.ID3, { info: playerInfo, rowid });
+        this.activeEncounters.set(player.ID3, rowid);
     }
 
-    static updatePlayer(player: Player) {
+    static updateKD(player: Player) {
         if(typeof player.kills !== "number" || typeof player.deaths !== "number") return;
 
         if(player.user) {
@@ -235,13 +214,13 @@ export default class History {
                 deaths: this.currentGame.deaths
             });
         } else {
-            if(!this.currentPlayers.has(player.ID3)) return;
-            let { rowid, info } = this.currentPlayers.get(player.ID3);
+            if(!this.activeEncounters.has(player.ID3)) return;
+            let rowid = this.activeEncounters.get(player.ID3);
     
-            info.kills = player.kills;
-            info.deaths = player.deaths;
-    
-            HistoryDatabase.updatePlayerEncounter(rowid, info);
+            HistoryDatabase.updateEncounter(rowid, {
+                kills: player.kills,
+                deaths: player.deaths
+            });
         }
     }
 
@@ -259,10 +238,9 @@ export default class History {
     }
 
     static updatePlayerName(player: Player) {
-        if(!this.currentGame || !this.currentPlayers.has(player.ID3)) return;
+        if(!this.currentGame || !this.activeEncounters.has(player.ID3)) return;
 
-        let gamePlayer = this.currentPlayers.get(player.ID3);
-        gamePlayer.info.name = player.name;
+        let rowid = this.activeEncounters.get(player.ID3);
 
         // If needed remove "unconnected" from the player's names
         let joinedUnconnectedIndex = this.joinedUnconnected.indexOf(player.ID3);
@@ -272,14 +250,14 @@ export default class History {
         }
         if(!player.names.includes(player.name)) player.names.push(player.name);
 
-        HistoryDatabase.updatePlayerName(player.ID3, gamePlayer.rowid, player.name, player.names);
+        HistoryDatabase.updatePlayerName(player.ID3, rowid, player.name, player.names);
     }
 
     static updatePlayerAvatar(player: Player) {
-        if(!this.currentGame || !this.currentPlayers.has(player.ID3)) return;
+        if(!this.currentGame || !this.activeEncounters.has(player.ID3)) return;
 
-        let gamePlayer = this.currentPlayers.get(player.ID3);
-        HistoryDatabase.updatePlayerAvatar(gamePlayer.rowid, player.avatarHash);
+        let rowid = this.activeEncounters.get(player.ID3);
+        HistoryDatabase.updateEncounter(rowid, { avatarHash: player.avatarHash });
     }
     
     static onGameEnd() {
@@ -292,7 +270,7 @@ export default class History {
         
         Log.info(`Recorded game: ${this.currentGame.map}`);
         this.currentGame = null;
-        this.currentPlayers.clear();
+        this.activeEncounters.clear();
         this.joinedUnconnected = [];
     }
 }

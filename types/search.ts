@@ -16,7 +16,8 @@ export interface PlayerSearchParams {
 }
 
 export interface EncounterSearchParams {
-    id: string;
+    id?: string;
+    gameId?: number;
     map?: string;
     name?: string;
     after?: number;

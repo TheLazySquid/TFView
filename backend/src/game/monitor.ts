@@ -517,7 +517,7 @@ export default class GameMonitor {
 
         // Update the k/d of the saved user if it changed
         if(History.currentGame && (diff.kills !== undefined || diff.deaths !== undefined)) {
-            History.updatePlayer(player as Player);
+            History.updateKD(player as Player);
         }
 
         if(!changed) return null;

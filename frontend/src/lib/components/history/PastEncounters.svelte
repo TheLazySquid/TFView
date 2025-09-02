@@ -15,7 +15,8 @@
         idKey: "gameId",
         params: { id },
         filter: (encounter, params) => (
-            encounter.playerId === params.id &&
+            (!encounter.playerId || encounter.playerId === params.id) &&
+            (!params.gameId || encounter.gameId === params.gameId) &&
             (!params.after || encounter.time > params.after) &&
             (!params.before || encounter.time < params.before) &&
             (!params.map || encounter.map.includes(params.map)) &&

@@ -1,6 +1,6 @@
 <script lang="ts">
     import Time from "$lib/components/Time.svelte";
-    import type { StoredPastGame } from "$types/data";
+    import type { PlayerEncounter, StoredPastGame } from "$types/data";
     import { Recieves } from "$types/messages";
     import { NinetyRingWithBg } from "svelte-svg-spinners";
     import Popups from "$lib/popups";
@@ -9,12 +9,32 @@
     import { toast } from "svelte-sonner";
     import DeleteGame from "../history/DeleteGame.svelte";
     import { dateFmt } from "$lib/consts";
+    import { InfiniteList } from "$lib/ws/infiniteList.svelte";
+    import type { EncounterSearchParams } from "$types/search";
+    import Avatar from "../player/Avatar.svelte";
+    import InfiniteLoading from "svelte-infinite-loading";
 
     let rowid: number | null = $state(null);
     let game: StoredPastGame | null = $state.raw(null);
     let popup: Popup;
     
+    const encounters = new InfiniteList<PlayerEncounter, EncounterSearchParams>({
+        listId: "encounters",
+        idKey: "gameId",
+        filter: (encounter, params) => (
+            (!encounter.playerId || encounter.playerId === params.id) &&
+            (!params.gameId || encounter.gameId === params.gameId) &&
+            (!params.after || encounter.time > params.after) &&
+            (!params.before || encounter.time < params.before) &&
+            (!params.map || encounter.map.includes(params.map)) &&
+            (!params.name || encounter.name.includes(params.name))
+        )
+    });
+
     const onOpen = async (id: number) => {
+        encounters.params.gameId = id;
+        encounters.updateSearch();
+        
         rowid = id;
         game = await WS.sendAndRecieve(Recieves.GetGame, rowid);
         return `Game on ${game?.map} on ${dateFmt.format(game?.start)}`;
@@ -58,17 +78,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {#each game.players as player}
+                    {#each encounters.items as encounter}
                         <tr>
-                            <td>
-                                <button onclick={() => Popups.open("pastPlayer", player.id)} 
-                                    class="underline">
-                                    {player.name}
-                                </button>
-                            </td>
-                            <td>{player.kills}/{player.deaths}</td>
+                            <td><Avatar avatarHash={encounter.avatarHash} name={encounter.name} /></td>
+                            <td>{encounter.name}</td>
+                            <td>{encounter.kills}/{encounter.deaths}</td>
                         </tr>
                     {/each}
+                    <InfiniteLoading on:infinite={encounters.infiniteHandler} identifier={rowid}>
+                        <svelte:fragment slot="noResults">
+                            No players recorded
+                        </svelte:fragment>
+                        <div slot="noMore"></div>
+                    </InfiniteLoading>
                 </tbody>
             </table>
         </div>
