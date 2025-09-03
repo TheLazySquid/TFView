@@ -6,10 +6,10 @@
     import { InfiniteList } from "$lib/ws/infiniteList.svelte";
     import type { KillfeedSearchParams } from "$types/search";
     import InfiniteLoading from "svelte-infinite-loading";
-    import Time from "$lib/components/Time.svelte";
     import Game from "$lib/ws/pages/game.svelte";
     import Select from "../search/Select.svelte";
     import Separator from "./Separator.svelte";
+    import { formatTime } from "$lib/utils";
     
     let { id, class: className = "" }: { id?: string, class?: string } = $props();
 
@@ -57,7 +57,9 @@
             {:else}
                 {@const killer = item.killerId ? Game.playersMap.get(item.killerId) : null}
                 {@const victim = Game.playersMap.get(item.victimId)}
-                <div class="text-zinc-400 content-center whitespace-nowrap"><Time timestamp={item.timestamp} type="time" /></div>
+                <div class="text-zinc-400 content-center whitespace-nowrap">
+                    {formatTime(item.timestamp)}
+                </div>
                 <div class="flex items-center rounded-md pl-5 pr-5 font-bold h-8 kill w-fit"
                     class:crit={item.crit}>
                     {#if killer}

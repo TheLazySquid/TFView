@@ -22,9 +22,9 @@
     import Skull from "@lucide/svelte/icons/skull";
     import Ping from "@lucide/svelte/icons/chart-no-axes-column-increasing"
     import Eye from "@lucide/svelte/icons/eye";
-    import Time from "../Time.svelte";
     import * as Tooltip from "$lib/components/ui/tooltip";
     import PastInfo from "../player/PastInfo.svelte";
+    import { formatDate, formatTimeAgo } from "$lib/utils";
 
     let player: Player | null = $state.raw(null);
 
@@ -121,10 +121,10 @@ style="max-width: min(700px, 85%);">
                             <Tooltip.Trigger>
                                 Account created
                                 <!-- Steam's timestamps are in seconds rather than ms -->
-                                <Time type="past" timestamp={player.createdTimestamp * 1000} />
+                                {formatTimeAgo(player.createdTimestamp * 1000)}
                             </Tooltip.Trigger>
                             <Tooltip.Content class="z-[100]">
-                                <Time type="date" timestamp={player.createdTimestamp * 1000} />
+                                {formatDate(player.createdTimestamp * 1000)}
                             </Tooltip.Content>
                         </Tooltip.Root>
                     </Tooltip.Provider>

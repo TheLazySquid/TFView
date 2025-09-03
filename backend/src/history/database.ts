@@ -124,7 +124,7 @@ export default class HistoryDatabase {
 
         this.db.prepare(`PRAGMA main.user_version = ${this.version};`).run();
 
-        if(newDb) {
+        if(newDb && flags.fakeData) {
             Log.info("Generating fake history data");
             createFakeHistory(this.db);
         }
@@ -355,28 +355,37 @@ export default class HistoryDatabase {
             duration: 0, kills: 0, deaths: 0
         });
 
+        const rowid = val.lastInsertRowid as number;
+
         this.pastGames.addStart({
             start: game.startTime,
             duration: 0,
             map: game.map,
             hostname: game.hostname,
             ip: game.ip,
-            rowid: game.rowid,
+            rowid: rowid,
             kills: game.kills,
             deaths: game.deaths
         });
 
-        return val.lastInsertRowid as number;
+        return rowid;
     }
 
     static updateCurrentGame(game: CurrentGame) {
-        this.db.query(`UPDATE games SET duration = $duration, kills = $kills,
-            deaths = $deaths WHERE rowid = $rowid`).run({
+        const update = {
             duration: Date.now() - game.startTime,
             kills: game.kills,
-            deaths: game.deaths,
+            deaths: game.deaths
+        }
+
+        this.db.query(`UPDATE games SET duration = $duration, kills = $kills,
+            deaths = $deaths WHERE rowid = $rowid`).run({
+            ...update,
             rowid: game.rowid
         });
+
+        console.log("Sending update:", update);
+        this.pastGames.update(game.rowid, update);
     }
 
     static updateCurrentHostname(game: CurrentGame) {
@@ -385,6 +394,7 @@ export default class HistoryDatabase {
         this.db.query(`UPDATE games SET hostname = $hostname, ip = $ip WHERE rowid = $rowid`)
             .run({ hostname, ip, rowid });
 
+        console.log("Updating:", rowid, hostname, ip);
         this.pastGames.update(rowid, { hostname, ip });
     }
 

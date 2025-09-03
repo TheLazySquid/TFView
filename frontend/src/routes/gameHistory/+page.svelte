@@ -1,5 +1,4 @@
 <script lang="ts">
-    import Time from "$lib/components/Time.svelte";
     import GameHistory from "$lib/ws/pages/gameHistory.svelte";
     import InfiniteLoading from "svelte-infinite-loading";
     import Popups from "$lib/popups";
@@ -10,6 +9,7 @@
     import DeleteGame from "$lib/components/history/DeleteGame.svelte";
     import WS from "$lib/ws/wsclient.svelte";
     import ProfilePicturePopup from "$lib/components/popups/ProfilePicturePopup.svelte";
+    import { formatDate, formatDuration } from "$lib/utils";
 
     WS.init("gamehistory");
 </script>
@@ -57,8 +57,8 @@
             <tbody>
                 {#each GameHistory.games.items as game (game.rowid)}
                     <tr class="border-t-2 *:py-1">
-                        <td class="whitespace-nowrap"><Time timestamp={game.start} type="date" /></td>
-                        <td><Time timestamp={game.duration} type="duration" /></td>
+                        <td class="whitespace-nowrap">{formatDate(game.start)}</td>
+                        <td>{formatDuration(game.duration)}</td>
                         <td>{game.map}</td>
                         <td>{game.hostname ?? "Unknown"}</td>
                         <td>{game.kills}/{game.deaths}</td>

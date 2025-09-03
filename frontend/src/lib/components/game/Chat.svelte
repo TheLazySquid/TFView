@@ -8,9 +8,9 @@
     import Send from "@lucide/svelte/icons/send";
     import { onDestroy, onMount } from "svelte";
     import InfiniteLoading from "svelte-infinite-loading";
-    import Time from "../Time.svelte";
     import Game from "$lib/ws/pages/game.svelte";
     import Separator from "./Separator.svelte";
+    import { formatTime } from "$lib/utils";
 
     let { id }: { id?: string } = $props();
     let team = $state(false);
@@ -63,7 +63,7 @@
             {:else}
                 {@const player = Game.playersMap.get(item.senderId)}
                 <div class="text-zinc-400 content-start whitespace-nowrap">
-                    <Time timestamp={item.timestamp} type="time" />
+                    {formatTime(item.timestamp)}
                 </div>
                 <div class="text-[0px] *:text-base">
                     {#if item.dead}

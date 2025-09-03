@@ -1,9 +1,7 @@
 <script lang="ts">
-    import Time from "$lib/components/Time.svelte";
     import type { PlayerEncounter, StoredPastGame } from "$types/data";
     import { Recieves } from "$types/messages";
     import { NinetyRingWithBg } from "svelte-svg-spinners";
-    import Popups from "$lib/popups";
     import WS from "$lib/ws/wsclient.svelte";
     import Popup from "./Popup.svelte";
     import { toast } from "svelte-sonner";
@@ -13,6 +11,7 @@
     import type { EncounterSearchParams } from "$types/search";
     import Avatar from "../player/Avatar.svelte";
     import InfiniteLoading from "svelte-infinite-loading";
+    import { formatDate, formatDuration } from "$lib/utils";
 
     let rowid: number | null = $state(null);
     let game: StoredPastGame | null = $state.raw(null);
@@ -53,10 +52,10 @@
         <NinetyRingWithBg color="white" />
     {:else}
         <div class="flex items-center gap-2">
-            Game on {game.map} on <Time timestamp={game.start} type="date" />
+            Game on {game.map} on {formatDate(game.start)}
             <DeleteGame {game} onSuccess={() => popup.closePopup()} />
         </div>
-        <div>Duration: <Time timestamp={game.duration} type="duration" /></div>
+        <div>Duration: {formatDuration(game.duration)}</div>
         <div>Server: {game.hostname ? `${game.hostname} (${game.ip})` : "Unknown"}</div>
         {#if game?.demos && game.demos.length > 0}
             <div class="flex items-center gap-2 flex-wrap">

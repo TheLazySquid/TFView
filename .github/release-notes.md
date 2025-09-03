@@ -1,2 +1,1 @@
-* Added display for number of players on each team
-* Fixed player avatars not being saved sometimes
+* Fixed current game in game history not updating

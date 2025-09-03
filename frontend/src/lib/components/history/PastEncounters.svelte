@@ -1,12 +1,12 @@
 <script lang="ts">
     import type { PlayerEncounter } from "$types/data";
-    import Time from "../Time.svelte";
     import Popups from "$lib/popups";
     import InfiniteLoading from "svelte-infinite-loading";
     import { InfiniteList } from "$lib/ws/infiniteList.svelte";
     import type { EncounterSearchParams } from "$types/search";
     import { onDestroy } from "svelte";
     import Avatar from "../player/Avatar.svelte";
+    import { formatDate } from "$lib/utils";
 
     let { id }: { id: string } = $props();
 
@@ -45,7 +45,7 @@
         <tbody>
             {#each encounters.items as encounter}
                 <tr>
-                    <td><Time timestamp={encounter.time} type="date" /></td>
+                    <td>{formatDate(encounter.time)}</td>
                     <td><Avatar avatarHash={encounter.avatarHash} name={encounter.name} /></td>
                     <td>{encounter.name}</td>
                     <td>{encounter.map}</td>

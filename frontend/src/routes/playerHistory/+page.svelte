@@ -3,7 +3,6 @@
     import PastGamePopup from "$lib/components/popups/PastGamePopup.svelte";
     import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
     import ProfilePicturePopup from "$lib/components/popups/ProfilePicturePopup.svelte";
-    import Time from "$lib/components/Time.svelte";
     import PlayerHistory from "$lib/ws/pages/playerHistory.svelte";
     import InfiniteLoading from "svelte-infinite-loading";
     import Tags from "$lib/ws/topics/tags.svelte";
@@ -14,6 +13,7 @@
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
     import ConfirmPopup from "$lib/components/popups/ConfirmPopup.svelte";
     import WS from "$lib/ws/wsclient.svelte";
+    import { formatDate } from "$lib/utils";
 
     WS.init("playerhistory");
 
@@ -83,7 +83,7 @@
                             <Nameplate current={false} bind:player={PlayerHistory.players.items[i]}
                                 onclick={() => Popups.open("pastPlayer", player.id)} /> 
                         </td>
-                        <td><Time timestamp={player.lastSeen} type="date" /></td>
+                        <td>{formatDate(player.lastSeen)}</td>
                         <td>{player.encounters}</td>
                     </tr>
                 {/each}
