@@ -384,7 +384,6 @@ export default class HistoryDatabase {
             rowid: game.rowid
         });
 
-        console.log("Sending update:", update);
         this.pastGames.update(game.rowid, update);
     }
 
