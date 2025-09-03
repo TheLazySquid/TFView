@@ -40,6 +40,7 @@ export default class Demos {
 
     static close() {
         this.closeWatcher();
+        this.closeDemo();
     }
 
     static masterbaseUrl = "megaanticheat.com";

@@ -99,6 +99,7 @@ export default class Rcon {
                     Log.warning(`RCON command timed out: ${command}`);
                     res(null);
                 }, timeoutMs);
+                timeout.unref();
             }
 
             this.server.execute(command)

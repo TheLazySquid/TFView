@@ -3,11 +3,19 @@ import HistoryDatabase from "src/history/database";
 import { join } from "node:path";
 import { readdirSync } from "node:fs";
 import { execSync } from "node:child_process";
-import type { Stored, StoredPlayer, ParsedDemo, PastGamePlayer } from "$types/data";
+import type { Stored, StoredPlayer, ParsedDemo } from "$types/data";
 import { getCurrentUserId } from "src/util";
 import { MultiBar, Presets } from "cli-progress";
 import { Database } from "bun:sqlite";
 import { dataPath } from "src/consts";
+
+interface PastGamePlayer {
+    id: string;
+    name: string;
+    time: number;
+    kills: number;
+    deaths: number;
+}
 
 await Settings.init();
 HistoryDatabase.createDb();
@@ -105,7 +113,6 @@ function recordDemo(name: string) {
             ip: output.header.server,
             start: date.getTime(),
             duration: output.header.duration * 1000,
-            players: JSON.stringify(Object.values(players)),
             kills: playerKills,
             deaths: playerDeaths,
             demos: JSON.stringify([name])

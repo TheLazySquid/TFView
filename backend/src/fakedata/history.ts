@@ -1,4 +1,3 @@
-import type { PastGamePlayer } from "$types/data";
 import type { Database } from "bun:sqlite";
 import { mapNames, playerIds, playerNames, random } from "./util";
 
@@ -11,7 +10,6 @@ export function createFakeHistory(db: Database) {
 
         let map = mapNames[random(0, mapNames.length - 1)];
         let numPlayers = random(5, 24);
-        let players: PastGamePlayer[] = [];
         let available = [];
         for(let i = 0; i < playerNames.length; i++) available.push(i);
 
@@ -41,7 +39,6 @@ export function createFakeHistory(db: Database) {
                 deaths: random(0, 10),
                 kills: random(0, 10)
             }
-            players.push(player);
 
             db.query(`INSERT INTO encounters (playerId, map, name, gameId, time, kills, deaths)
                 VALUES($playerId, $map, $name, $gameId, $time, $kills, $deaths)`).all({
@@ -62,7 +59,6 @@ export function createFakeHistory(db: Database) {
         db.query(`INSERT INTO games (map, hostname, ip, start, duration, players, kills, deaths, demos)
             VALUES($map, $hostname, $ip, $start, $duration, $players, $kills, $deaths, $demos)`).run({
             map: map,
-            players: JSON.stringify(players),
             start: start,
             duration: random(5e5, 5e6),
             hostname: "Some server " + Math.random().toString(36).slice(2),

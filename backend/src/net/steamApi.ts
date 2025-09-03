@@ -129,6 +129,7 @@ export default class SteamApi {
 				this.lastProcessTime = Date.now();
 				this.processSummariesFn();
 			}, this.delay - elapsed);
+			this.processTimeout.unref();
 		}
 	}
 
