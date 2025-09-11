@@ -1,2 +1,2 @@
-* Fixed current game in game history not updating
-* Fixed TFView taking longer than needed to shut down
+* Added names to items in kill tracker
+* Added kill icons for halloween spells

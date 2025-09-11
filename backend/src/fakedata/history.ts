@@ -56,8 +56,8 @@ export function createFakeHistory(db: Database) {
         let demo = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}_${date.getHours()}-${date.getMinutes()}-${date.getSeconds()}.dem`;
         let demos = JSON.stringify([demo]);
 
-        db.query(`INSERT INTO games (map, hostname, ip, start, duration, players, kills, deaths, demos)
-            VALUES($map, $hostname, $ip, $start, $duration, $players, $kills, $deaths, $demos)`).run({
+        db.query(`INSERT INTO games (map, hostname, ip, start, duration, kills, deaths, demos)
+            VALUES($map, $hostname, $ip, $start, $duration, $kills, $deaths, $demos)`).run({
             map: map,
             start: start,
             duration: random(5e5, 5e6),

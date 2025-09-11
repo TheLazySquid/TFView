@@ -140,6 +140,16 @@ export const fakeKillfeed: KillfeedEntry[] = [
         crit: false,
         killerId: "1127822620",
         victimId: "97733808",
+        timestamp: Date.now() - 10000
+    },
+    {
+        killer: "Grim Bloody Fable",
+        victim: "Still Alive",
+        victimTeam: 3,
+        weapon: "spellbook_boss",
+        crit: false,
+        killerId: "1127822620",
+        victimId: "97733808",
         timestamp: Date.now()
     }
 ]
