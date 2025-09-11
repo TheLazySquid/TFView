@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { getWeaponImage } from "$lib/killfeed";
+    import { getWeaponImage, knownIcons } from "$lib/killfeed";
     import KillTracker from "$lib/ws/pages/killTracker.svelte";
     import WS from "$lib/ws/wsclient.svelte";
     import ChevronRight from "@lucide/svelte/icons/chevron-right";
@@ -13,11 +13,14 @@
 </svelte:head>
 
 {#snippet iconCount(id: string, crit: boolean, count: number)}
-    <div class="flex items-center h-[35px]">
-        <div class="w-[200px]">
+    <div class="flex items-center h-[35px] text-zinc-900">
+        <div class="w-[280px] text-left sm:block hidden">
+            {knownIcons[id] ?? id} {#if crit}(Crit){/if}
+        </div>
+        <div class="w-[150px]">
             <img class:crit={crit} alt={id} src={getWeaponImage(id, crit)} />
         </div>
-        <div class="text-zinc-900 w-[150px] text-left">
+        <div class="w-[150px] text-left">
             {count}
         </div>
     </div>
@@ -33,11 +36,14 @@
             {@const total = KillTracker.getTotal(weapon)}
             <button class="weapon rounded-md px-2 relative" title={weapon.id}
                 onclick={() => weapon.expanded = !weapon.expanded}>
-                <div class="flex items-center h-[35px]">
-                    <div class="w-[200px]">
+                <div class="flex items-center h-[35px] text-zinc-900">
+                    <div class="w-[280px] text-left sm:block hidden">
+                        {knownIcons[weapon.id] ?? weapon.id}
+                    </div>
+                    <div class="w-[150px]">
                         <img alt={weapon.id} src={getWeaponImage(weapon.id, false)} />
                     </div>
-                    <div class="text-zinc-900 w-[150px] text-left">
+                    <div class="w-[150px] text-left">
                         {weapon.expanded ? weapon.noncrit : total}
                     </div>
                     <div>
