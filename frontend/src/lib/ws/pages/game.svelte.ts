@@ -21,6 +21,8 @@ export default new class Game {
                 if(player.user) this.userTeam = player.team;
                 this.playersMap.set(player.ID3, player);
             }
+
+            this.sortPlayers();
         });
 
         WS.on(Message.PlayerJoin, (player) => {
