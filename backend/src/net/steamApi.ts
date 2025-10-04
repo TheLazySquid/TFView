@@ -155,8 +155,12 @@ export default class SteamApi {
 				name: playerData.lastName
 			});
 
-			// Don't actively trigger a query- they happen in batches of 100, this one will happen eventually
-			if(!flags.noSteamApi) this.summaryQueue.push(waitingSummary);
+			if(!flags.noSteamApi) {
+				this.summaryQueue.push(waitingSummary);
+
+				// This query will probably happen on its own, but just in case it doesn't
+				setTimeout(() => this.processSummaries(), 30000);
+			}
 		} else if(!flags.noSteamApi) {
 			this.summaryQueue.push(waitingSummary);
 	
