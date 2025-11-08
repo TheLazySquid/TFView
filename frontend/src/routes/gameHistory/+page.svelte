@@ -10,6 +10,7 @@
     import WS from "$lib/ws/wsclient.svelte";
     import ProfilePicturePopup from "$lib/components/popups/ProfilePicturePopup.svelte";
     import { formatDate, formatDuration } from "$lib/utils";
+    import ReturnToTop from "$lib/components/history/ReturnToTop.svelte";
 
     WS.init("gamehistory");
 </script>
@@ -28,6 +29,7 @@
 {/snippet}
 
 <div class="w-full h-full flex justify-center overflow-y-auto">
+    <ReturnToTop />
     <div style="width: min(1000px, 90%)">
         <Search.SearchBox title="Search Games" singular="game" plural="games" list={GameHistory.games}>
             <div class="content-center">Map:</div>

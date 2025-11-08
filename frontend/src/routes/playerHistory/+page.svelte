@@ -14,6 +14,7 @@
     import ConfirmPopup from "$lib/components/popups/ConfirmPopup.svelte";
     import WS from "$lib/ws/wsclient.svelte";
     import { formatDate } from "$lib/utils";
+    import ReturnToTop from "$lib/components/history/ReturnToTop.svelte";
 
     WS.init("playerhistory");
 
@@ -42,6 +43,7 @@
 {/snippet}
 
 <div class="w-full h-full flex justify-center overflow-y-auto">
+    <ReturnToTop />
     <div style="width: min(1000px, 90%)">
         <Search.SearchBox title="Search Players" singular="player" plural="players"
             list={PlayerHistory.players} defaultParams={{ sortBy: "lastSeen" }}>
