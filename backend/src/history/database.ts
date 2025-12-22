@@ -204,7 +204,7 @@ export default class HistoryDatabase {
                 if(!isNaN(Number(id3))) {
                     params.id3 = id3;
                 }
-            } else if(!isNaN(Number(params.name))) {
+            } else if(!isNaN(Number(params.name)) && isFinite(Number(params.name))) {
                 params.id64 = id64ToId3(params.name);
                 params.id3 = params.name;
             }

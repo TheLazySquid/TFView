@@ -18,7 +18,7 @@ export default new class PlayerHistory {
                     if(!isNaN(parseInt(id3))) {
                         params.id3 = id3;
                     }
-                } else if(!isNaN(parseInt(params.name))) {
+                } else if(!isNaN(parseInt(params.name)) && isFinite(Number(params.name))) {
                     params.id64 = id64ToId3(params.name);
                     params.id3 = params.name;
                 }
