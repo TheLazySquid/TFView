@@ -23,7 +23,7 @@
 	}
 
 	const getMasks = (category: CasualMapCategory) => {
-		let masks: bigint[] = new Array(7).fill(0n);
+		let masks: bigint[] = new Array(8).fill(0n);
 		for(let map of category.maps) {
 			masks[map.number] |= 1n << map.bit;
 		}

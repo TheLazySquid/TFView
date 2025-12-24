@@ -38,7 +38,7 @@ export default class Casual {
 		});
 
 		Server.on(Recieves.NewCasualProfile, (name) => {
-			const selection = new Array(7).fill(0);
+			const selection = new Array(8).fill(0);
 			const id = crypto.randomUUID();
 
 			this.config.profiles.push({ name, id, selection });
@@ -115,8 +115,8 @@ export default class Casual {
 
 		for(let i = 0; i < numbers.length; i++) {
 			// Blank the corresponding mapBits, then set the new ones
-			numbers[i] &= ~mapBits[i];
-			numbers[i] |= BigInt(selection[i]);
+			numbers[i] &= ~(mapBits[i] ?? 0n);
+			numbers[i] |= BigInt(selection[i] ?? 0n);
 		}
 
 		const path = this.getCriteriaPath();

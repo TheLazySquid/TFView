@@ -6,7 +6,7 @@ export default new class Casual {
 	profiles: CasualProfile[] = $state([]);
 	selectedProfileId = $state("");
 	selectedProfile?: CasualProfile = $state();
-	selection: bigint[] = $state(new Array(7).fill(0n));
+	selection: bigint[] = $state(new Array(8).fill(0n));
 	
 	constructor() {
 		WS.on(Message.CasualConfig, (config) => {

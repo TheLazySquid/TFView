@@ -7,4 +7,5 @@ export const mapBits = [
     2147401754n,
     2147018752n,
     4191168n,
+    0n,
 ];

@@ -2,7 +2,7 @@ import { casualMaps } from "$shared/maps";
 import fs from "fs";
 
 // This script determines all bits which can be set for casual maps
-const numbers: bigint[] = new Array(7).fill(0n);
+const numbers: bigint[] = new Array(8).fill(0n);
 
 for(const category of casualMaps) {
 	for(const map of category.maps) {
