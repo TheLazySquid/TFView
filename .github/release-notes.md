@@ -1,2 +1,1 @@
-* Fixed an error when searing for players named "Infinity"
-* Fixed casual selection manager not working
+* Potentially fixed the updater not working on Windows 10

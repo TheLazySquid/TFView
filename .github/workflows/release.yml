@@ -12,11 +12,11 @@ jobs:
       contents: write
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-2022]
         include:
           - os: ubuntu-latest
             release_suffix: linux
-          - os: windows-latest
+          - os: windows-2022
             release_suffix: windows
     runs-on: ${{ matrix.os }}
     steps:
