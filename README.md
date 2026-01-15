@@ -1,4 +1,5 @@
 # TFView
+[![Discord Support Server](https://img.shields.io/badge/Discord-Support_Server-5865F2?logo=discord)](https://discord.gg/XNvhjhDQhZ)
 
 TFView is a TF2 interface that lets you easily view and interact with various things. It works by connecting to your TF2 console and gathering data by running console commands, similarly to [TF2BD](https://github.com/PazerOP/tf2_bot_detector) and [MegaAntiCheat](https://github.com/MegaAntiCheat/client-backend). This is intended by Valve, and does not put you at risk of being banned.
 
