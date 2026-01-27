@@ -50,16 +50,6 @@ export default class HistoryDatabase {
         Server.on(Recieves.GetPlayer, (id, { reply }) => {
             let data = this.getPlayerData(id);
             reply(data);
-
-            // Try to update their avatarHash
-            if(data?.avatarHash) return;
-
-            SteamApi.getSummary(id, (summary) => {
-                this.pastPlayers.update(id, summary);
-                Server.send("pastplayer", Message.PastPlayerUpdate, {
-                    id, ...summary
-                });
-            });
         });
     }
 
@@ -238,7 +228,22 @@ export default class HistoryDatabase {
         let query = this.getPlayersQuery(queryStart, params, offset);
 
         let rows = this.db.query<Stored<StoredPlayer>, {}>(query).all({ ...params, offset });
-        return rows.map(row => this.parsePlayerRow(row));
+        let parsed = rows.map(row => this.parsePlayerRow(row));
+        
+        // Fetch any missing avatarHashes, with low priority
+        for(let data of parsed) {
+            if(data.avatarHash) continue;
+            
+            let id = data.id;
+            SteamApi.getSummary(id, (summary) => {
+                this.pastPlayers.update(id, summary);
+                Server.send("pastplayer", Message.PastPlayerUpdate, {
+                    id, ...summary
+                });
+            }, true);
+        }
+
+        return parsed;
     }
 
     static parsePlayerRow(row: Stored<StoredPlayer>): PastPlayer {

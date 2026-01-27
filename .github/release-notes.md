@@ -1,1 +1,1 @@
-* Potentially fixed the updater not working on Windows 10
+* Attempt to fetch missing summaries when viewing player history

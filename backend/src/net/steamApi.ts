@@ -18,7 +18,6 @@ interface WaitingSummary {
 export default class SteamApi {
 	static apiBase = "https://api.steampowered.com/"
 	static summaryQueue: WaitingSummary[] = [];
-	static maxSummaries = 150;
 
 	static query(path: string, params: Record<string, any> = {}) {
 		return new Promise<SteamPlayerSummaries>((res, rej) => {
@@ -133,7 +132,7 @@ export default class SteamApi {
 		}
 	}
 
-	static getSummary(id3: string, callback: (summary: PlayerSummary) => void) {		
+	static getSummary(id3: string, callback: (summary: PlayerSummary) => void, deprioritize = false) {		
 		const id64 = id3ToId64(id3);
 		const waitingSummary = { id3, id64, callback, failedQueries: 0 };
 
@@ -156,12 +155,15 @@ export default class SteamApi {
 			});
 
 			if(!flags.noSteamApi) {
+				// If the query isn't priority don't start a second batch of summaries
+				if(deprioritize && this.summaryQueue.length > this.maxBatchSize) return;
 				this.summaryQueue.push(waitingSummary);
 
 				// This query will probably happen on its own, but just in case it doesn't
 				setTimeout(() => this.processSummaries(), 30000);
 			}
 		} else if(!flags.noSteamApi) {
+			if(deprioritize && this.summaryQueue.length > this.maxBatchSize) return;
 			this.summaryQueue.push(waitingSummary);
 	
 			// Let summaries accumilate if there's multiple in the same event loop
