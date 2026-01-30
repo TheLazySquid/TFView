@@ -132,7 +132,7 @@ export default class SteamApi {
 		}
 	}
 
-	static getSummary(id3: string, callback: (summary: PlayerSummary) => void, deprioritize = false) {		
+	static getSummary(id3: string, callback: (summary: PlayerSummary) => void, deprioritize = false) {
 		const id64 = id3ToId64(id3);
 		const waitingSummary = { id3, id64, callback, failedQueries: 0 };
 

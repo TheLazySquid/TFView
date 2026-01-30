@@ -22,6 +22,7 @@ export default class GameMonitor {
     static potentialClasses = new Map<string, TF2Class[]>();
     static userAccountID3 = "";
     static players: Player[] = [];
+    static playerIds = new Set<string>();
     static playerMap = new Map<string, Player>();
     static missedQueries = new Map<string, number>();
     static pollInterval = 1000;
@@ -49,6 +50,10 @@ export default class GameMonitor {
     static init() {       
         Server.onConnect("game", (respond) => {
             respond(Message.InitialPlayers, this.players);
+        });
+
+        Server.onConnect("playerids", (respond) => {
+            respond(Message.InitialPlayerIds, Array.from(this.playerIds));
         });
 
         Server.on(Recieves.Chat, (msg) => {
@@ -97,9 +102,9 @@ export default class GameMonitor {
 
         if(flags.fakeData) {
             this.players = fakePlayers;
+            this.playerIds = new Set(fakePlayers.map(p => p.ID3));
             this.killfeed.items = fakeKillfeed;
             this.chat.items = fakeChat;
-
             return;
         }
 
@@ -137,6 +142,9 @@ export default class GameMonitor {
             for(let player of this.players) {
                 this.missedQueries.set(player.ID3, 3);
             }
+
+            Server.send("playerids", Message.PlayerIdClear, undefined);
+            this.playerIds.clear();
         });
     }
 
@@ -358,6 +366,8 @@ export default class GameMonitor {
                 if(!player.names.includes(player.name)) player.names.push(player.name);
 
                 Server.send("game", Message.PlayerJoin, player as Player);
+                Server.send("playerids", Message.PlayerIdJoin, id);
+                this.playerIds.add(id);
                 this.players.push(player as Player);
                 this.playerMap.set(id, player as Player);
 
@@ -407,12 +417,14 @@ export default class GameMonitor {
             this.playerMap.delete(id);
             this.potentialClasses.delete(id);
             this.missedQueries.delete(id);
+            this.playerIds.delete(id);
             this.players.splice(i, 1);
             playersLeft = true;
             i--;
 
             // dispatch the change
             Server.send("game", Message.PlayerLeave, id);
+            Server.send("playerids", Message.PlayerIdLeave, id);
         }
 
         if(playersLeft) this.pruneOldEntries();

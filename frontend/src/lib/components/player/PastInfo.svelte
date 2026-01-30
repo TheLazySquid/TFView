@@ -19,7 +19,7 @@
     <div>{names.filter(n => n !== name).join(", ")}</div>
 {/if}
 
-{#if avatars.length > 1}
+{#if avatars?.length > 1}
     <Images class="h-full" />
     <div class="content-center">Past profile pictures</div>
     <div class="flex items-center gap-1">

@@ -12,6 +12,7 @@
     import Avatar from "../player/Avatar.svelte";
     import InfiniteLoading from "svelte-infinite-loading";
     import { formatDate, formatDuration } from "$lib/utils";
+    import PlayerIds from "$lib/ws/topics/playerIds.svelte";
 
     let rowid: number | null = $state(null);
     let game: StoredPastGame | null = $state.raw(null);
@@ -80,7 +81,7 @@
                     {#each encounters.items as encounter}
                         <tr>
                             <td><Avatar avatarHash={encounter.avatarHash} name={encounter.name} /></td>
-                            <td>{encounter.name}</td>
+                            <td class:text-online={PlayerIds.ids.has(encounter.playerId)}>{encounter.name}</td>
                             <td>{encounter.kills}/{encounter.deaths}</td>
                         </tr>
                     {/each}

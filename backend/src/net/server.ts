@@ -8,17 +8,20 @@ import Settings from "src/settings/settings";
 import { exists } from "node:fs/promises";
 
 export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" |
-    "tags" | "casual" | "global" | "killcounts" | "pastplayer";
+    "tags" | "casual" | "global" | "killcounts" | "pastplayer" | "playerids";
 export type WS = Bun.ServerWebSocket<{ page: Page }>;
 
+const playerTopics: Topic[] = ["tags", "pastplayer", "playerids"];
+const globalTopics: Topic[] = ["global"];
+
 const topics: Record<Page, Topic[]> = {
-    game: ["game", "tags", "pastplayer", "global"],
-    playerhistory: ["playerhistory", "tags", "pastplayer", "global"],
-    gamehistory: ["gamehistory", "tags", "pastplayer", "global"],
-    settings: ["settings", "directories", "global"],
-    casual: ["casual", "global"],
-    setup: ["directories", "global"],
-    killcounts: ["killcounts", "global"]
+    game: ["game", ...playerTopics, ...globalTopics],
+    playerhistory: ["playerhistory", ...playerTopics, ...globalTopics],
+    gamehistory: ["gamehistory", ...playerTopics, ...globalTopics],
+    settings: ["settings", "directories", ...globalTopics],
+    casual: ["casual", ...globalTopics],
+    setup: ["directories", ...globalTopics],
+    killcounts: ["killcounts", ...globalTopics]
 }
 
 export default class Server {

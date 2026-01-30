@@ -16,6 +16,7 @@
     import Tags from "$lib/ws/topics/tags.svelte";
     import { toast } from "svelte-sonner";
     import Avatar from "./Avatar.svelte";
+    import PlayerIds from "$lib/ws/topics/playerIds.svelte";
 
     interface PastProps { player: PastPlayer; current: false }
     interface CurrentProps { player: Player; current: true }
@@ -99,7 +100,7 @@
     <ContextMenu.Trigger>
         <div class="flex items-center pr-2 gap-1">
             <button class="grow text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
-            class:italic={player.nickname} {...restProps}>
+            class:italic={player.nickname} class:text-online={!current && PlayerIds.ids.has(id)} {...restProps}>
                 {player.nickname ? player.nickname : name}
             </button>
             {#if player.nickname}

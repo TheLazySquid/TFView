@@ -24,8 +24,8 @@ for(const arg of Bun.argv) {
     flags[flag] = true;
 }
 
-// Disable both MAC and steamApi if noNet is set
-if(flags.noNet) {
+// Disable both MAC and steamApi if noNet or fakeData is set
+if(flags.noNet || flags.fakeData) {
     flags.noMAC = true;
     flags.noSteamApi = true;
     flags.noUpdateCheck = true;

@@ -81,7 +81,7 @@
 	<div class="flex justify-end" style="width: max(270px, calc((100% - 550px) / 2));">
 		<div class="flex flex-col pt-6 gap-1 w-[230px] pr-10">
 			{#each Casual.profiles as profile}
-				<!-- svelte-ignore a11y_click_events_have_key_events a11y_no_static_element_interactions -->
+				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 				<div class="{profile.id === Casual.selectedProfileId ? "bg-primary" : "bg-accent"}
 					text-left text-lg px-2 flex items-center casual-profile cursor-pointer"
 					onclick={() => WS.send(Recieves.SelectCasualProfile, profile.id)}>
