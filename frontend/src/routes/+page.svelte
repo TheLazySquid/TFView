@@ -15,10 +15,8 @@
     import Close from "@lucide/svelte/icons/chevron-last";
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
     import WS from "$lib/ws/wsclient.svelte";
-    import PlayerIds from "$lib/ws/topics/playerIds.svelte";
 
     WS.init("game");
-    $inspect(PlayerIds.ids);
 
     const storageKey = "game-openPanel";
     let openPanel = $state(localStorage.getItem(storageKey));

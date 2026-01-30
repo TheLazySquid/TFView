@@ -12,7 +12,7 @@
     import Avatar from "../player/Avatar.svelte";
     import InfiniteLoading from "svelte-infinite-loading";
     import { formatDate, formatDuration } from "$lib/utils";
-    import PlayerIds from "$lib/ws/topics/playerIds.svelte";
+    import Popups from "$lib/popups";
 
     let rowid: number | null = $state(null);
     let game: StoredPastGame | null = $state.raw(null);
@@ -73,6 +73,7 @@
             <table class="w-full">
                 <thead class="sticky top-0 bg-background">
                     <tr class="*:text-left">
+                        <th class="min-w-10 w-10"></th>
                         <th>Player</th>
                         <th>K/D</th>
                     </tr>
@@ -81,7 +82,11 @@
                     {#each encounters.items as encounter}
                         <tr>
                             <td><Avatar avatarHash={encounter.avatarHash} name={encounter.name} /></td>
-                            <td class:text-online={PlayerIds.ids.has(encounter.playerId)}>{encounter.name}</td>
+                            <td>
+                                <button onclick={() => Popups.open("pastPlayer", encounter.playerId)}>
+                                    {encounter.name}
+                                </button>
+                            </td>
                             <td>{encounter.kills}/{encounter.deaths}</td>
                         </tr>
                     {/each}
