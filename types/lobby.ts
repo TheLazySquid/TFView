@@ -111,7 +111,7 @@ export interface PlayerSummary {
     avatarHash: string;
     avatars: string[]
     createdTimestamp: number;
-    name?: string;
+    name: string;
 }
 
 export type KickReason = "cheating" | "idle" | "scamming" | "other";

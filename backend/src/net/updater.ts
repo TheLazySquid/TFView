@@ -64,7 +64,7 @@ export default class Updater {
         let res = await fetch(this.endpoint);
         if(!res.ok) throw new Error("Api request failed");
 
-        let data = await res.json();
+        let data = await res.json() as any;
         Log.info(`Latest release: ${data.tag_name} (using v${version})`);
 
         if(Values.get("skippedVersion") === data.tag_name) return null;

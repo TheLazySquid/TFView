@@ -91,7 +91,8 @@ export enum Recieves {
     DeleteCasualProfile,
     LaunchGame,
     WantsStartMenuShortcut,
-    WantsToUpdate
+    WantsToUpdate,
+    GetFriends
 }
 
 export type RecievesTypes = 
@@ -123,6 +124,7 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.LaunchGame, void>
     | RecievedMessage<Recieves.WantsStartMenuShortcut, boolean>
     | RecievedMessage<Recieves.WantsToUpdate, string>
+    | RecievedMessage<Recieves.GetFriends, string, PastPlayer[]>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
 export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup" | "casual" | "killcounts";

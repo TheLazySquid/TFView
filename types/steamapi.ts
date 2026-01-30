@@ -20,3 +20,15 @@ export interface SteamPlayerSummaries {
         players: SteamPlayerSummary[];
     }
 }
+
+export interface SteamFriend {
+    steamid: string;
+    relationship: string;
+    friend_since: number;
+}
+
+export interface SteamFriendsList {
+    friendslist: {
+        friends: SteamFriend[];
+    }
+}

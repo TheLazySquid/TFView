@@ -20,9 +20,9 @@
 
     interface PastProps { player: PastPlayer; current: false }
     interface CurrentProps { player: Player; current: true }
-    type Props = (PastProps | CurrentProps) & HTMLButtonAttributes;
+    type Props = (PastProps | CurrentProps) & { grow?: boolean} & HTMLButtonAttributes;
 
-    let { player = $bindable(), current, ...restProps }: Props = $props();
+    let { player = $bindable(), current, grow, ...restProps }: Props = $props();
 
     let name = $derived(current ? (player as Player).name : (player as PastPlayer).lastName);
     let id = $derived(current ? (player as Player).ID3 : (player as PastPlayer).id);
@@ -97,7 +97,7 @@
 {/snippet}
 
 <ContextMenu.Root>
-    <ContextMenu.Trigger>
+    <ContextMenu.Trigger class={grow ? "grow" : ""}>
         <div class="flex items-center pr-2 gap-1">
             <button class="grow text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
             class:italic={player.nickname} class:text-online={!current && PlayerIds.ids.has(id)} {...restProps}>

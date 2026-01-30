@@ -19,6 +19,7 @@ import Values from "./settings/values";
 import KillTracker from "./history/killTracker";
 import Updater from "./net/updater";
 import { close } from "./close";
+import SteamApi from "./net/steamApi";
 
 init();
 
@@ -69,6 +70,7 @@ async function init() {
     Launcher.init();
     StartMenu.init();
     KillTracker.init();
+    SteamApi.init();
 
     Server.on(Recieves.CloseApp, async (closeGame) => {
         if(closeGame) await Rcon.run("quit");

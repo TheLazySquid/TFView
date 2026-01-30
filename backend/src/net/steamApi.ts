@@ -1,11 +1,14 @@
-import type { SteamPlayerSummaries } from "$types/steamapi";
+import type { SteamFriendsList, SteamPlayerSummaries } from "$types/steamapi";
 import type { PlayerSummary } from "$types/lobby";
-import { id3ToId64 } from "$shared/steamid";
+import { id3ToId64, id64ToId3 } from "$shared/steamid";
 import Settings from "src/settings/settings";
 import Log from "src/log";
 import HistoryDatabase from "src/history/database";
 import { flags } from "src/consts";
 import Values from "src/settings/values";
+import type { PastPlayer } from "$types/data";
+import Server from "./server";
+import { Recieves } from "$types/messages";
 
 interface WaitingSummary {
 	id3: string;
@@ -19,8 +22,15 @@ export default class SteamApi {
 	static apiBase = "https://api.steampowered.com/"
 	static summaryQueue: WaitingSummary[] = [];
 
-	static query(path: string, params: Record<string, any> = {}) {
-		return new Promise<SteamPlayerSummaries>((res, rej) => {
+	static init() {
+		Server.on(Recieves.GetFriends, async (id3, { reply }) => {
+			const friends = await this.getUserFriends(id3);
+			reply(friends);
+		});
+	}
+
+	static query<T>(path: string, params: Record<string, any> = {}) {
+		return new Promise<T>((res, rej) => {
 			let searchParams = new URLSearchParams({
 				key: Settings.get("steamApiKey"),
 				...params
@@ -49,7 +59,7 @@ export default class SteamApi {
 		const ids = summaries.map(s => s.id64).join(",");
 
 		// Steam really loves to give 429s
-		this.query("ISteamUser/GetPlayerSummaries/v0002", { steamids: ids })
+		this.query<SteamPlayerSummaries>("ISteamUser/GetPlayerSummaries/v2", { steamids: ids })
 			.then((res) => {
 				this.delay = this.baseDelay; // reset delay on success
 
@@ -146,6 +156,8 @@ export default class SteamApi {
 			}
 		}
 
+		const shouldQuery = !flags.noSteamApi && Settings.get("steamApiKey");
+
 		if(playerData && playerData.avatarHash && playerData.createdTimestamp) {
 			callback({
 				avatarHash: playerData.avatarHash,
@@ -154,7 +166,7 @@ export default class SteamApi {
 				name: playerData.lastName
 			});
 
-			if(!flags.noSteamApi) {
+			if(shouldQuery) {
 				// If the query isn't priority don't start a second batch of summaries
 				if(deprioritize && this.summaryQueue.length > this.maxBatchSize) return;
 				this.summaryQueue.push(waitingSummary);
@@ -162,7 +174,7 @@ export default class SteamApi {
 				// This query will probably happen on its own, but just in case it doesn't
 				setTimeout(() => this.processSummaries(), 30000);
 			}
-		} else if(!flags.noSteamApi) {
+		} else if(shouldQuery) {
 			if(deprioritize && this.summaryQueue.length > this.maxBatchSize) return;
 			this.summaryQueue.push(waitingSummary);
 	
@@ -183,6 +195,29 @@ export default class SteamApi {
 			this.summaryQueue.push(waitingSummary);
 			
 			if(!summary) setTimeout(() => this.processSummaries(), 0);
+		}
+	}
+
+	// This is only called when the user actively clicks on a profile so we don't really care about the ratelimit
+	static async getUserFriends(id3: string) {
+		if(!Settings.get("steamApiKey") || flags.noSteamApi) return null;
+
+		try {
+			const id64 = id3ToId64(id3);
+			const res = await this.query<SteamFriendsList>("ISteamUser/GetFriendList/v1", { steamid: id64 });
+			const friendIds = res.friendslist.friends.map(f => id64ToId3(f.steamid));
+			const friends: PastPlayer[] = [];
+	
+			for(const id of friendIds) {
+				const playerdata = HistoryDatabase.getPlayerData(id);
+				if(playerdata) friends.push(playerdata);
+			}
+	
+			return friends;
+		} catch(e) {
+			// Expected if the user has a private friends list
+			if(e !== 401) Log.warning(`Failed to get friend for ${id3} from Steam API`);
+			return null;
 		}
 	}
 }
