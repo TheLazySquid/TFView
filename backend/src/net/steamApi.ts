@@ -69,7 +69,7 @@ export default class SteamApi {
 
 					// Get the stored avatars
 					let playerData = HistoryDatabase.getPlayerData(waiting.id3);
-					let avatars = playerData ? playerData.avatars : [];
+					let avatars = playerData?.avatars ? playerData.avatars : [];
 
 					if(playerData) {
 						if(!avatars.includes(player.avatarhash)) avatars.push(player.avatarhash);
@@ -99,7 +99,7 @@ export default class SteamApi {
 				if(typeof e === "number") {
 					Log.warning(`Failed to get player summaries (status ${e})`);
 				} else {
-					Log.warning("Failed to get player summaries");
+					Log.warning("Failed to get player summaries", e);
 				}
 
 				for(let i = 0; i < summaries.length; i++) {
@@ -148,7 +148,7 @@ export default class SteamApi {
 
 		// Check if we have the summary stored
 		let playerData = HistoryDatabase.getPlayerData(id3);
-		let avatars = playerData ? playerData.avatars : [];
+		let avatars = playerData?.avatars ? playerData.avatars : [];
 
 		if(playerData) {
 			if(playerData.avatarHash && !avatars.includes(playerData.avatarHash)) {
