@@ -1,17 +1,18 @@
 import fsp from "node:fs/promises";
 import { join } from "node:path";
-import { compiled, root } from "src/consts";
+import { root } from "src/consts";
 import { exec } from "node:child_process";
 import Server from "src/net/server";
 import { Message, Recieves } from "$types/messages";
 import Settings from "src/settings/settings";
+import { feature } from "bun:bundle";
 
 export default class StartMenu {
     static startMenuPath = 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs';
     static linkPath = join(this.startMenuPath, "TFView.lnk");
 
     static init() {
-        if(!compiled || process.platform !== "win32" || Settings.get("pickedIfShortcut")) return;
+        if(!feature("COMPILED") || process.platform !== "win32" || Settings.get("pickedIfShortcut")) return;
         
         let existsPromise = this.check();
         Server.onConnect("global", async (reply) => {

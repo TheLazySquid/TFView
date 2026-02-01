@@ -27,7 +27,7 @@ const topics: Record<Page, Topic[]> = {
 export default class Server {
     static events = new EventEmitter();
     static staticPath = join(root, "static");
-    static server: Bun.Server;
+    static server: Bun.Server<{ page: Page }>;
     static setupMode = false;
     
     static init() {

@@ -7,6 +7,10 @@ import { version, author } from "../../package.json";
 const args = parseArgs({
     args: process.argv.slice(2),
     options: {
+        production: {
+            type: "boolean",
+            short: "p"
+        },
         zip: {
             type: "string",
             short: "z"
@@ -25,10 +29,15 @@ if(!await exists("static")) {
 }
 
 console.log("Building binary...");
+
+const features = ["COMPILED"];
+if(args.values.production) features.push("PRODUCTION");
+
 await Bun.build({
     entrypoints: ["./src/index.ts"],
     minify: true,
     bytecode: true,
+    features,
     compile: {
         outfile: "./dist/unpacked/tfview",
         windows: {

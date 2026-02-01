@@ -1,4 +1,4 @@
-import { compiled, flags, isLinux, root } from "src/consts";
+import { flags, isLinux, root } from "src/consts";
 import { version } from "../../../package.json";
 import unzip from "unzip-stream";
 import { join } from "node:path";
@@ -10,6 +10,7 @@ import Values from "src/settings/values";
 import fsp from "node:fs/promises";
 import { spawn } from "node:child_process";
 import { close } from "src/close";
+import { feature } from "bun:bundle";
 
 interface UpdateInfo {
     url: string;
@@ -24,7 +25,7 @@ export default class Updater {
     static gotResponse = false;
 
     static async init() {
-        if(!compiled || flags.noUpdateCheck) return;
+        if(!feature("COMPILED") || flags.noUpdateCheck) return;
         
         Server.onConnect("global", (reply) => {
             if(this.checkFailed) {

@@ -1,10 +1,10 @@
 import { join } from "node:path";
 import { homedir } from "node:os";
+import { feature } from "bun:bundle";
 
 export const dataPath = join(homedir(), ".tfview");
 export const pageSize = 50;
-export const compiled = !process.execPath.replaceAll("\\", "/").includes(".bun/bin/bun");
-export const root = compiled ? join(process.execPath, "..") : join(Bun.main, "..", "..");
+export const root = feature("COMPILED") ? join(process.execPath, "..") : join(Bun.main, "..", "..");
 export const isLinux = process.platform === "linux";
 
 // Read flags

@@ -38,7 +38,7 @@ jobs:
         run: bun i --frozen-lockfile
 
       - name: Compile Release
-        run: cd backend && bun run compile --zip tfview_${{ github.ref_name }}_${{ matrix.release_suffix }}
+        run: cd backend && bun run compile --production --zip tfview_${{ github.ref_name }}_${{ matrix.release_suffix }}
 
       - name: Upload Release Artifacts
         uses: actions/upload-artifact@v4

@@ -20,6 +20,7 @@ import KillTracker from "./history/killTracker";
 import Updater from "./net/updater";
 import { close } from "./close";
 import SteamApi from "./net/steamApi";
+import { feature } from "bun:bundle";
 
 init();
 
@@ -35,6 +36,8 @@ async function init() {
         console.trace(reason);
     });
 
+    if(feature("COMPILED")) Log.info("Running compiled executable");
+    if(!feature("PRODUCTION")) Log.info("Using development build");
     if(flags.fakeData) Log.info("Using fake data for backend");
     if(flags.noMAC) Log.info("MegaAntiCheat integration disabled");
     if(flags.noSteamApi) Log.info("Steam API usage disabled");

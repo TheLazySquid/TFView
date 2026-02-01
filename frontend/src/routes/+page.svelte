@@ -15,7 +15,6 @@
     import Close from "@lucide/svelte/icons/chevron-last";
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
     import WS from "$lib/ws/wsclient.svelte";
-    import popups from "$lib/popups";
 
     WS.init("game");
 
@@ -30,10 +29,6 @@
             openPanel = type
             localStorage.setItem(storageKey, openPanel);
         }
-    }
-
-    window.test = () => {
-        popups.open("player", Game.players.find(p => p.name === "TheLazySquid"));
     }
 </script>
 

@@ -1,7 +1,7 @@
 import type { MessageTypes, Page, RecievedMessage, RecievesTypes, SentMessage } from "$types/messages";
 import { networkPort } from "$shared/consts";
 
-type Status = "idle" | "connecting" | "connected" | "disconnected"  ;
+type Status = "idle" | "connecting" | "connected" | "disconnected";
 
 class WSClient {
     page = "";
