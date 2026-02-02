@@ -13,7 +13,7 @@
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
     import { id3ToId64 } from "$shared/steamid";
-    import Tags from "$lib/ws/topics/tags.svelte";
+    import Settings from "$lib/ws/topics/settings.svelte";
     import { toast } from "svelte-sonner";
     import Avatar from "./Avatar.svelte";
     import PlayerIds from "$lib/ws/topics/playerIds.svelte";
@@ -193,7 +193,7 @@
                 Tags
             </ContextMenu.SubTrigger>
             <ContextMenu.SubContent>
-                {#each Tags.tags as tag}
+                {#each Settings.settings.tags as tag}
                     <!-- I know there's a built in checkbox but it's causing problems -->
                     <ContextMenu.Item onclick={() => toggleTag(tag.id)} closeOnSelect={false}>
                         <div class="w-5">

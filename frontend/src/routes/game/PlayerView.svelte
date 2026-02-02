@@ -3,18 +3,23 @@
     import { classIcons, nameColors } from "$lib/consts";
     import Game from "$lib/ws/pages/game.svelte";
     import Avatar from "$lib/components/player/Avatar.svelte";
-    import Tags from "$lib/ws/topics/tags.svelte";
     import Nameplate from "$lib/components/player/Nameplate.svelte";
     import Popups from "$lib/popups";
     import { columns } from "./state.svelte";
+    import UserFriends from "$lib/ws/topics/userFriends.svelte";
+    import Settings from "$lib/ws/topics/settings.svelte";
 
     let { index }: { index: number } = $props();
     let player = $derived(Game.players[index]);
     let color = $derived.by(() => {
-        if(player.user) return Game.userColor;
-        for(let tag of Tags.tags) {
+        if(player.user) return Settings.settings.userColor;
+        if(UserFriends.ids.has(player.ID3)) return Settings.settings.friendColor;
+
+        if(!Settings.settings.tags) return "";
+        for(let tag of Settings.settings.tags) {
             if(player.tags[tag.id]) return tag.color;
         }
+        
         return "";
     });
     let showHealth = $derived(Game.userTeam === 1 || player.team === Game.userTeam);

@@ -25,6 +25,7 @@ export interface SettingsType {
     steamApiKey?: string;
     tags: Tag[];
     userColor: string;
+    friendColor: string;
     masterbaseKey?: string;
     casual?: CasualConfig;
     launchTf2OnStart: boolean;
@@ -37,6 +38,8 @@ export interface ValuesType {
     userSummary?: PlayerSummary;
     killCounts?: Record<string, [number, number]>;
     skippedVersion?: string;
+    lastFriendFetch?: number;
+    friendIds?: string[];
 }
 
 export type GameDir = "steam" | "tf";

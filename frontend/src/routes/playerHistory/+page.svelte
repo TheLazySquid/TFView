@@ -5,7 +5,7 @@
     import ProfilePicturePopup from "$lib/components/popups/ProfilePicturePopup.svelte";
     import PlayerHistory from "$lib/ws/pages/playerHistory.svelte";
     import InfiniteLoading from "svelte-infinite-loading";
-    import Tags from "$lib/ws/topics/tags.svelte";
+    import Settings from "$lib/ws/topics/settings.svelte";
     import TagSelector from "$lib/components/history/TagSelector.svelte";
     import * as Search from "$lib/components/search";
     import Nameplate from "$lib/components/player/Nameplate.svelte";
@@ -15,12 +15,15 @@
     import WS from "$lib/ws/wsclient.svelte";
     import { formatDate } from "$lib/utils";
     import ReturnToTop from "$lib/components/history/ReturnToTop.svelte";
+    import type { PastPlayer } from "$types/data";
+    import UserFriends from "$lib/ws/topics/userFriends.svelte";
 
     WS.init("playerhistory");
 
-    const getColor = (tags: Record<string, boolean>) => {
-        for(let tag of Tags.tags) {
-            if(tags[tag.id]) {
+    const getColor = (player: PastPlayer) => {
+        if(UserFriends.ids.has(player.id)) return Settings.settings.friendColor;
+        for(let tag of Settings.settings.tags) {
+            if(player.tags[tag.id]) {
                 return tag.color;
             }
         }
@@ -77,7 +80,7 @@
             </thead>
             <tbody>
                 {#each PlayerHistory.players.items as player, i}
-                    <tr class="border-t-2 *:py-1" style="background-color: {getColor(player.tags)}">
+                    <tr class="border-t-2 *:py-1" style="background-color: {getColor(player)}">
                         <td>
                             <Avatar avatarHash={player.avatarHash} name={player.lastName} />
                         </td>

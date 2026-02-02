@@ -2,8 +2,12 @@ import type { SettingsType } from "$types/data";
 import { Message } from "$types/messages";
 import WS from "../wsclient.svelte";
 
+const defaultSettings: Partial<SettingsType> = {
+    tags: []
+}
+
 export default new class Settings {
-    settings = $state<Partial<SettingsType>>({});
+    settings = $state<SettingsType>(defaultSettings as SettingsType);
     settingsLoaded = $state(false);
 
     constructor() {
@@ -13,6 +17,7 @@ export default new class Settings {
         });
 
         WS.on(Message.SettingUpdate, ({ key, value }) => {
+            // @ts-expect-error headache otherwise
             this.settings[key] = value;
         });
     }

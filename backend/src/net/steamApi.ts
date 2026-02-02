@@ -4,11 +4,12 @@ import { id3ToId64, id64ToId3 } from "$shared/steamid";
 import Settings from "src/settings/settings";
 import Log from "src/log";
 import HistoryDatabase from "src/history/database";
-import { flags } from "src/consts";
+import { flags, friendCheckInterval } from "src/consts";
 import Values from "src/settings/values";
 import type { PastPlayer } from "$types/data";
 import Server from "./server";
-import { Recieves } from "$types/messages";
+import { Message, Recieves } from "$types/messages";
+import { getCurrentUserId } from "src/util";
 
 interface WaitingSummary {
 	id3: string;
@@ -24,9 +25,17 @@ export default class SteamApi {
 
 	static init() {
 		Server.on(Recieves.GetFriends, async (id3, { reply }) => {
-			const friends = await this.getUserFriends(id3);
+			const friends = await this.getPlayerFriends(id3);
 			reply(friends);
 		});
+
+		Server.onConnect("userfriends", (respond) => {
+			respond(Message.UserFriendIds, Values.get("friendIds") ?? []);
+		});
+
+		Settings.on("steamApiKey", this.tryGetUserFriends.bind(this));
+		Settings.on("steamPath", this.tryGetUserFriends.bind(this));
+		this.tryGetUserFriends();
 	}
 
 	static query<T>(path: string, params: Record<string, any> = {}) {
@@ -198,26 +207,48 @@ export default class SteamApi {
 		}
 	}
 
-	// This is only called when the user actively clicks on a profile so we don't really care about the ratelimit
-	static async getUserFriends(id3: string) {
+	static async tryGetUserFriends() {
+		if(!Settings.get("steamApiKey") || flags.noSteamApi) return;
+
+		const lastCheck = Values.get("lastFriendFetch") ?? 0;
+		const elapsed = Date.now() - lastCheck;
+		if(elapsed < friendCheckInterval) return;
+
+		const userId = await getCurrentUserId();
+		if(!userId) return;
+
+		const friendIds = await this.getFriendIds(userId);
+		if(!friendIds) return;
+
+		Values.set("friendIds", friendIds);
+		Server.send("userfriends", Message.UserFriendIds, friendIds);
+	}
+
+	static async getFriendIds(id3: string) {
 		if(!Settings.get("steamApiKey") || flags.noSteamApi) return null;
 
 		try {
 			const id64 = id3ToId64(id3);
 			const res = await this.query<SteamFriendsList>("ISteamUser/GetFriendList/v1", { steamid: id64 });
-			const friendIds = res.friendslist.friends.map(f => id64ToId3(f.steamid));
-			const friends: PastPlayer[] = [];
-	
-			for(const id of friendIds) {
-				const playerdata = HistoryDatabase.getPlayerData(id);
-				if(playerdata) friends.push(playerdata);
-			}
-	
-			return friends;
+			return res.friendslist.friends.map(f => id64ToId3(f.steamid));
 		} catch(e) {
 			// Expected if the user has a private friends list
 			if(e !== 401) Log.warning(`Failed to get friend for ${id3} from Steam API`);
 			return null;
 		}
+	}
+
+	// This is only called when the user actively clicks on a profile so we don't really care about the ratelimit
+	static async getPlayerFriends(id3: string) {
+		const friendIds = await this.getFriendIds(id3);
+		if(friendIds === null) return null;
+
+		const friends: PastPlayer[] = [];
+		for(const id of friendIds) {
+			const playerdata = HistoryDatabase.getPlayerData(id);
+			if(playerdata) friends.push(playerdata);
+		}
+
+		return friends;
 	}
 }

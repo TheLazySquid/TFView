@@ -6,6 +6,7 @@ export const dataPath = join(homedir(), ".tfview");
 export const pageSize = 50;
 export const root = feature("COMPILED") ? join(process.execPath, "..") : join(Bun.main, "..", "..");
 export const isLinux = process.platform === "linux";
+export const friendCheckInterval = 1000 * 60 * 60; // 1 hour
 
 // Read flags
 export let flags = {

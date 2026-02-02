@@ -8,7 +8,6 @@ export default new class Game {
     players: Player[] = $state([]);
     playersMap = new Map<string, Player>();
     currentServer: CurrentServerInfo | null = $state(null);
-    userColor: string | undefined = $state();
     definitelyNotInGame = $state(false);
 
     constructor() {
@@ -59,10 +58,6 @@ export default new class Game {
             if(definitelyNotInGame !== undefined) {
                 this.definitelyNotInGame = definitelyNotInGame;
             }
-        });
-
-        WS.on(Message.UserColor, (color) => {
-            this.userColor = color;
         });
     }
 

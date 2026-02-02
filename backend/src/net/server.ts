@@ -8,10 +8,10 @@ import Settings from "src/settings/settings";
 import { exists } from "node:fs/promises";
 
 export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" |
-    "tags" | "casual" | "global" | "killcounts" | "pastplayer" | "playerids";
+    "tags" | "casual" | "global" | "killcounts" | "pastplayer" | "playerids" | "userfriends";
 export type WS = Bun.ServerWebSocket<{ page: Page }>;
 
-const playerTopics: Topic[] = ["tags", "pastplayer", "playerids"];
+const playerTopics: Topic[] = ["tags", "pastplayer", "playerids", "userfriends", "settings"];
 const globalTopics: Topic[] = ["global"];
 
 const topics: Record<Page, Topic[]> = {

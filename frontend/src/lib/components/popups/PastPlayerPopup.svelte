@@ -14,6 +14,7 @@
     import Avatar from "../player/Avatar.svelte";
     import { onDestroy } from "svelte";
     import PastInfo from "../player/PastInfo.svelte";
+    import UserFriends from "$lib/ws/topics/userFriends.svelte";
 
     let player: PastPlayer | null = $state(null);
     const onUpdate = (data: Partial<PastPlayer> & { id: string }) => {
@@ -77,7 +78,8 @@
                 <div>Note:</div>
                 <textarea class="resize-y p-1 h-[150px] w-full outline not-focus:outline-zinc-600 mb-3"
                 bind:value={player.note} onchange={sendNote}></textarea>
-                <TagSelector bind:tagsObj={player.tags} onChange={saveTags}>
+                <TagSelector bind:tagsObj={player.tags} onChange={saveTags}
+                    friend={UserFriends.ids.has(player.id)}>
                     <div class="-mt-1">Tags:</div>
                 </TagSelector>
             </Tabs.Content>

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Settings from "$lib/ws/pages/settings.svelte";
+    import Settings from "$lib/ws/topics/settings.svelte";
     import WS from "$lib/ws/wsclient.svelte";
     import type { SettingsType } from "$types/data";
     import { Recieves } from "$types/messages";

@@ -15,8 +15,6 @@ export enum Message {
     InitialSettings,
     SettingUpdate,
     CurrentServer,
-    Tags,
-    UserColor,
     Directories,
     RconConnected,
     CasualConfig,
@@ -28,7 +26,8 @@ export enum Message {
     InitialPlayerIds,
     PlayerIdClear,
     PlayerIdJoin,
-    PlayerIdLeave
+    PlayerIdLeave,
+    UserFriendIds
 }
 
 export type MessageTypes =
@@ -42,8 +41,6 @@ export type MessageTypes =
     | SentMessage<Message.InitialSettings, SettingsType>
     | SentMessage<Message.SettingUpdate, { key: keyof SettingsType, value: any }>
     | SentMessage<Message.CurrentServer, { server: CurrentServerInfo | null, definitelyNotInGame?: boolean }>
-    | SentMessage<Message.Tags, Tag[]>
-    | SentMessage<Message.UserColor, string | undefined>
     | SentMessage<Message.Directories, GameDirectories>
     | SentMessage<Message.RconConnected, boolean>
     | SentMessage<Message.CasualConfig, CasualConfig>
@@ -56,6 +53,7 @@ export type MessageTypes =
     | SentMessage<Message.PlayerIdClear, void>
     | SentMessage<Message.PlayerIdJoin, string>
     | SentMessage<Message.PlayerIdLeave, string>
+    | SentMessage<Message.UserFriendIds, string[]>
     | SentMessage<`list-${string}-addStart`, any>
     | SentMessage<`list-${string}-update`, { id: any, update: any }>
     | SentMessage<`list-${string}-delete`, any>

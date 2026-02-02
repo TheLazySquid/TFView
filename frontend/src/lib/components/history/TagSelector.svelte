@@ -3,18 +3,20 @@
     import Tag from "@lucide/svelte/icons/tag";
     import CircleX from "@lucide/svelte/icons/circle-x";
     import CirclePlus from "@lucide/svelte/icons/circle-plus";
-    import Tags from "$lib/ws/topics/tags.svelte";
+    import Settings from "$lib/ws/topics/settings.svelte";
     import type { Snippet } from "svelte";
     import { watch } from "runed";
 
     interface Props {
+        you?: boolean;
+        friend?: boolean;
         tags?: string[];
         tagsObj?: Record<string, boolean>;
         onChange?: () => void;
         children?: Snippet;
     }
 
-    let { tags = $bindable(), tagsObj = $bindable({}), onChange, children }: Props = $props();
+    let { you, friend, tags = $bindable(), tagsObj = $bindable({}), onChange, children }: Props = $props();
     if(tags) tagsObj = Object.fromEntries(tags.map((t) => [t, true]));
 
     watch(() => Object.values(tagsObj), () => {
@@ -25,12 +27,25 @@
         onChange?.();
     }, { lazy: true });
 
-    let hasTags = $derived(Tags.tags.filter((t) => tagsObj[t.id]));
-    let missingTags = $derived(Tags.tags.filter((t) => !tagsObj[t.id]));
+    let hasTags = $derived(Settings.settings.tags.filter((t) => tagsObj[t.id]));
+    let missingTags = $derived(Settings.settings.tags.filter((t) => !tagsObj[t.id]));
 </script>
+
+{#snippet uninteractiveTag(name: string, color: string)}
+    <button class="flex items-center text-sm rounded-full px-1.5 bg-accent gap-1">
+        <Tag size={12} color={color} />
+        <div class="-mt-0.5">{name}</div>
+    </button>
+{/snippet}
 
 <div class="flex items-center flex-wrap gap-1">
     {@render children?.()}
+    {#if you}
+        {@render uninteractiveTag("You", Settings.settings.userColor)}
+    {/if}
+    {#if friend}
+        {@render uninteractiveTag("Steam Friend", Settings.settings.friendColor)}
+    {/if}
     {#each hasTags as tag (tag.id)}
         <button onclick={() => tagsObj[tag.id] = false}
         class="flex items-center text-sm rounded-full px-1.5 bg-accent gap-1">

@@ -27,6 +27,9 @@
     import { formatDate, formatTimeAgo } from "$lib/utils";
     import type { PastPlayer } from "$types/data";
     import Nameplate from "../player/Nameplate.svelte";
+    import Settings from "$lib/ws/topics/settings.svelte";
+    import UserFriends from "$lib/ws/topics/userFriends.svelte";
+    import userFriendsSvelte from "$lib/ws/topics/userFriends.svelte";
 
     let player: Player | null = $state.raw(null);
     let friends: PastPlayer[] | null = $state.raw(null);
@@ -151,14 +154,9 @@ style="max-width: min(700px, 85%);">
                 <div>Note:</div>
                 <textarea class="resize-y p-1 h-[150px] w-full outline not-focus:outline-zinc-600"
                 bind:value={player.note} onchange={sendNote}></textarea>
-                <TagSelector bind:tagsObj={player.tags} onChange={saveTags}>
+                <TagSelector bind:tagsObj={player.tags} onChange={saveTags}
+                    you={player.user} friend={UserFriends.ids.has(player.ID3)}>
                     <div class="-mt-1">Tags:</div>
-                    {#if player.user}
-                        <button class="flex items-center text-sm rounded-full px-1.5 bg-accent gap-1">
-                            <Tag size={12} color={Game.userColor} />
-                            <div class="-mt-0.5">You</div>
-                        </button>
-                    {/if}
                 </TagSelector>
             </Tabs.Content>
             {#if !player.user}

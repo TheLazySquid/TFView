@@ -20,14 +20,10 @@ const defaultSettings: Partial<SettingsType> = {
             name: "Suspicious",
             color: "#c9c020",
             id: "suspicious"
-        },
-        {
-            name: "Friend",
-            color: "#037d96",
-            id: "friend"
         }
     ],
     userColor: "#7a2f00",
+    friendColor: "#037d96",
     launchTf2OnStart: false,
     openUiOnStart: false,
     finishedSetup: false
@@ -55,20 +51,10 @@ export default class Settings {
             reply(Message.InitialSettings, this.settings);
         });
 
-        Server.onConnect("game", (reply) => {
-            reply(Message.UserColor, this.settings.userColor);
-        });
-
-        Server.onConnect("tags", (reply) => {
-            reply(Message.Tags, this.settings.tags);
-        });
-
         Server.on(Recieves.UpdateSetting, ({ key, value }, { ws }) => {
             this.set(key, value);
             this.events.emit(key, value);
 
-            if(key === "tags") Server.send("tags", Message.Tags, value);
-            else if(key === "userColor") Server.send("game", Message.UserColor, value);
             Server.sendOthers(ws, "settings", Message.SettingUpdate, { key, value });
         });
 

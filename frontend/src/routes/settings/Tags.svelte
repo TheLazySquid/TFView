@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Tag } from "$types/data";
-    import Settings from "$lib/ws/pages/settings.svelte";
+    import Settings from "$lib/ws/topics/settings.svelte";
     import { flip } from "svelte/animate";
     import { dndzone, type DndEvent } from "svelte-dnd-action";
     import { toast } from "svelte-sonner";
@@ -63,10 +63,16 @@
         WS.send(Recieves.UpdateSetting, { key: "userColor", value: Settings.settings.userColor });
     }
 
+    const sendFriendColor = () => {
+        WS.send(Recieves.UpdateSetting, { key: "friendColor", value: Settings.settings.friendColor });
+    }
+
     const onupdate = throttle(sendState, 250);
     const onUserColorUpdate = throttle(sendUserColor, 250);
+    const onFriendColorUpdate = throttle(sendFriendColor, 250);
 
     watch(() => Settings.settings.userColor, onUserColorUpdate, { lazy: true });
+    watch(() => Settings.settings.friendColor, onFriendColorUpdate, { lazy: true });
 </script>
 
 <h2 class="text-xl verdana col-span-2 pt-4">User Tags</h2>
@@ -76,6 +82,14 @@
             <ColorPicker bind:hex={Settings.settings.userColor} label="" isAlpha={false} />
         </div>
         <div class="font-semibold">You</div>
+    </div>
+{/if}
+{#if Settings.settings.friendColor}
+    <div class="flex items-center gap-2">
+        <div class="picker">
+            <ColorPicker bind:hex={Settings.settings.friendColor} label="" isAlpha={false} />
+        </div>
+        <div class="font-semibold">Steam Friends</div>
     </div>
 {/if}
 <div class="flex flex-col" onconsider={handleDndConsider} onfinalize={handleDndFinalize}
