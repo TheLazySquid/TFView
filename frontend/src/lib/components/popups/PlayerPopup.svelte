@@ -8,7 +8,6 @@
     import HistoryIcon from "@lucide/svelte/icons/folder-clock";
     import ChatIcon from "@lucide/svelte/icons/message-square-more";
     import KillfeedIcon from "@lucide/svelte/icons/swords";
-    import Tag from "@lucide/svelte/icons/tag";
     import Killfeed from "../game/Killfeed.svelte";
     import Popup from "./Popup.svelte";
     import Game from "$lib/ws/pages/game.svelte";
@@ -25,20 +24,11 @@
     import * as Tooltip from "$lib/components/ui/tooltip";
     import PastInfo from "../player/PastInfo.svelte";
     import { formatDate, formatTimeAgo } from "$lib/utils";
-    import type { PastPlayer } from "$types/data";
-    import Nameplate from "../player/Nameplate.svelte";
-    import Settings from "$lib/ws/topics/settings.svelte";
     import UserFriends from "$lib/ws/topics/userFriends.svelte";
-    import userFriendsSvelte from "$lib/ws/topics/userFriends.svelte";
 
     let player: Player | null = $state.raw(null);
-    let friends: PastPlayer[] | null = $state.raw(null);
 
     const onOpen = (openPlayer: Player) => {
-        // Fetch the users' friends list
-        WS.sendAndRecieve(Recieves.GetFriends, openPlayer.ID3)
-            .then(f => friends = f);
-
         player = openPlayer;
         return player.name;
     }
@@ -138,18 +128,6 @@ style="max-width: min(700px, 85%);">
                             </Tooltip.Content>
                         </Tooltip.Root>
                     </Tooltip.Provider>
-                {/if}
-                {#if friends?.length}
-                    <div>Known Friends:</div>
-                    <div class="flex flex-col max-h-[200px] overflow-y-auto">
-                        {#each friends as friend}
-                            <div class="flex items-center gap-2">
-                                <Avatar avatarHash={friend.avatarHash} name={friend.lastName} />
-                                <Nameplate current={false} player={friend} grow={true}
-                                    onclick={() => Game.openPlayer(friend.id)}/>
-                            </div>
-                        {/each}
-                    </div>
                 {/if}
                 <div>Note:</div>
                 <textarea class="resize-y p-1 h-[150px] w-full outline not-focus:outline-zinc-600"

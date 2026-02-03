@@ -21,6 +21,7 @@ export interface PopupArguments {
     profilePicture: { hash: string, name: string };
     input: InputOptions;
     confirm: ConfirmOptions;
+    friends: { name: string, id3: string };
 }
 
 interface PopupReturned {

@@ -1,8 +1,5 @@
 <script lang="ts">
     import Avatar from "$lib/components/player/Avatar.svelte";
-    import PastGamePopup from "$lib/components/popups/PastGamePopup.svelte";
-    import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
-    import ProfilePicturePopup from "$lib/components/popups/ProfilePicturePopup.svelte";
     import PlayerHistory from "$lib/ws/pages/playerHistory.svelte";
     import InfiniteLoading from "svelte-infinite-loading";
     import Settings from "$lib/ws/topics/settings.svelte";
@@ -17,6 +14,7 @@
     import ReturnToTop from "$lib/components/history/ReturnToTop.svelte";
     import type { PastPlayer } from "$types/data";
     import UserFriends from "$lib/ws/topics/userFriends.svelte";
+    import PlayerPopups from "$lib/components/popups/PlayerPopups.svelte";
 
     WS.init("playerhistory");
 
@@ -35,9 +33,7 @@
 	<title>Player History | TFView</title>
 </svelte:head>
 
-<ProfilePicturePopup />
-<PastPlayerPopup />
-<PastGamePopup />
+<PlayerPopups />
 <InputPopup />
 <ConfirmPopup />
 

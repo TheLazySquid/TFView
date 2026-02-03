@@ -15,6 +15,9 @@
     import Close from "@lucide/svelte/icons/chevron-last";
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
     import WS from "$lib/ws/wsclient.svelte";
+    import FriendsPopup from "$lib/components/popups/FriendsPopup.svelte";
+    import Play from "@lucide/svelte/icons/play";
+    import PlayerPopups from "$lib/components/popups/PlayerPopups.svelte";
 
     WS.init("game");
 
@@ -36,9 +39,7 @@
 	<title>Game View | TFView</title>
 </svelte:head>
 
-<PlayerPopup />
-<PastGamePopup />
-<PastPlayerPopup />
+<PlayerPopups />
 <ProfilePicturePopup />
 <InputPopup />
 

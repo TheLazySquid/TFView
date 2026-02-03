@@ -2,15 +2,13 @@
     import GameHistory from "$lib/ws/pages/gameHistory.svelte";
     import InfiniteLoading from "svelte-infinite-loading";
     import Popups from "$lib/popups";
-    import PastGamePopup from "$lib/components/popups/PastGamePopup.svelte";
-    import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
     import * as Search from "$lib/components/search";
     import ConfirmPopup from "$lib/components/popups/ConfirmPopup.svelte";
     import DeleteGame from "$lib/components/history/DeleteGame.svelte";
     import WS from "$lib/ws/wsclient.svelte";
-    import ProfilePicturePopup from "$lib/components/popups/ProfilePicturePopup.svelte";
     import { formatDate, formatDuration } from "$lib/utils";
     import ReturnToTop from "$lib/components/history/ReturnToTop.svelte";
+    import PlayerPopups from "$lib/components/popups/PlayerPopups.svelte";
 
     WS.init("gamehistory");
 </script>
@@ -19,9 +17,7 @@
 	<title>Game History | TFView</title>
 </svelte:head>
 
-<ProfilePicturePopup />
-<PastGamePopup />
-<PastPlayerPopup />
+<PlayerPopups />
 <ConfirmPopup />
 
 {#snippet historyEnd()}

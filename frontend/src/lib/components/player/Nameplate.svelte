@@ -233,5 +233,8 @@
                 </ContextMenu.SubContent>
             </ContextMenu.Sub>
         {/if}
+        <ContextMenu.Item onclick={() => Popups.open("friends", { id3: id, name })}>
+            View Known Friends
+        </ContextMenu.Item>
     </ContextMenu.Content>
 </ContextMenu.Root>
