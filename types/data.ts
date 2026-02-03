@@ -3,7 +3,8 @@ import type { PlayerSummary } from "./lobby";
 export interface Tag {
     id: string;
     name: string;
-    color?: string;
+    color: string;
+    highlight: boolean;
 }
 
 export interface CasualProfile {
@@ -25,7 +26,9 @@ export interface SettingsType {
     steamApiKey?: string;
     tags: Tag[];
     userColor: string;
+    highlightUser: boolean;
     friendColor: string;
+    highlightFriends: boolean;
     masterbaseKey?: string;
     casual?: CasualConfig;
     launchTf2OnStart: boolean;

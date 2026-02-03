@@ -21,9 +21,9 @@
     WS.init("playerhistory");
 
     const getColor = (player: PastPlayer) => {
-        if(UserFriends.ids.has(player.id)) return Settings.settings.friendColor;
+        if(UserFriends.ids.has(player.id) && Settings.settings.highlightFriends) return Settings.settings.friendColor;
         for(let tag of Settings.settings.tags) {
-            if(player.tags[tag.id]) {
+            if(tag.highlight && player.tags[tag.id]) {
                 return tag.color;
             }
         }

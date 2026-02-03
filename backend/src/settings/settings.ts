@@ -14,16 +14,20 @@ const defaultSettings: Partial<SettingsType> = {
         {
             name: "Cheater",
             color: "#930d08",
+            highlight: true,
             id: "cheater"
         },
         {
             name: "Suspicious",
             color: "#c9c020",
+            highlight: true,
             id: "suspicious"
         }
     ],
     userColor: "#7a2f00",
+    highlightUser: true,
     friendColor: "#037d96",
+    highlightFriends: true,
     launchTf2OnStart: false,
     openUiOnStart: false,
     finishedSetup: false
@@ -42,9 +46,15 @@ export default class Settings {
             // Can't use this.file.json() because if it fails bun will quietly exit the process
             // Rather than throw an error normally for some reason
             const contents = await readFile(filePath);
-            this.settings = JSON.parse(contents.toString());
+            const parsed = JSON.parse(contents.toString());
+            this.settings = Object.assign({}, defaultSettings, parsed);
         } catch {
             this.settings = defaultSettings as SettingsType;
+        }
+
+        // Add highlight to any tags missing it
+        for(const tag of this.settings.tags) {
+            tag.highlight ??= true;
         }
 
         Server.onConnect("settings", (reply) => {

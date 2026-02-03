@@ -3,3 +3,4 @@
 * Fixed players not being clickable in past game popup
 * Added display for known friends when clicking on player in game
 * Added automatic tag for steam friends
+* Added option to not have tags apply highlight

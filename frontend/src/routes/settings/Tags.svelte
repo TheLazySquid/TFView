@@ -11,6 +11,7 @@
     import throttle from "throttleit";
     import ColorPicker from "svelte-awesome-color-picker";
     import { watch } from "runed";
+    import { Checkbox } from "$lib/components/ui/checkbox";
     
     let items: Tag[] = $state([]);
     $effect(() => {
@@ -51,7 +52,7 @@
 
     const createTag = () => {
         let color = "#" + Math.floor(Math.random() * 0xffffff).toString(16).padStart(6, "0");
-        items.push({ id: crypto.randomUUID(), name: "New Tag", color });
+        items.push({ id: crypto.randomUUID(), name: "New Tag", color, highlight: true });
         onupdate();
     }
 
@@ -59,35 +60,27 @@
         WS.send(Recieves.UpdateSetting, { key: "tags", value: $state.snapshot(items) });
     }
 
-    const sendUserColor = () => {
-        WS.send(Recieves.UpdateSetting, { key: "userColor", value: Settings.settings.userColor });
-    }
-
-    const sendFriendColor = () => {
-        WS.send(Recieves.UpdateSetting, { key: "friendColor", value: Settings.settings.friendColor });
-    }
-
     const onupdate = throttle(sendState, 250);
-    const onUserColorUpdate = throttle(sendUserColor, 250);
-    const onFriendColorUpdate = throttle(sendFriendColor, 250);
-
-    watch(() => Settings.settings.userColor, onUserColorUpdate, { lazy: true });
-    watch(() => Settings.settings.friendColor, onFriendColorUpdate, { lazy: true });
 </script>
 
 <h2 class="text-xl verdana col-span-2 pt-4">User Tags</h2>
-{#if Settings.settings.userColor}
+<p class="text-xs italic">Checkbox indicates whether the color will be used to highlight users</p>
+{#if Settings.loaded}
     <div class="flex items-center gap-2">
+        <Checkbox class="mb-1" bind:checked={Settings.settings.highlightUser}
+            onCheckedChange={() => Settings.update("highlightUser")} />
         <div class="picker">
-            <ColorPicker bind:hex={Settings.settings.userColor} label="" isAlpha={false} />
+            <ColorPicker bind:hex={Settings.settings.userColor} label="" isAlpha={false}
+                onInput={() => Settings.updateThrottled("userColor")} />
         </div>
         <div class="font-semibold">You</div>
     </div>
-{/if}
-{#if Settings.settings.friendColor}
     <div class="flex items-center gap-2">
+        <Checkbox class="mb-1" bind:checked={Settings.settings.highlightFriends}
+            onCheckedChange={() => Settings.update("highlightFriends")} />
         <div class="picker">
-            <ColorPicker bind:hex={Settings.settings.friendColor} label="" isAlpha={false} />
+            <ColorPicker bind:hex={Settings.settings.friendColor} label="" isAlpha={false}
+                onInput={() => Settings.updateThrottled("friendColor")} />
         </div>
         <div class="font-semibold">Steam Friends</div>
     </div>
@@ -102,8 +95,8 @@ use:dndzone={{ items, flipDurationMs, dragDisabled, dropTargetStyle: {} }}>
         </div>
     {/each}
 </div>
-<button class="m-1" onclick={createTag}>
-    <CirclePlus size={25} />
+<button class="mt-1" onclick={createTag}>
+    <CirclePlus size={20} />
 </button>
 
 <style>

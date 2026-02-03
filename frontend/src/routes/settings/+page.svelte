@@ -60,7 +60,7 @@
         
                     {#if setting.type === "string"}
                         <input class="border-b border-zinc-600 outline-none" {onchange}
-                            bind:value={Settings.settings[setting.id]} />
+          loaded    bind:value={Settings.settings[setting.id]} />
                     {:else if setting.type === "number"}
                         <input class="border-b border-zinc-600 outline-none" type="number" {onchange}
                             bind:value={Settings.settings[setting.id]} />

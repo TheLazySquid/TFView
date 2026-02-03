@@ -4,6 +4,7 @@
     import Trash from "@lucide/svelte/icons/trash-2";
 	import ColorPicker from "svelte-awesome-color-picker";
 	import { watch } from "runed";
+	import { Checkbox } from "$lib/components/ui/checkbox";
 	
 	interface Props {
 		tag: Tag;
@@ -25,17 +26,22 @@
 	}
 
 	// Update when the color changes (onInput sucks)
-	watch(() => tag.color, onupdate, { lazy: true });
+	watch([() => tag.color, () => tag.highlight], onupdate, { lazy: true });
 </script>
+
+<Checkbox class="mb-1" bind:checked={tag.highlight} />
 
 <div class="picker">
 	<ColorPicker bind:hex={tag.color} label="" isAlpha={false} />
 </div>
+
 <input class="border-b border-zinc-600 w-[250px] outline-none"
 	bind:value={tag.name} {onchange} />
+
 <button onclick={() => ondelete(tag)}>
 	<Trash />
 </button>
+
 <button class={dragDisabled ? "cursor-grab" : "cursor-grabbing"}
 onpointerdown={() => dragDisabled = false}>
 	<GripVertical />

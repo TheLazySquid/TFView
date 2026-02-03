@@ -12,12 +12,11 @@
     let { index }: { index: number } = $props();
     let player = $derived(Game.players[index]);
     let color = $derived.by(() => {
-        if(player.user) return Settings.settings.userColor;
-        if(UserFriends.ids.has(player.ID3)) return Settings.settings.friendColor;
+        if(player.user && Settings.settings.highlightUser) return Settings.settings.userColor;
+        if(UserFriends.ids.has(player.ID3) && Settings.settings.highlightFriends) return Settings.settings.friendColor;
 
-        if(!Settings.settings.tags) return "";
         for(let tag of Settings.settings.tags) {
-            if(player.tags[tag.id]) return tag.color;
+            if(tag.highlight && player.tags[tag.id]) return tag.color;
         }
         
         return "";
