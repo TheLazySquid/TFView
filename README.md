@@ -52,3 +52,33 @@ You will be walked through setup upon opening TFView for the first time. There a
 ## Storage Usage
 
 TFView uses a surprisngly small amount of storage space. Even with 100,000 different players and 6,500 different games recorded the database only uses roughly 42 megabytes.
+
+## Development
+
+This project features two parts, a frontend written in [svelte](https://svelte.dev/) and a backend in typescript which is turned into an executable via [bun](https://bun.com/). There is also a small updater in the backend which handles the final stages of updating, written in C++. The backend records data to a sqlite database located at \[HOME]/.tfview/history.sqlite. This database is used regardless of whether you're using the development or release version, so if you doing something risky you may want to take a backup.
+
+### Setup
+
+1. Make sure you have [git](https://git-scm.com/) and [bun](https://bun.com/) installed.
+2. If you intent to distribute the executable, also install [make](https://www.gnu.org/software/make/) and [gcc](https://www.gnu.org/software/gcc/).
+3. Clone this repo with git and cd into it
+4. Run `bun install`
+
+You'll then likely want to open a second terminal to run the frontend and backend simultaneously.
+
+### Running the backend
+
+1. cd into the `backend` directory
+2. Run `bun start`
+
+### Running the frontend
+
+1. cd into the `frontend` directory
+2. Run `bun run dev`
+
+### Creating a release
+
+1. cd into `backend`
+2. If you have made changes to the frontend, clear the `static` directory.
+3. Run `bun run compile`
+4. The final contents will be in `dist/unpacked`
