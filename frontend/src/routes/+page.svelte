@@ -40,6 +40,7 @@
 </svelte:head>
 
 <PlayerPopups />
+<PlayerPopup />
 <ProfilePicturePopup />
 <InputPopup />
 
