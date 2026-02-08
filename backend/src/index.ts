@@ -21,6 +21,7 @@ import Updater from "./net/updater";
 import { close } from "./close";
 import SteamApi from "./net/steamApi";
 import { feature } from "bun:bundle";
+import Scripting from "./game/scripting";
 
 init();
 
@@ -64,6 +65,7 @@ async function init() {
         LogParser.init();
         Demos.init();
         Updater.init();
+        Scripting.init();
     }
     
     HistoryDatabase.init();

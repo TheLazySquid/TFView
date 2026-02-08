@@ -63,7 +63,7 @@ export default class LogParser {
             .catch(() => {
                 if(!this.shouldRestart) Log.warning("Failed to stat logfile");
                 this.shouldRestart = true;
-            })
+            });
     }
 
     static readLog() {

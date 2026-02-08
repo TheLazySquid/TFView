@@ -1,5 +1,5 @@
 {
-  "include": ["./src/**/*.ts", "./scripts/**/*.ts", "../types/**/*.ts", "../shared/**/*.ts"],
+  "include": ["./src/**/*.ts", "./scripts/**/*.ts", "../types/**/*.ts", "../shared/**/*.ts", "scripts/test.js"],
 
   "compilerOptions": {
     // Environment setup & latest features
