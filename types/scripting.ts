@@ -9,6 +9,9 @@ export interface ScriptContext {
         error(...messages: string[]): void;
         warning(...messages: string[]): void;
     },
+    rcon: {
+        run(command: string): Promise<string | null>;
+    },
     steamPath: string;
     tfPath: string;
 }

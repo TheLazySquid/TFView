@@ -14,10 +14,9 @@ export default class Demos {
     static events = new EventEmitter();
     static recentDemos: string[] = [];
     static firstDemo = true;
-    static closeWatcher: () => void;
 
     static init() {
-        this.closeWatcher = createWatcher("demos", async (event, file) => {
+        createWatcher("demos", async (event, file) => {
             if(event === "change" || !file.endsWith(".dem")) return;
 
             this.demosPath = join(Settings.get("tfPath"), "demos");
@@ -39,7 +38,6 @@ export default class Demos {
     }
 
     static close() {
-        this.closeWatcher();
         this.closeDemo();
     }
 

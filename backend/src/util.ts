@@ -40,26 +40,16 @@ export function createWatcher(path: string, callback: (event: "rename" | "change
 		const fullPath = join(Settings.get("tfPath"), path);
 
 		try {
-			watcher = watch(fullPath, null, (event, file) => {
+			watcher = watch(fullPath, { persistent: false }, (event, file) => {
 				callback(event, file.toString());
 			});
 		} catch {
-			watchTimeout = setTimeout(() => watchDemos(), 5000);
+			watchTimeout = setTimeout(() => watchDemos(), 5000).unref();
 		}
-	}
-
-	const close = () => {
-		if(watcher) watcher.close();
-		if(watchTimeout) clearTimeout(watchTimeout);
-		watcher = null;
-		watchTimeout = null;
 	}
 
 	watchDemos();
 	Settings.on("tfPath", () => {
-		close();
 		watchDemos();
 	});
-
-	return close;
 }
