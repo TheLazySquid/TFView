@@ -29,6 +29,10 @@ TFView tracks the number of kills you get with each weapon, letting you see how 
 
 ![Weapon Kill Count Tracker Preview](./images/Weapon_Kill_Counts.png)
 
+### Advanced Scripting
+
+TFView can work in tandem with tf2 scripts to trigger effects outside of the game that would normally be impossible, such as saving data or modifying configs on the fly. See the [Scripting](#Scripting) section below for more info.
+
 ## Installation
 
 * Download the windows or linux zip from [the latest release](https://github.com/TheLazySquid/TFView/releases/latest)
@@ -53,9 +57,37 @@ You will be walked through setup upon opening TFView for the first time. There a
 
 TFView uses a surprisngly small amount of storage space. Even with 100,000 different players and 6,500 different games recorded the database only uses roughly 42 megabytes.
 
+## Scripting
+
+TFView can detect when a string of the following format is echoed in the TF2 console: `tfview.script(arg1,arg2,etc)`. It will then attempt to run the file `[HOME]/.tfview/scripts/[SCRIPT].js` (.ts is also supported). For example, running `echo "tfview.hi(arg, 123)"` will run the file `[HOME]/.tfview/scripts/hi.js`. If the file exports a `run` function, it will be called with a context object (more on that below), and then all the arguments supplied, like so: `export function run(context, arg1, arg2, etc)`. Note that the arguments will always be strings. Calling a script in this way may add a second or two of delay, and has a chance of being dropped.
+
+### Environment
+
+Scripts run in a standard nodejs/bun esm environment. This means that node apis can be used, such as `import fs from "node:fs"`.
+
+### Context
+
+Scripts are given a context object which allows them to interact with TF2 and TFView, which looks like so:
+
+|Property|Type|Description|
+|--------|----|-----------|
+|steamPath|string|The path to the user's steam directory.|
+|tfPath|string|The path to the user's tf directory.|
+|rcon.run|(command: string) => Promise<string \| null>|Runs a command in the user's TF2 console, and returns a promise containing the response, if there is any. Resolves with null if the command fails.|
+|toast.success|(message: string) => void|Displays a success toast on the web UI.|
+|toast.error|(message: string) => void|Displays an error toast on the web UI.|
+|toast.warning|(message: string) => void|Displays a warning toast on the web UI.|
+|log.info|(...items: any[]) => void|Logs info to the console and log file.|
+|log.warning|(...items: any[]) => void|Logs a warning to the console and log file.|
+|log.error|(...items: any[]) => void|Logs an error to the console and log file.|
+
+### Persistent Scripts
+
+By default, scripts are re-run every time they are called. By naming a script `[SCRIPT].persistent.js` it will instead be run on startup, with its exported `init` function being called with the context object. If a persistent script is deleted or updated its exported `close` function will be called with the context object. Like with a normal script, the `run` function will be called with the context and arguments when `echo "tfview.script(...args)"` is called. This is useful if state needs to be "remembered" between runs.
+
 ## Development
 
-This project features two parts, a frontend written in [svelte](https://svelte.dev/) and a backend in typescript which is turned into an executable via [bun](https://bun.com/). There is also a small updater in the backend which handles the final stages of updating, written in C++. The backend records data to a sqlite database located at \[HOME]/.tfview/history.sqlite. This database is used regardless of whether you're using the development or release version, so if you doing something risky you may want to take a backup.
+This project features two parts, a frontend written in [svelte](https://svelte.dev/) and a backend in typescript which is turned into an executable via [bun](https://bun.com/). There is also a small updater in the backend which handles the final stages of updating, written in C++. The backend records data to a sqlite database located at `[HOME]/.tfview/history.sqlite`. This database is used regardless of whether you're using the development or release version, so if you doing something risky you may want to take a backup.
 
 ### Setup
 
