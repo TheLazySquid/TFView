@@ -1,1 +1,1 @@
-* Made script runner actually ready for use
+* Added SteamHistory integration, allows you to view if players have SourceBans

@@ -52,6 +52,7 @@ You will be walked through setup upon opening TFView for the first time. There a
 2. Add `ip 0.0.0.0`, `rcon_password [your password here]`, and `net_start` to your autoexec.
 3. (Optional, but strongly recommended) Get a [Steam api key](https://steamcommunity.com/dev/apikey). This lets you see the profile pictures of the players in your game.
 4. (Optional) Get a [MegaAntiCheat api key](https://megaanticheat.com/provision) to send demos of games you play to MegaAntiCheat's masterbase. (You will also need to run `ds_enable 2` in the console).
+5. (Optional) Get a [SteamHistory api key](https://steamhistory.net/api) to show which players in your lobby have SourceBans.
 
 ## Storage Usage
 
