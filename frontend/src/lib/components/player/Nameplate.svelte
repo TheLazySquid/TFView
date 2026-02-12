@@ -156,7 +156,7 @@
             {#if player.sourceBanned}
                 <Tooltip.Provider>
                     <Tooltip.Root>
-                        <Tooltip.Trigger class="cursor-pointer">
+                        <Tooltip.Trigger class="cursor-pointer" onclick={() => Popups.open("sourceBans", { id3: id, name })}>
                             <Gavel />
                         </Tooltip.Trigger>
                         <Tooltip.Content>

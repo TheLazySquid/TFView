@@ -22,6 +22,7 @@ export interface PopupArguments {
     input: InputOptions;
     confirm: ConfirmOptions;
     friends: { name: string, id3: string };
+    sourceBans: { name: string, id3: string };
 }
 
 interface PopupReturned {

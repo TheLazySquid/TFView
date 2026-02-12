@@ -1,3 +1,4 @@
+import type { SourceBanInfo } from "./apis";
 import type { CasualConfig, CasualProfile, GameDir, GameDirectories, PastPlayer, SettingsType, StoredPastGame, Tag } from "./data";
 import type { CurrentServerInfo, KickReason, Player } from "./lobby";
 
@@ -90,7 +91,8 @@ export enum Recieves {
     LaunchGame,
     WantsStartMenuShortcut,
     WantsToUpdate,
-    GetFriends
+    GetFriends,
+    GetSourcebans
 }
 
 export type RecievesTypes = 
@@ -123,6 +125,7 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.WantsStartMenuShortcut, boolean>
     | RecievedMessage<Recieves.WantsToUpdate, string>
     | RecievedMessage<Recieves.GetFriends, string, PastPlayer[]>
+    | RecievedMessage<Recieves.GetSourcebans, string, SourceBanInfo[] | null>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
 export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup" | "casual" | "killcounts";

@@ -35,7 +35,7 @@ export interface SteamFriendsList {
 
 export type BanState = "Permanent" | "Temp-Ban" | "Expired" | "Unbanned";
 
-export interface BanInfo {
+export interface SourceBanInfo {
     SteamID: string;
     Name: string;
     CurrentState: BanState;
@@ -47,5 +47,5 @@ export interface BanInfo {
 }
 
 export interface SourceBansResponse {
-    response: Record<string, BanInfo[]>;
+    response: Record<string, SourceBanInfo[]>;
 }
