@@ -359,6 +359,7 @@ export default class GameMonitor {
                     if(playerData.note) player.note = playerData.note;
                     if(playerData.encounters) player.encounters = playerData.encounters;
                     if(playerData.names) player.names = playerData.names;
+                    if(playerData.sourceBanned) player.sourceBanned = playerData.sourceBanned;
                 }
 
                 // track the player in the game history

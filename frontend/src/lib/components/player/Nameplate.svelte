@@ -153,7 +153,7 @@
                     </Tooltip.Root>
                 </Tooltip.Provider>
             {/if}
-            {#if player.sourceBanned}
+            {#if player.sourceBanned && Settings.settings.steamhistoryApiKey}
                 <Tooltip.Provider>
                     <Tooltip.Root>
                         <Tooltip.Trigger class="cursor-pointer" onclick={() => Popups.open("sourceBans", { id3: id, name })}>

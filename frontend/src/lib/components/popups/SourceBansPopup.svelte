@@ -45,7 +45,6 @@
     <Dialog.Header>
         <Dialog.Title>{name}'s SourceBans</Dialog.Title>
     </Dialog.Header>
-    <div class="text-xs italic">This only includes players who you have encountered at least once</div>
     {#if sourceBans?.length}
         <div class="max-h-[800px] overflow-y-auto">
             {#each sourceBans as ban, i}
