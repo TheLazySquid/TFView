@@ -9,6 +9,7 @@
     import Check from "@lucide/svelte/icons/check";
     import TextCursorInput from "@lucide/svelte/icons/text-cursor-input";
     import Images from "@lucide/svelte/icons/images";
+    import Gavel from "@lucide/svelte/icons/gavel";
     import Popups from "$lib/popups";
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
@@ -148,6 +149,18 @@
                         </Tooltip.Trigger>
                         <Tooltip.Content>
                             Past {player.names.length === 2 ? "name" : "names"}: {player.names.filter(n => n !== name).join(", ")}
+                        </Tooltip.Content>
+                    </Tooltip.Root>
+                </Tooltip.Provider>
+            {/if}
+            {#if player.sourceBanned}
+                <Tooltip.Provider>
+                    <Tooltip.Root>
+                        <Tooltip.Trigger class="cursor-pointer">
+                            <Gavel />
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>
+                            One or more SourceBans on record
                         </Tooltip.Content>
                     </Tooltip.Root>
                 </Tooltip.Provider>

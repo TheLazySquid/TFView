@@ -24,6 +24,7 @@ export interface SettingsType {
     rconPort: number;
     rconPassword: string;
     steamApiKey?: string;
+    steamhistoryApiKey?: string;
     tags: Tag[];
     userColor: string;
     highlightUser: boolean;
@@ -81,7 +82,8 @@ export interface CurrentGame {
 }
 
 export type Stored<T> = {
-    [K in keyof T]: T[K] extends (string | number | boolean | null) ? T[K] : string;
+    [K in keyof T]: T[K] extends (string | number | null) ? T[K]
+        : T[K] extends boolean ? number : string;
 }
 
 export interface PlayerEncounter {
@@ -107,6 +109,7 @@ export interface StoredPlayer {
     tags?: string[];
     nickname?: string;
     note?: string;
+    sourceBanned?: boolean;
 }
 
 export type PastPlayer = Omit<StoredPlayer, 'tags'> & {

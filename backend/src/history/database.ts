@@ -57,7 +57,7 @@ export default class HistoryDatabase {
         this.db.close();
     }
 
-    static version = 2;
+    static version = 3;
     static createDb() {
         const dbPath = join(dataPath, flags.fakeData ? "testhistory.sqlite" : "history.sqlite");
         
@@ -93,7 +93,8 @@ export default class HistoryDatabase {
             createdTimestamp INTEGER,
             tags TEXT,
             nickname TEXT,
-            note TEXT
+            note TEXT,
+            sourceBanned INTEGER
         )`);
 
         const dbVersion = this.db.prepare<{ "user_version": number }, []>(`PRAGMA main.user_version;`)
@@ -110,6 +111,12 @@ export default class HistoryDatabase {
         if(!newDb && dbVersion < 2) {
             Log.info("Migrating history database to version 2");
             this.db.run(`ALTER TABLE games DROP COLUMN players`);
+        }
+
+        // Add the sourceBanned column to players
+        if(!newDb && dbVersion < 3) {
+            Log.info("Migrating history database to version 3");
+            this.db.run(`ALTER TABLE players ADD COLUMN sourceBanned INTEGER;`);
         }
 
         this.db.prepare(`PRAGMA main.user_version = ${this.version};`).run();
@@ -135,14 +142,20 @@ export default class HistoryDatabase {
         return value;
     }
 
-    static parseRow<T>(row: Stored<T>, parseKeys: (keyof T)[]): T {
-        for(let key of parseKeys) {
+    static parseRow<T>(row: Stored<T>, objects: (keyof T)[], booleans: (keyof T)[] = []): T {
+        let parsed = row as T;
+
+        for(let key of objects) {
             if (typeof row[key] === "string") {
-                row[key] = JSON.parse(row[key]);
+                parsed[key] = JSON.parse(row[key]);
             }
         }
 
-        return row as T;
+        for(let key of booleans) {
+            parsed[key] = Boolean(row[key]) as any;
+        }
+
+        return parsed;
     }
 
     // Queries for past games
@@ -247,7 +260,7 @@ export default class HistoryDatabase {
     }
 
     static parsePlayerRow(row: Stored<StoredPlayer>): PastPlayer {
-        let parsed = this.parseRow(row, ["names", "avatars", "tags"]);
+        let parsed = this.parseRow(row, ["names", "avatars", "tags"], ["sourceBanned"]);
 
         let tags: Record<string, boolean> = {};
         if(parsed.tags) {
@@ -309,8 +322,8 @@ export default class HistoryDatabase {
             this.db.query(`UPDATE players SET ${key} = $value WHERE id = $id`).run({ value, id });
     
             this.pastPlayers.update(id, { [key]: value });
-        } catch {
-            Log.error(`Tried to set ${key} for player ${id} that doesn't exist`);
+        } catch(e) {
+            Log.error(`Failed to set ${key} for player ${id}`, e);
         }
     }
 
@@ -321,8 +334,8 @@ export default class HistoryDatabase {
                 .run({ tags: JSON.stringify(activeTags), id });
     
             this.pastPlayers.update(id, { tags });
-        } catch {
-            Log.error(`Tried to set tags for player ${id} that doesn't exist`);
+        } catch(e) {
+            Log.error(`Failed to set user data for player ${id}`, e);
         }
     }
 
@@ -337,8 +350,8 @@ export default class HistoryDatabase {
                 .run({ id, avatarHash, createdTimestamp, avatars: JSON.stringify(summary.avatars) });
 
             this.pastPlayers.update(id, { avatarHash, createdTimestamp });
-        } catch {
-            Log.error(`Tried to set user data for player ${id} that doesn't exist`);
+        } catch(e) {
+            Log.error(`Failed to set user data for player ${id}`, e);
         }
     }
 
@@ -348,6 +361,12 @@ export default class HistoryDatabase {
 
         this.db.query(`UPDATE encounters SET name = $name WHERE rowid = $rowid`)
             .run({ name, rowid: encounterRowid });
+    }
+
+    static markPlayerSourceBanned(id: string) {
+        // Bans are never removed
+        this.db.query(`UPDATE players SET sourceBanned = 1 WHERE id = $id`).run({ id });
+        this.pastPlayers.update(id, { sourceBanned: true });
     }
 
     static createCurrentGame(game: CurrentGame) {

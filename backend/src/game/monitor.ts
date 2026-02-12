@@ -16,6 +16,7 @@ import { getCurrentUserId } from "src/util";
 import KillTracker from "src/history/killTracker";
 import Settings from "src/settings/settings";
 import Log from "src/log";
+import SourceBans from "src/net/sourcebans";
 
 export default class GameMonitor {
     static logPath: string;
@@ -395,8 +396,18 @@ export default class GameMonitor {
                     });
                 }
 
-                if(player.user) SteamApi.getUserSummary(player.ID3, summaryCallback);
-                else SteamApi.getSummary(player.ID3, summaryCallback);
+                if(player.user) {
+                    SteamApi.getUserSummary(player.ID3, summaryCallback);
+                } else {
+                    SteamApi.getSummary(player.ID3, summaryCallback);
+                    SourceBans.getBanned(player.ID3).then((banned) => {
+                        player.sourceBanned = banned;
+                        Server.send("game", Message.PlayerUpdate, {
+                            ID3: player.ID3,
+                            sourceBanned: banned
+                        });
+                    });
+                }
             }
         }
 
@@ -419,6 +430,7 @@ export default class GameMonitor {
             this.missedQueries.delete(id);
             this.playerIds.delete(id);
             this.players.splice(i, 1);
+            SourceBans.onLeave(id);
             playersLeft = true;
             i--;
 

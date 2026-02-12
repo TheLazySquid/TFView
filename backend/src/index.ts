@@ -22,6 +22,7 @@ import { close } from "./close";
 import SteamApi from "./net/steamApi";
 import { feature } from "bun:bundle";
 import Scripting from "./game/scripting";
+import SourceBans from "./net/sourcebans";
 
 init();
 
@@ -76,6 +77,7 @@ async function init() {
     StartMenu.init();
     KillTracker.init();
     SteamApi.init();
+    SourceBans.init();
 
     Server.on(Recieves.CloseApp, async (closeGame) => {
         if(closeGame) await Rcon.run("quit");

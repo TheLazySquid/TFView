@@ -65,6 +65,9 @@ export interface Player {
     tags: Record<string, boolean>;
     nickname?: string | null;
     note: string;
+
+    // From steamhistory api
+    sourceBanned?: boolean;
 }
 
 export interface ListEvent {
