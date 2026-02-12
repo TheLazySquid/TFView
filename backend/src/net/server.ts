@@ -20,7 +20,7 @@ const topics: Record<Page, Topic[]> = {
     gamehistory: ["gamehistory", ...playerTopics, ...globalTopics],
     settings: ["settings", "directories", ...globalTopics],
     casual: ["casual", ...globalTopics],
-    setup: ["directories", ...globalTopics],
+    setup: ["directories", "settings", ...globalTopics],
     killcounts: ["killcounts", ...globalTopics]
 }
 

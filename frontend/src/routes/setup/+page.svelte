@@ -12,6 +12,7 @@
     import { goto } from "$app/navigation";
     import Integrations from "./Integrations.svelte";
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
+    import ComponentPopup from "$lib/components/popups/ComponentPopup.svelte";
 
     let step = $state(0);
     const steps = 5;
@@ -45,6 +46,7 @@
 </svelte:head>
 
 <InputPopup />
+<ComponentPopup />
 
 <AlertDialog.Root open>
     <AlertDialog.Content class="!max-w-[700px]">
