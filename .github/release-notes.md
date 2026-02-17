@@ -1,1 +1,1 @@
-* Added SteamHistory integration, allows you to view if players have SourceBans
+* Fixed updater on linux

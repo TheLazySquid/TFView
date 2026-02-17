@@ -61,6 +61,7 @@ int main() {
     #ifdef _WIN32
     system("start tfview.exe");
     #else
+    system("chmod +x tfview");
     system("./tfview &");
     #endif
     

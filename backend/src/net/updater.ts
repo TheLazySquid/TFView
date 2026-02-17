@@ -8,7 +8,7 @@ import Server from "./server";
 import { Message, Recieves } from "$types/messages";
 import Values from "src/settings/values";
 import fsp from "node:fs/promises";
-import { spawn } from "node:child_process";
+import { spawn, execSync } from "node:child_process";
 import { close } from "src/close";
 import { feature } from "bun:bundle";
 
@@ -112,10 +112,13 @@ export default class Updater {
         const newUpdater = join(root, "updated", `updater${extension}`);
         const oldUpdater = join(root, `updater${extension}`);
         
-        if(await fsp.exists(newUpdater)) {
-            await fsp.rm(oldUpdater, { force: true });
-            await fsp.rename(newUpdater, oldUpdater);
-        }
+        // if(await fsp.exists(newUpdater)) {
+        //     await fsp.rm(oldUpdater, { force: true });
+        //     await fsp.rename(newUpdater, oldUpdater);
+        // }
+
+        // On linux, mark the updater as exectable
+        if(isLinux) execSync(`chmod +x "${oldUpdater}"`);
 
         // Remove the updated directory
         const updatedPath = join(root, "updated");
