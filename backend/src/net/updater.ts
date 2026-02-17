@@ -112,10 +112,10 @@ export default class Updater {
         const newUpdater = join(root, "updated", `updater${extension}`);
         const oldUpdater = join(root, `updater${extension}`);
         
-        // if(await fsp.exists(newUpdater)) {
-        //     await fsp.rm(oldUpdater, { force: true });
-        //     await fsp.rename(newUpdater, oldUpdater);
-        // }
+        if(await fsp.exists(newUpdater)) {
+            await fsp.rm(oldUpdater, { force: true });
+            await fsp.rename(newUpdater, oldUpdater);
+        }
 
         // On linux, mark the updater as exectable
         if(isLinux) execSync(`chmod +x "${oldUpdater}"`);
