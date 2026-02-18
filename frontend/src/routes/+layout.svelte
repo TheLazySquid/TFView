@@ -42,13 +42,13 @@
 	WS.on(Message.Warning, (message) => toast.warning(message));
 	WS.on(Message.Error, (message) => toast.error(message));
 	WS.on(Message.OfferStartMenuShortcut, () => {
-		createActionToast("Would you like to create a start menu shortcut for TFView?",[
+		createActionToast("shortcut", "Would you like to create a start menu shortcut for TFView?", [
 			{ label: "Create", onClick: () => WS.send(Recieves.WantsStartMenuShortcut, true) },
 			{ label: "Ignore", onClick: () => WS.send(Recieves.WantsStartMenuShortcut, false) }
 		]);
 	});
 	WS.on(Message.UpdateAvailable, (change) => {
-		createActionToast(`An update for TFView is available! (${change})`, [
+		createActionToast("update", `An update for TFView is available! (${change})`, [
 			{ label: "Update Now", onClick: () => WS.send(Recieves.WantsToUpdate, "now") },
 			{ label: "Later", onClick: () => WS.send(Recieves.WantsToUpdate, "later") },
 			{ label: "Skip Update", onClick: () => WS.send(Recieves.WantsToUpdate, "skip") }

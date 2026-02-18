@@ -1,5 +1,6 @@
 <script lang="ts">
     import { toast } from "svelte-sonner";
+    import { openToasts } from "./state";
 
     interface Action {
         label: string;
@@ -17,6 +18,9 @@
     function onClick(action: Action) {
         toast.dismiss(id);
         action.onClick();
+        
+        const index = openToasts.indexOf(id);
+        if(index !== -1) openToasts.splice(index, 1);
     }
 </script>
 
