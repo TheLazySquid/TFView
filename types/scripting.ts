@@ -15,3 +15,13 @@ export interface ScriptContext {
     steamPath: string;
     tfPath: string;
 }
+
+export interface PersistentScriptContext extends ScriptContext {
+    watchConsole: (regex: RegExp, callback: (data: RegExpExecArray) => void) => () => void;
+}
+
+export interface PersistentScript {
+    exports: any;
+    context: PersistentScriptContext;
+    cleanup: (() => void)[];
+}

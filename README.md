@@ -76,6 +76,7 @@ Scripts are given a context object which allows them to interact with TF2 and TF
 |--------|----|-----------|
 |steamPath|string|The path to the user's steam directory.|
 |tfPath|string|The path to the user's tf directory.|
+|watchConsole|(regex: RegExp, callback: (data: RegExpExecArray) => void) => () => void|Runs a callback whenever the given regex appears in the TF2 console. Returns a callback to cancel watching. Only available for persistent scripts.|
 |rcon.run|(command: string) => Promise<string \| null>|Runs a command in the user's TF2 console, and returns a promise containing the response, if there is any. Resolves with null if the command fails.|
 |toast.success|(message: string) => void|Displays a success toast on the web UI.|
 |toast.error|(message: string) => void|Displays an error toast on the web UI.|

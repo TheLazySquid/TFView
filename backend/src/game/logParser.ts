@@ -41,7 +41,13 @@ export default class LogParser {
     }
 
     static on(regex: RegExp, callback: (data: RegExpExecArray) => void) {
-        this.listeners.push({ regex, callback });
+        const listener: LogListener = { regex, callback };
+        this.listeners.push(listener);
+
+        return () => {
+            const index = this.listeners.indexOf(listener);
+            if(index !== -1) this.listeners.splice(index, 1);
+        }
     }
 
     static poll() {
