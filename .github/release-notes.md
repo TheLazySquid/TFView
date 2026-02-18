@@ -1,1 +1,1 @@
-* Fixed updater on linux
+* Fixed toasts not being interactable with a modal open
