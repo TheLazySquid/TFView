@@ -8,7 +8,7 @@ import { flags, friendCheckInterval } from "src/consts";
 import Values from "src/settings/values";
 import type { PastPlayer } from "$types/data";
 import Server from "./server";
-import { Message, Recieves } from "$types/messages";
+import { Message, Recieves, type FriendsResult } from "$types/messages";
 import { getCurrentUserId } from "src/util";
 import { BatchRequester } from "./batchRequester";
 
@@ -158,38 +158,43 @@ export default class SteamApi {
 		const userId = await getCurrentUserId();
 		if(!userId) return;
 
-		const friendIds = await this.getFriendIds(userId);
-		if(!friendIds) return;
+		try {
+			const friendIds = await this.getFriendIds(userId);
 
-		Values.set("friendIds", friendIds);
-		Server.send("userfriends", Message.UserFriendIds, friendIds);
+			Values.set("friendIds", friendIds);
+			Server.send("userfriends", Message.UserFriendIds, friendIds);
+		} catch(e) {
+			if(e !== 401) Log.error("Failed to fetch user friends list");
+			return;
+		}
 	}
 
 	static async getFriendIds(id3: string) {
 		if(!Settings.get("steamApiKey") || flags.noSteamApi) return null;
 
-		try {
-			const id64 = id3ToId64(id3);
-			const res = await this.query<SteamFriendsList>("ISteamUser/GetFriendList/v1", { steamid: id64 });
-			return res.friendslist.friends.map(f => id64ToId3(f.steamid));
-		} catch(e) {
-			// Expected if the user has a private friends list
-			if(e !== 401) Log.warning(`Failed to get friend for ${id3} from Steam API`);
-			return null;
-		}
+		const id64 = id3ToId64(id3);
+		const res = await this.query<SteamFriendsList>("ISteamUser/GetFriendList/v1", { steamid: id64 });
+		return res.friendslist.friends.map(f => id64ToId3(f.steamid));
 	}
 
 	// This is only called when the user actively clicks on a profile so we don't really care about the ratelimit
-	static async getPlayerFriends(id3: string) {
-		const friendIds = await this.getFriendIds(id3);
-		if(friendIds === null) return null;
+	static async getPlayerFriends(id3: string): Promise<FriendsResult> {
+		try {
+			const friendIds = await this.getFriendIds(id3);
+	
+			const friends: PastPlayer[] = [];
+			for(const id of friendIds) {
+				const playerdata = HistoryDatabase.getPlayerData(id);
+				if(playerdata) friends.push(playerdata);
+			}
+	
+			return { status: "success", friends };
+		} catch(e) {
+			// Private profile, expected
+			if(e === 401) return { status: "private" };
 
-		const friends: PastPlayer[] = [];
-		for(const id of friendIds) {
-			const playerdata = HistoryDatabase.getPlayerData(id);
-			if(playerdata) friends.push(playerdata);
+			Log.error("Failed to fetch friends for " + id3, e);
+			return { status: "error" };
 		}
-
-		return friends;
 	}
 }

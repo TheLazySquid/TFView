@@ -1,6 +1,11 @@
 import type { SourceBanInfo } from "./apis";
-import type { CasualConfig, CasualProfile, GameDir, GameDirectories, PastPlayer, SettingsType, StoredPastGame, Tag } from "./data";
+import type { CasualConfig, CasualProfile, GameDir, GameDirectories, PastPlayer, SettingsType, StoredPastGame } from "./data";
 import type { CurrentServerInfo, KickReason, Player } from "./lobby";
+
+export interface FriendsError { status: "error" }
+export interface FriendsPrivate { status: "private" }
+export interface FriendsSuccess { status: "success", friends: PastPlayer[] }
+export type FriendsResult = FriendsError | FriendsPrivate | FriendsSuccess;
 
 // Sending messages from the backend
 export type SentMessage<Channel, Data> = { channel: Channel, data: Data };
@@ -124,7 +129,7 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.LaunchGame, void>
     | RecievedMessage<Recieves.WantsStartMenuShortcut, boolean>
     | RecievedMessage<Recieves.WantsToUpdate, string>
-    | RecievedMessage<Recieves.GetFriends, string, PastPlayer[]>
+    | RecievedMessage<Recieves.GetFriends, string, FriendsResult>
     | RecievedMessage<Recieves.GetSourcebans, string, SourceBanInfo[] | null>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
