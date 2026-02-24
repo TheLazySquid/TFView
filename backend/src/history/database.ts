@@ -12,6 +12,7 @@ import { Message, Recieves } from "$types/messages";
 import type { Player, PlayerSummary } from "$types/lobby";
 import { id64ToId3 } from "$shared/steamid";
 import SteamApi from "src/net/steamApi";
+import { isBot } from "src/util";
 
 export default class HistoryDatabase {
     static db: Database;
@@ -430,7 +431,7 @@ export default class HistoryDatabase {
 
     static recordPlayerEncounter(player: Player, game: CurrentGame) {
         // Ignore unconnected/bots
-        if(player.ID3.length <= 2) return;
+        if(isBot(player.ID3)) return;
         
         const now = Date.now();
 

@@ -31,6 +31,11 @@ export async function getCurrentUserId() {
 	}
 }
 
+export function isBot(id3: string) {
+	// This ignores like 100 real users but they're all valve employees
+	return id3.length <= 2;
+}
+
 export function createWatcher(path: string, callback: (event: "rename" | "change", file: string) => void) {
 	let watcher: FSWatcher | null = null;
 	let watchTimeout: Timer | null = null;

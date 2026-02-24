@@ -10,6 +10,7 @@ import { fakeCurrentGame } from "src/fakedata/game";
 import HistoryDatabase from "./database";
 import Demos from "./demos";
 import GameMonitor from "src/game/monitor";
+import { isBot } from "src/util";
 
 export interface CurrentGame {
     map: string;
@@ -225,9 +226,7 @@ export default class History {
     }
 
     static onJoin(player: Player) {
-        // Don't record bots (Technically there's 100 people who this won't track, but they're all valve employees so I don't care)
-        // This does raise the question of what if someone with id 1 joins a game with a bot, will they have the same id?
-        if(player.ID3.length <= 2 || !this.currentGame) return;
+        if(isBot(player.ID3) || !this.currentGame) return;
 
         if(!player.names.includes("unconnected") && player.name === "unconnected") {
             this.joinedUnconnected.push(player.ID3);

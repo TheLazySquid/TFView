@@ -12,7 +12,7 @@ import { id3ToId64 } from "$shared/steamid";
 import HistoryDatabase from "src/history/database";
 import { fakeChat, fakeKillfeed, fakePlayers } from "src/fakedata/game";
 import { LoadedInfiniteList } from "src/net/infiniteList";
-import { getCurrentUserId } from "src/util";
+import { getCurrentUserId, isBot } from "src/util";
 import KillTracker from "src/history/killTracker";
 import Settings from "src/settings/settings";
 import Log from "src/log";
@@ -146,6 +146,15 @@ export default class GameMonitor {
 
             Server.send("playerids", Message.PlayerIdClear, undefined);
             this.playerIds.clear();
+        });
+
+        // If the steamhistory api key changes try to fetch all the bans again
+        Settings.on("steamhistoryApiKey", (key) => {
+            if(!key) return;
+            for(let player of this.players) {
+                if(isBot(player.ID3)) continue;
+                this.updateSourcebans(player);
+            }
         });
     }
 
@@ -373,8 +382,7 @@ export default class GameMonitor {
                 this.players.push(player as Player);
                 this.playerMap.set(id, player as Player);
 
-                // These are almost certainly tfbots
-                if(player.ID3.length <= 2) continue;
+                if(isBot(player.ID3)) continue;
 
                 const summaryCallback = (summary: PlayerSummary) => {
                     player.avatarHash = summary.avatarHash;
@@ -401,13 +409,7 @@ export default class GameMonitor {
                     SteamApi.getUserSummary(player.ID3, summaryCallback);
                 } else {
                     SteamApi.getSummary(player.ID3, summaryCallback);
-                    SourceBans.getBanned(player.ID3).then((banned) => {
-                        player.sourceBanned = banned;
-                        Server.send("game", Message.PlayerUpdate, {
-                            ID3: player.ID3,
-                            sourceBanned: banned
-                        });
-                    });
+                    this.updateSourcebans(player as Player);
                 }
             }
         }
@@ -560,5 +562,15 @@ export default class GameMonitor {
             timestamp: Date.now()
         }
         this.chat.push(message);
+    }
+
+    static updateSourcebans(player: Player) {
+        SourceBans.getBanned(player.ID3).then((banned) => {
+            player.sourceBanned = banned;
+            Server.send("game", Message.PlayerUpdate, {
+                ID3: player.ID3,
+                sourceBanned: banned
+            });
+        });
     }
 }
