@@ -11,6 +11,7 @@ import Server from "./server";
 import { Message, Recieves, type FriendsResult } from "$types/messages";
 import { getCurrentUserId } from "src/util";
 import { BatchRequester } from "./batchRequester";
+import GameMonitor from "src/game/monitor";
 
 export default class SteamApi {
 	static apiBase = "https://api.steampowered.com/"
@@ -181,9 +182,16 @@ export default class SteamApi {
 	static async getPlayerFriends(id3: string): Promise<FriendsResult> {
 		try {
 			const friendIds = await this.getFriendIds(id3);
-	
+			const ingameFriends = friendIds.filter(id => GameMonitor.playerIds.has(id));
+			const otherFriends = friendIds.filter(id => !GameMonitor.playerIds.has(id));
+
 			const friends: PastPlayer[] = [];
-			for(const id of friendIds) {
+			for(const id of ingameFriends) {
+				const playerdata = HistoryDatabase.getPlayerData(id);
+				if(playerdata) friends.push(playerdata);
+			}
+
+			for(const id of otherFriends) {
 				const playerdata = HistoryDatabase.getPlayerData(id);
 				if(playerdata) friends.push(playerdata);
 			}
