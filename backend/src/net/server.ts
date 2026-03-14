@@ -165,8 +165,21 @@ export default class Server {
         this.events.once(channel.toString(), callback);
     }
 
+    static pendingMessages: Record<string, any[]> = {};
     static send<C extends MessageTypes["channel"]>(topic: Topic, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {
-        this.server.publish(topic, JSON.stringify({ channel, data }));
+        this.pendingMessages[topic] ??= [];
+
+        const pending = this.pendingMessages[topic];
+        pending.push({ channel, data });
+
+        // If a message will be sent multiple times simultaneously batch them together
+        if(pending.length !== 1) return; 
+        setTimeout(() => {
+            const message = pending.length === 1 ? pending[0] : pending;
+            this.server.publish(topic, JSON.stringify(message));
+            
+            this.pendingMessages[topic] = [];
+        }, 0);
     }
 
     static sendTo<C extends MessageTypes["channel"]>(ws: WS, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {

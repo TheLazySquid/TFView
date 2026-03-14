@@ -58,13 +58,16 @@ class WSClient {
         }, { once: true });
 
         this.ws.addEventListener("message", (event) => {
-            let message = JSON.parse(event.data);
+            let data = JSON.parse(event.data);
+            let messages = Array.isArray(data) ? data : [data];
 
-            if(message.reply) {
-                this.replies.get(message.reply)?.(message.data);
-                this.replies.delete(message.reply);
-            } else {
-                this.listeners.get(message.channel)?.forEach(cb => cb(message.data));
+            for(const message of messages) {
+                if(message.reply) {
+                    this.replies.get(message.reply)?.(message.data);
+                    this.replies.delete(message.reply);
+                } else {
+                    this.listeners.get(message.channel)?.forEach(cb => cb(message.data));
+                }
             }
         });
     }
