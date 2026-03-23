@@ -45,7 +45,7 @@
     <ReturnToTop />
     <div style="width: min(1000px, 90%)">
         <Search.SearchBox title="Search Players" singular="player" plural="players"
-            list={PlayerHistory.players} defaultParams={{ sortBy: "lastSeen" }}>
+            list={PlayerHistory.players} defaultParams={{ tags: {}, sortBy: "lastSeen" }}>
             <div class="content-center">Name or ID:</div>
             <Search.TextInput bind:value={PlayerHistory.players.params.name} />
 
@@ -56,7 +56,7 @@
             <Search.DateInput bind:timestamp={PlayerHistory.players.params.before} />
 
             <div class="content-center">Tags:</div>
-            <TagSelector bind:tags={PlayerHistory.players.params.tags}
+            <TagSelector bind:tagsObj={PlayerHistory.players.params.tags}
                 onChange={() => PlayerHistory.players.updateSearch()} />
 
             <div class="content-center">Sort by:</div>

@@ -5,30 +5,29 @@
     import CirclePlus from "@lucide/svelte/icons/circle-plus";
     import Settings from "$lib/ws/topics/settings.svelte";
     import type { Snippet } from "svelte";
-    import { watch } from "runed";
 
     interface Props {
         you?: boolean;
         friend?: boolean;
-        tags?: string[];
         tagsObj?: Record<string, boolean>;
         onChange?: () => void;
         children?: Snippet;
     }
 
-    let { you, friend, tags = $bindable(), tagsObj = $bindable({}), onChange, children }: Props = $props();
-    if(tags) tagsObj = Object.fromEntries(tags.map((t) => [t, true]));
-
-    watch(() => Object.values(tagsObj), () => {
-        if(tags) {
-            tags = Object.keys(tagsObj).filter((key) => tagsObj[key]);
-        }
-
-        onChange?.();
-    }, { lazy: true });
+    let { you, friend, tagsObj = $bindable({}), onChange, children }: Props = $props();
 
     let hasTags = $derived(Settings.settings.tags.filter((t) => tagsObj[t.id]));
     let missingTags = $derived(Settings.settings.tags.filter((t) => !tagsObj[t.id]));
+
+    function removeTag(id: string) {
+        tagsObj[id] = false;
+        onChange?.();
+    }
+
+    function addTag(id: string) {
+        tagsObj[id] = true;
+        onChange?.();
+    }
 </script>
 
 {#snippet uninteractiveTag(name: string, color: string)}
@@ -47,7 +46,7 @@
         {@render uninteractiveTag("Steam Friend", Settings.settings.friendColor)}
     {/if}
     {#each hasTags as tag (tag.id)}
-        <button onclick={() => tagsObj[tag.id] = false}
+        <button onclick={() => removeTag(tag.id)}
         class="flex items-center text-sm rounded-full px-1.5 bg-accent gap-1">
             <Tag size={12} color={tag.color} />
             <div class="-mt-0.5">{tag.name}</div>
@@ -61,7 +60,7 @@
             </DropdownMenu.Trigger>
             <DropdownMenu.Content class="z-[100]">
                 {#each missingTags as tag}
-                    <DropdownMenu.Item onclick={() => tagsObj[tag.id] = true}>
+                    <DropdownMenu.Item onclick={() => addTag(tag.id)}>
                         <Tag size={16} color={tag.color} />
                         {tag.name}
                     </DropdownMenu.Item>

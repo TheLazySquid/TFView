@@ -7,7 +7,7 @@ export default new class PlayerHistory {
     players = new InfiniteList<PastPlayer, PlayerSearchParams>({
         listId: "pastplayers",
         idKey: "id",
-        params: { tags: [], sortBy: "lastSeen" },
+        params: { tags: {}, sortBy: "lastSeen" },
         filter: (player, params) => {
             if(params.sortBy === "encounters") return false;
 
@@ -33,7 +33,7 @@ export default new class PlayerHistory {
                 ) &&
                 (!params.after || player.lastSeen >= params.after) &&
                 (!params.before || player.lastSeen <= params.before) &&
-                (params.tags.every(tag => player.tags[tag]))
+                (Object.entries(params.tags).every(([tag, enabled]) => !enabled || player.tags[tag]))
             )
         }
     });

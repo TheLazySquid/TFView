@@ -223,7 +223,8 @@ export default class HistoryDatabase {
         }
 
         if(params.tags) {
-            for(let tag of params.tags) {
+            for(let tag in params.tags) {
+                if(!params.tags[tag]) continue;
                 whereClauses.push(`tags LIKE "%""${this.escapeLike(tag, true)}""%" ESCAPE '\\'`);
             }
         }

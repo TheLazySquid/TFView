@@ -2,3 +2,4 @@
 * Added re-query for sourcebans if steamhistory api key changes mid-game
 * Added sorting for friends list that puts in-game users at the top
 * Fixed flicker of players list when teams switch
+* Fixed tags not working after clearing search
