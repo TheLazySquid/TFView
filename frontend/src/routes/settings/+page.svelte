@@ -47,7 +47,7 @@
 <InputPopup />
 <ComponentPopup />
 
-<div class="flex justify-center pt-5 max-h-full overflow-y-auto">
+<div class="flex justify-center pt-5 h-full overflow-y-auto">
     <div style="width: min(750px, 60%)">
         <h1 class="text-2xl verdana col-span-2">
             Settings
