@@ -1,11 +1,11 @@
 import LogParser from "./logParser";
-import Log from "src/log";
+import Log from "$src/log";
 import { join } from "path";
-import { dataPath } from "src/consts";
+import { dataPath } from "$src/consts";
 import type { PersistentScript, PersistentScriptContext, ScriptContext } from "$types/scripting";
-import Server from "src/net/server";
+import Server from "$src/net/server";
 import { Message } from "$types/messages";
-import Settings from "src/settings/settings";
+import Settings from "$src/settings/settings";
 import Rcon from "./rcon";
 import { watch } from "chokidar";
 import fsp from "node:fs/promises";

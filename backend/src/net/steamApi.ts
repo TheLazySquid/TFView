@@ -1,17 +1,17 @@
 import type { SteamFriendsList, SteamPlayerSummaries, SteamPlayerSummary } from "$types/apis";
 import type { PlayerSummary } from "$types/lobby";
 import { id3ToId64, id64ToId3 } from "$shared/steamid";
-import Settings from "src/settings/settings";
-import Log from "src/log";
-import HistoryDatabase from "src/history/database";
-import { flags, friendCheckInterval } from "src/consts";
-import Values from "src/settings/values";
+import Settings from "$src/settings/settings";
+import Log from "$src/log";
+import HistoryDatabase from "$src/history/database";
+import { flags, friendCheckInterval } from "$src/consts";
+import Values from "$src/settings/values";
 import type { PastPlayer } from "$types/data";
 import Server from "./server";
 import { Message, Recieves, type FriendsResult } from "$types/messages";
-import { getCurrentUserId } from "src/util";
+import { getCurrentUserId } from "$src/util";
 import { BatchRequester } from "./batchRequester";
-import GameMonitor from "src/game/monitor";
+import GameMonitor from "$src/game/monitor";
 
 export default class SteamApi {
 	static apiBase = "https://api.steampowered.com/"

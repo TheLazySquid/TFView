@@ -1,4 +1,4 @@
-import Log from "src/log";
+import Log from "$src/log";
 
 export interface QueuedRequest<T> {
     id: string;

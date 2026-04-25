@@ -1,16 +1,16 @@
 import type { Player } from "$types/lobby";
 import { Message, Recieves } from "$types/messages";
-import { flags } from "src/consts";
+import { flags } from "$src/consts";
 import LogParser from "../game/logParser";
-import Server from "src/net/server";
+import Server from "$src/net/server";
 import EventEmitter from "node:events";
-import Log from "src/log";
-import Rcon from "src/game/rcon";
-import { fakeCurrentGame } from "src/fakedata/game";
+import Log from "$src/log";
+import Rcon from "$src/game/rcon";
+import { fakeCurrentGame } from "$src/fakedata/game";
 import HistoryDatabase from "./database";
 import Demos from "./demos";
-import GameMonitor from "src/game/monitor";
-import { isBot } from "src/util";
+import GameMonitor from "$src/game/monitor";
+import { isBot } from "$src/util";
 
 export interface CurrentGame {
     map: string;

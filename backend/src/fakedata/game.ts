@@ -1,5 +1,5 @@
 import type { ChatEntry, KillfeedEntry, Player } from "$types/lobby";
-import type { CurrentGame } from "src/history/history";
+import type { CurrentGame } from "$src/history/history";
 
 export const fakeCurrentGame: CurrentGame = {
     map: "pl_borneo",

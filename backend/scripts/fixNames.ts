@@ -1,12 +1,12 @@
 import type { PastPlayer, PlayerEncounter } from "$types/data";
-import HistoryDatabase from "src/history/database";
+import HistoryDatabase from "$src/history/database";
 
 HistoryDatabase.init();
 let playerOffset = 0;
 let players: PastPlayer[] = [];
 
 do {
-    players = HistoryDatabase.getPlayers(playerOffset, { tags: [], sortBy: "lastSeen" });
+    players = HistoryDatabase.getPlayers(playerOffset, { tags: {}, sortBy: "lastSeen" });
     playerOffset += players.length;
 
     for(let player of players) {

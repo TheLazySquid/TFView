@@ -1,13 +1,13 @@
-import Settings from "src/settings/settings";
-import HistoryDatabase from "src/history/database";
+import Settings from "$src/settings/settings";
+import HistoryDatabase from "$src/history/database";
 import { join } from "node:path";
 import { readdirSync } from "node:fs";
 import { execSync } from "node:child_process";
 import type { Stored, StoredPlayer, ParsedDemo } from "$types/data";
-import { getCurrentUserId } from "src/util";
+import { getCurrentUserId } from "$src/util";
 import { MultiBar, Presets } from "cli-progress";
 import { Database } from "bun:sqlite";
-import { dataPath } from "src/consts";
+import { dataPath } from "$src/consts";
 
 interface PastGamePlayer {
     id: string;

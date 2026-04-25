@@ -3,8 +3,8 @@ import { Recieves, type MessageTypes, type Page, type RecievesTypes, type SentMe
 import EventEmitter from "node:events";
 import { join } from "node:path";
 import Log from "../log";
-import { root } from "src/consts";
-import Settings from "src/settings/settings";
+import { root } from "$src/consts";
+import Settings from "$src/settings/settings";
 import { exists } from "node:fs/promises";
 
 export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" |

@@ -1,8 +1,8 @@
-import Settings from "src/settings/settings";
+import Settings from "$src/settings/settings";
 import { mapBits } from "./mapBits";
 import { join } from "node:path";
 import fsp from "node:fs/promises";
-import Server from "src/net/server";
+import Server from "$src/net/server";
 import { Message, Recieves } from "$types/messages";
 import type { CasualConfig } from "$types/data";
 

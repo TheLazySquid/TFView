@@ -1,8 +1,8 @@
 import { Message } from "$types/messages";
-import { flags } from "src/consts";
-import { fakeKillCounts } from "src/fakedata/killCounts";
-import Server from "src/net/server";
-import Values from "src/settings/values";
+import { flags } from "$src/consts";
+import { fakeKillCounts } from "$src/fakedata/killCounts";
+import Server from "$src/net/server";
+import Values from "$src/settings/values";
 
 export default class KillTracker {
     static init() {

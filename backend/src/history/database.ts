@@ -2,17 +2,17 @@ import type { StoredPlayer, PastGame, Stored, PlayerEncounter, StoredPastGame, P
 import type { EncounterSearchParams, GameSearchParams, PlayerSearchParams } from "$types/search";
 import type { CurrentGame } from "./history";
 import { Database } from "bun:sqlite";
-import { flags, dataPath, pageSize } from "src/consts";
+import { flags, dataPath, pageSize } from "$src/consts";
 import { join } from "node:path";
-import Log from "src/log";
-import { createFakeHistory } from "src/fakedata/history";
-import { InfiniteList } from "src/net/infiniteList";
-import Server from "src/net/server";
+import Log from "$src/log";
+import { createFakeHistory } from "$src/fakedata/history";
+import { InfiniteList } from "$src/net/infiniteList";
+import Server from "$src/net/server";
 import { Message, Recieves } from "$types/messages";
 import type { Player, PlayerSummary } from "$types/lobby";
 import { id64ToId3 } from "$shared/steamid";
-import SteamApi from "src/net/steamApi";
-import { isBot } from "src/util";
+import SteamApi from "$src/net/steamApi";
+import { isBot } from "$src/util";
 
 export default class HistoryDatabase {
     static db: Database;

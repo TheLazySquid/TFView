@@ -1,7 +1,7 @@
 import { join } from "node:path";
 import type { SettingsType } from "$types/data";
 import { dataPath } from "../consts";
-import Server from "src/net/server";
+import Server from "$src/net/server";
 import { Recieves, Message } from "$types/messages";
 import EventEmitter from "node:events";
 import { readFile } from "node:fs/promises";

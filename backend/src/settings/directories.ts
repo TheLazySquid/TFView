@@ -2,7 +2,7 @@ import { join, basename } from "node:path";
 import os from "node:os";
 import fsp from "node:fs/promises";
 import Settings from "./settings";
-import Server from "src/net/server";
+import Server from "$src/net/server";
 import { Message, Recieves } from "$types/messages";
 import type { GameDir, GameDirectories } from "$types/data";
 import { parse } from "vdf-parser";

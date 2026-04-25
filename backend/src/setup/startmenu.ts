@@ -1,10 +1,10 @@
 import fsp from "node:fs/promises";
 import { join } from "node:path";
-import { root } from "src/consts";
+import { root } from "$src/consts";
 import { exec } from "node:child_process";
-import Server from "src/net/server";
+import Server from "$src/net/server";
 import { Message, Recieves } from "$types/messages";
-import Settings from "src/settings/settings";
+import Settings from "$src/settings/settings";
 import { feature } from "bun:bundle";
 
 export default class StartMenu {

@@ -1,12 +1,12 @@
-import Settings from "src/settings/settings";
-import HistoryDatabase from "src/history/database";
+import Settings from "$src/settings/settings";
+import HistoryDatabase from "$src/history/database";
 import { join } from "node:path";
 import { readdirSync } from "node:fs";
 import { execSync } from "node:child_process";
 import type { ParsedDemo } from "$types/data";
 import { MultiBar, Presets } from "cli-progress";
-import { getCurrentUserId } from "src/util";
-import Values from "src/settings/values";
+import { getCurrentUserId } from "$src/util";
+import Values from "$src/settings/values";
 
 // This is unable to tell whether kills were crits or not
 await Settings.init();

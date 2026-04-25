@@ -1,8 +1,8 @@
 import RconServer from "rcon-srcds";
 import Settings from "../settings/settings";
-import History from "src/history/history";
-import Log from "src/log";
-import Server from "src/net/server";
+import History from "$src/history/history";
+import Log from "$src/log";
+import Server from "$src/net/server";
 import { Message, Recieves } from "$types/messages";
 
 export default class Rcon {

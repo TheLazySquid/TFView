@@ -1,9 +1,9 @@
 import { Recieves } from "$types/messages";
-import Log from "src/log";
-import Server from "src/net/server";
+import Log from "$src/log";
+import Server from "$src/net/server";
 import { join } from "path";
-import Settings from "src/settings/settings";
-import { getCurrentUserId } from "src/util";
+import Settings from "$src/settings/settings";
+import { getCurrentUserId } from "$src/util";
 import fsp from "node:fs/promises";
 import { parse, stringify } from "vdf-parser";
 import { kill } from "node:process";

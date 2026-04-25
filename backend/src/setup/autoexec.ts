@@ -1,8 +1,8 @@
 import { Recieves } from "$types/messages";
-import Log from "src/log";
-import Server from "src/net/server";
+import Log from "$src/log";
+import Server from "$src/net/server";
 import { join, dirname } from "path";
-import Settings from "src/settings/settings";
+import Settings from "$src/settings/settings";
 import fsp from "node:fs/promises";
 
 export default class AutoexecCheck {

@@ -1,4 +1,4 @@
-import { pageSize } from "src/consts";
+import { pageSize } from "$src/consts";
 import Server, { type Topic } from "./server";
 
 interface Options<T, Params> {

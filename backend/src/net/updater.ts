@@ -1,15 +1,15 @@
-import { flags, isLinux, root } from "src/consts";
+import { flags, isLinux, root } from "$src/consts";
 import { version } from "../../../package.json";
 import unzip from "unzip-stream";
 import { join } from "node:path";
 import { Readable } from "node:stream";
-import Log from "src/log";
+import Log from "$src/log";
 import Server from "./server";
 import { Message, Recieves } from "$types/messages";
-import Values from "src/settings/values";
+import Values from "$src/settings/values";
 import fsp from "node:fs/promises";
 import { spawn, execSync } from "node:child_process";
-import { close } from "src/close";
+import { close } from "$src/close";
 import { feature } from "bun:bundle";
 
 interface UpdateInfo {

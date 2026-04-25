@@ -1,8 +1,8 @@
 import type { SourceBanInfo, SourceBansResponse } from "$types/apis";
-import Settings from "src/settings/settings"
+import Settings from "$src/settings/settings"
 import { BatchRequester } from "./batchRequester";
 import { id3ToId64 } from "$shared/steamid";
-import HistoryDatabase from "src/history/database";
+import HistoryDatabase from "$src/history/database";
 import Server from "./server";
 import { Recieves } from "$types/messages";
 

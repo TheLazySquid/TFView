@@ -1,12 +1,12 @@
-import Settings from "src/settings/settings";
+import Settings from "$src/settings/settings";
 import { join } from "node:path";
 import fsp from "node:fs/promises";
 import fs from "node:fs";
-import Log from "src/log";
+import Log from "$src/log";
 import { EventEmitter } from "node:events";
-import Rcon from "src/game/rcon";
-import { flags } from "src/consts";
-import { createWatcher } from "src/util";
+import Rcon from "$src/game/rcon";
+import { flags } from "$src/consts";
+import { createWatcher } from "$src/util";
 
 export default class Demos {
     static demosPath: string;

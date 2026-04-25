@@ -1,8 +1,8 @@
 import { Message, Recieves } from "$types/messages";
-import Server from "src/net/server";
-import Settings from "src/settings/settings";
+import Server from "$src/net/server";
+import Settings from "$src/settings/settings";
 import { exec } from "node:child_process";
-import { flags } from "src/consts";
+import { flags } from "$src/consts";
 
 export default class Launcher {
     static init() {
