@@ -13,6 +13,8 @@
     import InfiniteLoading from "svelte-infinite-loading";
     import { formatDate, formatDuration } from "$lib/utils";
     import Popups from "$lib/popups";
+    import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
+    import RconConnected from "$lib/ws/topics/rconConnected.svelte";
 
     let rowid: number | null = $state(null);
     let game: StoredPastGame | null = $state.raw(null);
@@ -40,11 +42,24 @@
         return `Game on ${game?.map} on ${dateFmt.format(game?.start)}`;
     }
 
+    const copyDemo = (demo: string) => {
+        navigator.clipboard.writeText(demo)
+            .then(() => toast.success("Demo name copied to clipboard!"))
+            .catch(() => toast.error("Failed to copy demo."));
+    }
+
     const copyDemoCommand = (demo: string) => {
         const command = `playdemo demos/${demo}`;
         navigator.clipboard.writeText(command)
             .then(() => toast.success("Demo command copied to clipboard!"))
             .catch(() => toast.error("Failed to copy demo command."));
+    }
+
+    const playDemo = async (demo: string) => {
+        const success = await WS.sendAndRecieve(Recieves.PlayDemo, demo);
+        
+        if(success) return;
+        toast.error("Could not find demo file to play");
     }
 </script>
 
@@ -62,10 +77,22 @@
             <div class="flex items-center gap-2 flex-wrap">
                 Associated demos:
                 {#each game.demos as demo}
-                    <button onclick={() => copyDemoCommand(demo)}
-                    class="border-b border-gray-300">
-                        {demo}
-                    </button>
+                    <DropdownMenu.Root>
+                        <DropdownMenu.Trigger class="border-b border-gray-300">
+                            {demo}
+                        </DropdownMenu.Trigger>
+                        <DropdownMenu.Content>
+                            <DropdownMenu.Item onclick={() => copyDemo(demo)}>
+                                Copy demo name
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item onclick={() => copyDemoCommand(demo)}>
+                                Copy demo command
+                            </DropdownMenu.Item>
+                            <DropdownMenu.Item onclick={() => playDemo(demo)} disabled={!RconConnected.connected}>
+                                Play demo
+                            </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                    </DropdownMenu.Root>
                 {/each}
             </div>
         {/if}

@@ -7,6 +7,8 @@ import { EventEmitter } from "node:events";
 import Rcon from "$src/game/rcon";
 import { flags } from "$src/consts";
 import { createWatcher } from "$src/util";
+import Server from "$src/net/server";
+import { Recieves } from "$types/messages";
 
 export default class Demos {
     static demosPath: string;
@@ -35,10 +37,26 @@ export default class Demos {
             this.events.emit("create", file);
             this.startSession(file);
         });
+
+        Server.on(Recieves.PlayDemo, async (demo: string, { reply }) => {
+            const success = await this.playDemo(demo);
+            reply(success);
+        });
     }
 
     static close() {
         this.closeDemo();
+    }
+
+    static async playDemo(demo: string) {
+        const path = join(Settings.get("tfPath"), "demos", demo);
+        if(!await fsp.exists(path)) {
+            Log.error("Demo not found:", path);
+            return false;
+        }
+
+        Rcon.run(`playdemo demos/${demo}`);
+        return true;
     }
 
     static masterbaseUrl = "megaanticheat.com";
@@ -144,7 +162,7 @@ export default class Demos {
 
             stream.on("data", (buffer) => {
                 this.lastPos += buffer.length;
-                this.ws.send(buffer);
+                this.ws.send(buffer as BufferSource);
             });
         } catch {
             Log.warning("Failed to read demo file, has it been deleted?");

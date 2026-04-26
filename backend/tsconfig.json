@@ -27,6 +27,7 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
 
+    "types": ["bun"],
     "paths": {
       "$src/*": ["./src/*"],
       "$types/*": ["../types/*"],

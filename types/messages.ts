@@ -97,7 +97,8 @@ export enum Recieves {
     WantsStartMenuShortcut,
     WantsToUpdate,
     GetFriends,
-    GetSourcebans
+    GetSourcebans,
+    PlayDemo
 }
 
 export type RecievesTypes = 
@@ -131,6 +132,7 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.WantsToUpdate, string>
     | RecievedMessage<Recieves.GetFriends, string, FriendsResult>
     | RecievedMessage<Recieves.GetSourcebans, string, SourceBanInfo[] | null>
+    | RecievedMessage<Recieves.PlayDemo, string, boolean>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
 export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup" | "casual" | "killcounts";
