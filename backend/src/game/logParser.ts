@@ -33,11 +33,7 @@ export default class LogParser {
 
         // fs.watch can't be relied on for log updates, somehow the log
         // doesn't trigger whatever listeners it uses
-        this.pollInterval = setInterval(() => this.poll(), this.pollIntervalTime);
-    }
-
-    static close() {
-        clearInterval(this.pollInterval);
+        setInterval(() => this.poll(), this.pollIntervalTime).unref();
     }
 
     static on(regex: RegExp, callback: (data: RegExpExecArray) => void) {

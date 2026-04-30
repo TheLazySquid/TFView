@@ -13,6 +13,7 @@ import type { Player, PlayerSummary } from "$types/lobby";
 import { id64ToId3 } from "$shared/steamid";
 import SteamApi from "$src/net/steamApi";
 import { isBot } from "$src/util";
+import Close from "$src/close";
 
 export default class HistoryDatabase {
     static db: Database;
@@ -52,10 +53,8 @@ export default class HistoryDatabase {
             let data = this.getPlayerData(id);
             reply(data);
         });
-    }
 
-    static close() {
-        this.db.close();
+        Close.on("close", () => this.db.close());
     }
 
     static version = 3;

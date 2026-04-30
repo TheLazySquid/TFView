@@ -9,11 +9,16 @@ import { flags } from "$src/consts";
 import { createWatcher } from "$src/util";
 import Server from "$src/net/server";
 import { Recieves } from "$types/messages";
+import Close from "$src/close";
+
+interface DemosEvents {
+    create: [demo: string];
+}
 
 export default class Demos {
     static demosPath: string;
     static watchInterval = 5000;
-    static events = new EventEmitter();
+    static events = new EventEmitter<DemosEvents>();
     static recentDemos: string[] = [];
     static firstDemo = true;
 
@@ -42,10 +47,8 @@ export default class Demos {
             const success = await this.playDemo(demo);
             reply(success);
         });
-    }
 
-    static close() {
-        this.closeDemo();
+        Close.on("close", () => this.closeDemo());
     }
 
     static async playDemo(demo: string) {
@@ -144,7 +147,7 @@ export default class Demos {
 
         this.ws.addEventListener("open", () => {
             Log.info("Connected to masterbase websocket");
-            this.readTimer = setInterval(() => this.updateDemo(), this.readInterval);
+            this.readTimer = setInterval(() => this.updateDemo(), this.readInterval).unref();
         });
     } 
 
@@ -162,7 +165,7 @@ export default class Demos {
 
             stream.on("data", (buffer) => {
                 this.lastPos += buffer.length;
-                this.ws.send(buffer as BufferSource);
+                this.ws.send(buffer as any); // Types are weird here
             });
         } catch {
             Log.warning("Failed to read demo file, has it been deleted?");

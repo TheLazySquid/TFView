@@ -29,6 +29,7 @@
 
     const settings: Setting[] = [
         { name: "Launch TF2 when TFView is opened", id: "launchTf2OnStart", type: "switch" },
+        { name: "Use Custom Discord Rich Presence", id: "useCustomRPC", type: "switch" },
         // { name: "Open TFView UI when TFView is opened", id: "openUiOnStart", type: "switch" },
         { name: "RCON Port", id: "rconPort", type: "number" },
         { name: "RCON Password", id: "rconPassword", type: "password" },

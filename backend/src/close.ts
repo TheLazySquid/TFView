@@ -1,30 +1,21 @@
-import { flags } from "./consts";
-import LogParser from "./game/logParser";
-import GameMonitor from "./game/monitor";
-import Rcon from "./game/rcon";
-import HistoryDatabase from "./history/database";
-import Demos from "./history/demos";
-import History from "./history/history";
 import Log from "./log";
-import Server from "./net/server";
+import EventEmitter from "node:events";
 
-export function close() {
-    Server.close();
-    History.close();
-    HistoryDatabase.close();
-    GameMonitor.close();
-    
-    if(!flags.fakeData) {
-        Rcon.close();
-        LogParser.close();
-        Demos.close();
-    }
-
-    Log.info("Closing backend");
-    setTimeout(forceClose, 2500).unref();
+interface CloseEvents {
+    close: [];
 }
 
-async function forceClose() {
-    await Log.warning("Failed to close gracefully, force closing");
-    process.exit(0);
+export default new class Close extends EventEmitter<CloseEvents> {
+    isClosed = false;
+
+    close() {
+        this.isClosed = true;
+        Log.info("Closing backend");
+        setTimeout(this.forceClose.bind(this), 2500).unref();
+    }
+
+    async forceClose() {
+        await Log.warning("Failed to close gracefully, force closing");
+        process.exit(0);
+    }
 }

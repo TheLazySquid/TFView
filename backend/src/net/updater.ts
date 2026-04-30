@@ -9,7 +9,7 @@ import { Message, Recieves } from "$types/messages";
 import Values from "$src/settings/values";
 import fsp from "node:fs/promises";
 import { spawn, execSync } from "node:child_process";
-import { close } from "$src/close";
+import Close from "$src/close";
 import { feature } from "bun:bundle";
 
 interface UpdateInfo {
@@ -125,7 +125,7 @@ export default class Updater {
         await fsp.rm(updatedPath, { recursive: true, force: true });
 
         // Spawn the updater and kill the process
-        close();
+        Close.close();
         spawn(oldUpdater, { cwd: root, detached: true, stdio: "ignore" }).unref();
     }
 }

@@ -11,18 +11,19 @@ import HistoryDatabase from "./history/database";
 import Directories from "./settings/directories";
 import Autoexec from "./setup/autoexec";
 import LaunchOptionsCheck from "./setup/launchOptions";
-import { Recieves } from "$types/messages";
 import Casual from "./casual/casual";
 import Launcher from "./game/launcher";
 import StartMenu from "./setup/startmenu";
 import Values from "./settings/values";
 import KillTracker from "./history/killTracker";
 import Updater from "./net/updater";
-import { close } from "./close";
+import Close from "./close";
 import SteamApi from "./net/steamApi";
 import { feature } from "bun:bundle";
 import Scripting from "./game/scripting";
 import SourceBans from "./net/sourcebans";
+import { Recieves } from "$types/messages";
+import CustomRPC from "./net/rpc";
 
 init();
 
@@ -78,9 +79,10 @@ async function init() {
     KillTracker.init();
     SteamApi.init();
     SourceBans.init();
+    CustomRPC.init();
 
     Server.on(Recieves.CloseApp, async (closeGame) => {
         if(closeGame) await Rcon.run("quit");
-        close();
+        Close.close();
     });
 }

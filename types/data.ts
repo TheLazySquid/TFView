@@ -36,6 +36,7 @@ export interface SettingsType {
     openUiOnStart: boolean;
     pickedIfShortcut: boolean;
     finishedSetup: boolean;
+    useCustomRPC: boolean;
 }
 
 export interface ValuesType {

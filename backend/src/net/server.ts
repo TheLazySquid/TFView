@@ -6,6 +6,7 @@ import Log from "../log";
 import { root } from "$src/consts";
 import Settings from "$src/settings/settings";
 import { exists } from "node:fs/promises";
+import Close from "$src/close";
 
 export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" |
     "tags" | "casual" | "global" | "killcounts" | "pastplayer" | "playerids" | "userfriends";
@@ -139,10 +140,10 @@ export default class Server {
         // if(Settings.get("openUiOnStart")) open(url);
 
         Log.info(`Server open on ${url}`);
-    }
 
-    static close() {
-        this.server.stop(true);
+        Close.on("close", () => {
+            this.server.stop(true);
+        });
     }
 
     static onConnect<C extends MessageTypes["channel"]>(topic: Topic, callback: (send: (channel: C, data:

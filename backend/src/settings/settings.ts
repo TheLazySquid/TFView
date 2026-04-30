@@ -30,7 +30,8 @@ const defaultSettings: Partial<SettingsType> = {
     highlightFriends: true,
     launchTf2OnStart: false,
     openUiOnStart: false,
-    finishedSetup: false
+    finishedSetup: false,
+    useCustomRPC: false
 }
 
 export default class Settings {
@@ -78,6 +79,8 @@ export default class Settings {
     }
 
     static set<T extends keyof SettingsType>(key: T, value: SettingsType[T]) {
+        if(this.settings[key] === value) return;
+        
         this.settings[key] = value;
         this.file.write(JSON.stringify(this.settings, null, 4));
         this.events.emit(key, value);

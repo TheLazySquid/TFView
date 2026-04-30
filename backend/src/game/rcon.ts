@@ -4,11 +4,19 @@ import History from "$src/history/history";
 import Log from "$src/log";
 import Server from "$src/net/server";
 import { Message, Recieves } from "$types/messages";
+import EventEmitter from "node:events";
+import Close from "$src/close";
+
+interface RconEvents {
+    connect: [];
+    disconnect: [];
+}
 
 export default class Rcon {
     static server: RconServer;
     static pollInterval = 1000;
     static connected = false;
+    static events = new EventEmitter<RconEvents>();
 
     static init() {
         // @ts-ignore for some reason bundlers get confused with the import
@@ -39,6 +47,8 @@ export default class Rcon {
         Server.onConnect("global", (reply) => {
             reply(Message.RconConnected, this.connected);
         });
+
+        Close.on("close", () => this.server?.disconnect());
     }
 
     static setConnected(connected: boolean) {
@@ -50,24 +60,18 @@ export default class Rcon {
         if(connected) {
             Log.info(`RCON connected`);
             Server.send("global", Message.Success, "Connected to TF2 console");
+            this.events.emit("connect");
         } else {
             Log.warning(`RCON disconnected`);
             Server.send("global", Message.Warning, "Disconnected from TF2 console");
+            this.events.emit("disconnect");
         }
-    }
-    
-    static isClosed = false;
-    static reconnectTimeout: Timer;
-    static close() {
-        this.server.disconnect();
-        this.isClosed = true;
-        if(this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
     }
 
     static connect() {
         const pollReconnect = () => {
-            if(this.isClosed) return;
-            this.reconnectTimeout = setTimeout(() => this.connect(), this.pollInterval);
+            if(Close.isClosed) return;
+            setTimeout(() => this.connect(), this.pollInterval).unref();
         }
 
         const password = Settings.get("rconPassword");
@@ -78,7 +82,7 @@ export default class Rcon {
                 this.setConnected(true);
                 
                 this.server.connection.once("close", () => {
-                    if(this.isClosed) return;
+                    if(Close.isClosed) return;
 
                     this.setConnected(false);
                     this.server.disconnect();

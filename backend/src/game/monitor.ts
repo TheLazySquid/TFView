@@ -17,6 +17,7 @@ import KillTracker from "$src/history/killTracker";
 import Settings from "$src/settings/settings";
 import Log from "$src/log";
 import SourceBans from "$src/net/sourcebans";
+import Close from "$src/close";
 
 export default class GameMonitor {
     static logPath: string;
@@ -158,19 +159,12 @@ export default class GameMonitor {
         });
     }
 
-    static runTimeout: Timer;
-    static closed = false;
-    static close() {
-        this.closed = true;
-        if(this.runTimeout) clearTimeout(this.runTimeout);
-    }
-
     static gotResponse = false;
     static responseTime = 0;
     static async poll() {
         const runAgain = () => {
-            if(this.closed) return;
-            this.runTimeout = setTimeout(() => this.poll(), this.pollInterval);
+            if(Close.isClosed) return;
+            setTimeout(() => this.poll(), this.pollInterval).unref();
         }
 
         if(!Rcon.connected) return runAgain();

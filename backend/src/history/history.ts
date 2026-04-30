@@ -11,6 +11,7 @@ import HistoryDatabase from "./database";
 import Demos from "./demos";
 import GameMonitor from "$src/game/monitor";
 import { isBot } from "$src/util";
+import Close from "$src/close";
 
 export interface CurrentGame {
     map: string;
@@ -23,14 +24,18 @@ export interface CurrentGame {
     demos: string[];
 }
 
+interface HistoryEvents {
+    startGame: [map: string];
+    endGame: [];
+}
+
 export default class History {
     static currentGame: CurrentGame | null = null;
     static activeEncounters = new Map<string, number>();
     static gamesFile: Bun.BunFile;
     static pastGamesDir: string;
     static pageSize = 50;
-    static events = new EventEmitter();
-    static updateInterval: Timer;
+    static events = new EventEmitter<HistoryEvents>();
     static updateIntervalTime = 10000;
     static definitelyNotInGame = false;
     static joinedUnconnected: string[] = [];
@@ -64,14 +69,11 @@ export default class History {
         this.listenToLog();
         Demos.events.on("create", (name) => this.addDemo(name));
 
-        this.updateInterval = setInterval(() => {
+        setInterval(() => {
             this.updateCurrentGame();
-        }, this.updateIntervalTime);
-    }
+        }, this.updateIntervalTime).unref();
 
-    static close() {
-        clearInterval(this.updateInterval);
-        this.updateCurrentGame();
+        Close.on("close", () => this.updateCurrentGame());
     }
 
     static getCurrentServer() {
