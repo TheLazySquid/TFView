@@ -5,6 +5,7 @@ import History from "$src/history/history";
 import Settings from "$src/settings/settings";
 import Log from "$src/log";
 import { Client, type SetActivity } from "@xhayper/discord-rpc";
+import GameMonitor from "$src/game/monitor";
 
 const baseActivity: SetActivity = {
     smallImageKey: "tfview",
@@ -14,7 +15,8 @@ const baseActivity: SetActivity = {
 
 export default class CustomRPC {
     static client: Client;
-    static state = "In the menu";
+    static map: string | null = null;
+    static currentClass: string | null = null;
 
     static init() {
         this.client = new Client({ clientId: discordAppId });
@@ -27,32 +29,50 @@ export default class CustomRPC {
         // After logging in set the initial activity
         this.client.on("ready", () => {
             Log.info("Connected to Discord RPC");
-
-            this.client.user?.setActivity({
-                state: this.state,
-                ...baseActivity
-            });
+            this.updateActivity();
         });
 
         // Update the current map
-        History.events.on("startGame", (map) => this.updateActivity(`Playing on ${map}`));
-        History.events.on("endGame", () => this.updateActivity("In the menu"));
+        History.events.on("startGame", (map) => this.updateMap(map));
+        History.events.on("endGame", () => this.updateMap(null));
 
-        Rcon.events.on("connect", () => this.updateActivity("In the menu"));
-        Rcon.events.on("disconnect", () => this.client.user?.clearActivity());
+        // Update the current class
+        GameMonitor.events.on("userClassUpdate", (className) => this.updateClass(className));
+
+        Rcon.events.on("connect", () => this.updateMap(null));
+        Rcon.events.on("disconnect", () => {
+            this.map = null;
+            this.currentClass = null;
+            this.client.user?.clearActivity();
+        });
 
         if(Settings.get("useCustomRPC")) this.client.login();
 
         Close.on("close", () => this.client.destroy());
     }
 
-    static updateActivity(state: string) {
-        this.state = state;
+    static updateMap(map: string | null) {
+        this.map = map;
+        this.currentClass = null;
+        this.updateActivity();
+    }
 
-        if(!Settings.get("useCustomRPC")) return;
-        this.client.user?.setActivity({
-            state: this.state,
+    static updateClass(className: string | null) {
+        if(className === this.currentClass) return;
+
+        this.currentClass = className;
+        this.updateActivity();
+    }
+
+    static updateActivity() {
+        if(!Settings.get("useCustomRPC") || !Rcon.connected) return;
+
+        const activity: SetActivity = {
+            state: this.map ? `Playing on ${this.map}` : "In the menu",
             ...baseActivity
-        });
+        }
+
+        if(this.currentClass) activity.details = `Playing ${this.currentClass}`;
+        this.client.user?.setActivity(activity);
     }
 }

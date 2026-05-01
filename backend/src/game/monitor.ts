@@ -7,7 +7,7 @@ import { flags } from "$src/consts";
 import LogParser from "./logParser";
 import History from "$src/history/history";
 import SteamApi from "../net/steamApi";
-import { killClasses, possibleMaxHps, startingAmmo, startingHealths } from "./classConsts";
+import { classNames, killClasses, possibleMaxHps, startingAmmo, startingHealths } from "./classConsts";
 import { id3ToId64 } from "$shared/steamid";
 import HistoryDatabase from "$src/history/database";
 import { fakeChat, fakeKillfeed, fakePlayers } from "$src/fakedata/game";
@@ -18,6 +18,11 @@ import Settings from "$src/settings/settings";
 import Log from "$src/log";
 import SourceBans from "$src/net/sourcebans";
 import Close from "$src/close";
+import EventEmitter from "node:events";
+
+interface GameMonitorEvents {
+    userClassUpdate: [name: string | null];
+}
 
 export default class GameMonitor {
     static logPath: string;
@@ -48,6 +53,7 @@ export default class GameMonitor {
         getParamsId: (params) => params.id ?? "",
         reverse: true
     });
+    static events = new EventEmitter<GameMonitorEvents>();
 
     static init() {       
         Server.onConnect("game", (respond) => {
@@ -251,6 +257,7 @@ export default class GameMonitor {
 
                 if(classes.length === 1) {
                     killer.class = classes[0];
+                    if(killer.user) this.onUserClass(classes[0]);
 
                     // Quick sanity check
                     if(options && !options.includes(classes[0])) {
@@ -509,12 +516,18 @@ export default class GameMonitor {
             else if(healthClasses) potentialClasses = healthClasses;
             else if(ammoClasses) potentialClasses = ammoClasses;
 
-            if(potentialClasses.length === 1) copy("class", potentialClasses[0]);
-            else if(potentialClasses.length > 0) {
+            if(potentialClasses.length === 1) {
+                const newClass = potentialClasses[0];
+                copy("class", newClass);
+
+                // If the player is the user dispatch an event
+                if(player.user) this.onUserClass(newClass);
+            } else if(potentialClasses.length > 0) {
                 this.potentialClasses.set(info.iAccountID, potentialClasses);
                 // Check whether the current class makes sense
                 if(typeof player.class === "number" && !potentialClasses.includes(player.class)) {
                     copy("class", null);
+                    if(player.user) this.onUserClass(null);
                 }
             }
         }
@@ -566,5 +579,14 @@ export default class GameMonitor {
                 sourceBanned: banned
             });
         });
+    }
+
+    static onUserClass(tf2Class: TF2Class | null) {
+        if(tf2Class) {
+            const name = classNames[tf2Class];
+            this.events.emit("userClassUpdate", name);
+        } else {
+            this.events.emit("userClassUpdate", null);
+        }
     }
 }

@@ -1,5 +1,17 @@
 import { TF2Class } from "$types/lobby";
 
+export const classNames: Record<TF2Class, string> = {
+    [TF2Class.Scout]: "Scout",
+    [TF2Class.Soldier]: "Soldier",
+    [TF2Class.Pyro]: "Pyro",
+    [TF2Class.Demo]: "Demoman",
+    [TF2Class.Heavy]: "Heavy",
+    [TF2Class.Engineer]: "Engineer",
+    [TF2Class.Medic]: "Medic",
+    [TF2Class.Sniper]: "Sniper",
+    [TF2Class.Spy]: "Spy"
+}
+
 // This leaves room for ambiguity between stock scout and stock engineer
 export const startingHealths: Record<number, TF2Class[]> = {
     [70]: [TF2Class.Spy], // Kunai
