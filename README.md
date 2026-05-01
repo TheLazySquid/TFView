@@ -33,6 +33,10 @@ TFView tracks the number of kills you get with each weapon, letting you see how 
 
 TFView can work in tandem with tf2 scripts to trigger effects outside of the game that would normally be impossible, such as saving data or modifying configs on the fly. See the [Scripting](#Scripting) section below for more info.
 
+### Improved Rich Presence
+
+TFView can give better rich presence information to Discord, showing what class and map you are playing. This is off by default.
+
 ## Installation
 
 * Download the windows or linux zip from [the latest release](https://github.com/TheLazySquid/TFView/releases/latest)
