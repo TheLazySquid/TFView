@@ -9,8 +9,10 @@ export default new class Close extends EventEmitter<CloseEvents> {
     isClosed = false;
 
     close() {
-        this.isClosed = true;
         Log.info("Closing backend");
+        this.isClosed = true;
+        this.emit("close");
+
         setTimeout(this.forceClose.bind(this), 2500).unref();
     }
 
