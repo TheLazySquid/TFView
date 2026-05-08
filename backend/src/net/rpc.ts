@@ -32,6 +32,10 @@ export default class CustomRPC {
             this.updateActivity();
         });
 
+        this.client.on("disconnected", () => {
+            setTimeout(() => this.tryToConnect(), 5000).unref();
+        });
+
         // Update the current map
         History.events.on("startGame", (map) => this.updateMap(map));
         History.events.on("endGame", () => this.updateMap(null));
@@ -46,9 +50,19 @@ export default class CustomRPC {
             this.client.user?.clearActivity();
         });
 
-        if(Settings.get("useCustomRPC")) this.client.login();
+        if(Settings.get("useCustomRPC")) this.tryToConnect();
 
         Close.on("close", () => this.client.destroy());
+    }
+
+    static async tryToConnect() {
+        if(!Settings.get("useCustomRPC")) return;
+
+        try {
+            await this.client.login();
+        } catch {
+            setTimeout(() => this.tryToConnect(), 5000).unref();
+        }
     }
 
     static updateMap(map: string | null) {

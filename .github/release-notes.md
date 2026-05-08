@@ -1,1 +1,1 @@
-* Fixed close button not working
+* Fixed error if Discord is not open when using custom RPC
