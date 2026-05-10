@@ -130,7 +130,7 @@
                         </Tooltip.Trigger>
                         <Tooltip.Content>
                             <div class="w-full text-center">Past profile pictures</div>
-                            <div class="flex items-center justify-center gap-1">
+                            <div class="flex items-center justify-center gap-1 flex-wrap max-w-[500px]">
                                 {#each player.avatars as avatarHash}
                                     {#if avatarHash !== player.avatarHash}
                                         <Avatar {avatarHash} {name} />

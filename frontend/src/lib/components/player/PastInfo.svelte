@@ -22,7 +22,7 @@
 {#if avatars?.length > 1}
     <Images class="h-full" />
     <div class="content-center">Past profile pictures</div>
-    <div class="flex items-center gap-1">
+    <div class="flex items-center gap-1 flex-wrap">
         {#each avatars as hash}
             {#if hash !== avatarHash}
                 <Avatar avatarHash={hash} {name} />
