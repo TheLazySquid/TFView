@@ -57,7 +57,6 @@ export default class SteamApi {
 	static query<T>(path: string, params: Record<string, any> = {}) {
 		return new Promise<T>((res, rej) => {
 			const url = this.getRequestUrl(path, params);
-			console.log(url);
 
 			fetch(url).then((resp) => {
 				if(resp.status !== 200) return rej(resp.status);
