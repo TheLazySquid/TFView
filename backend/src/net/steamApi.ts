@@ -1,4 +1,4 @@
-import type { SteamFriendsList, SteamPlayerSummaries, SteamPlayerSummary } from "$types/apis";
+import type { ResolvedVanityUrl, SteamFriendsList, SteamPlayerSummaries, SteamPlayerSummary } from "$types/apis";
 import type { PlayerSummary } from "$types/lobby";
 import { id3ToId64, id64ToId3 } from "$shared/steamid";
 import Settings from "$src/settings/settings";
@@ -57,6 +57,7 @@ export default class SteamApi {
 	static query<T>(path: string, params: Record<string, any> = {}) {
 		return new Promise<T>((res, rej) => {
 			const url = this.getRequestUrl(path, params);
+			console.log(url);
 
 			fetch(url).then((resp) => {
 				if(resp.status !== 200) return rej(resp.status);
@@ -203,6 +204,35 @@ export default class SteamApi {
 
 			Log.error("Failed to fetch friends for " + id3, e);
 			return { status: "error" };
+		}
+	}
+
+	static lastVanityLookup: string | null = null;
+	static lastVanityPromise: Promise<string | null>;
+	static async resolveVanityUrl(url: string) {
+		if(url === this.lastVanityLookup) return this.lastVanityPromise;
+
+		const promise = this.runResolveVanityUrl(url);
+		this.lastVanityLookup = url;
+		this.lastVanityPromise = promise;
+		return promise;
+	}
+
+	static async runResolveVanityUrl(url: string) {
+		try {
+			const res = await this.query<ResolvedVanityUrl>("ISteamUser/ResolveVanityURL/v1", { vanityurl: url });
+			if(!res.response.steamid) {
+				Log.info("Vanity url", url, "doesn't exist", res.response.message);
+				return null;
+			}
+
+			const id3 = id64ToId3(res.response.steamid);
+
+			this.lastVanityLookup = url;
+			return id3;
+		} catch(e) {
+			Log.error("Failed to resolve vanity url", url, e);
+			return null;
 		}
 	}
 }

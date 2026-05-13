@@ -46,7 +46,7 @@
     <div style="width: min(1000px, 90%)">
         <Search.SearchBox title="Search Players" singular="player" plural="players"
             list={PlayerHistory.players} defaultParams={{ tags: {}, sortBy: "lastSeen" }}>
-            <div class="content-center">Name or ID:</div>
+            <div class="content-center">Name, ID, or profile:</div>
             <Search.TextInput bind:value={PlayerHistory.players.params.name} />
 
             <div class="content-center">Last seen after:</div>

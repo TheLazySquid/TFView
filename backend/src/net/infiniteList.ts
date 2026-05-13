@@ -4,17 +4,17 @@ import Server, { type Topic } from "./server";
 interface Options<T, Params> {
 	topic: Topic;
 	listId: string;
-	getTotal: (params: any) => number;
-	getBatch: (offset: number, params: Params) => T[];
+	getTotal: (params: any) => number | Promise<number>;
+	getBatch: (offset: number, params: Params) => T[] | Promise<T[]>;
 }
 
 export class InfiniteList<T, Params> {
 	constructor(private options: Options<T, Params>) {
-		Server.on(`list-${options.listId}`, ({ offset, params }, { reply }) => {
-			let items = options.getBatch(offset, params);
+		Server.on(`list-${options.listId}`, async ({ offset, params }, { reply }) => {
+			let items = await Promise.resolve(options.getBatch(offset, params));
 			
 			if(offset === 0) {
-				let total = options.getTotal(params);
+				let total = await Promise.resolve(options.getTotal(params));
 				reply({ items, total });
 			} else {
 				reply({ items });

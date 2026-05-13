@@ -33,6 +33,14 @@ export interface SteamFriendsList {
     }
 }
 
+export interface ResolvedVanityUrl {
+    response: {
+        steamid?: string;
+        success: number;
+        message?: string;
+    }
+}
+
 export type BanState = "Permanent" | "Temp-Ban" | "Expired" | "Unbanned";
 
 export interface SourceBanInfo {

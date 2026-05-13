@@ -14,6 +14,8 @@ import { id64ToId3 } from "$shared/steamid";
 import SteamApi from "$src/net/steamApi";
 import { isBot } from "$src/util";
 import Close from "$src/close";
+import { steamProfilesUrl, steamVanityUrl } from "$shared/consts";
+import { isStringNumber } from "$shared/util";
 
 export default class HistoryDatabase {
     static db: Database;
@@ -195,21 +197,26 @@ export default class HistoryDatabase {
     }
 
     // Queries for past players
-    static getPlayersQuery(query: string, params: PlayerSearchParams, offset?: number) {
+    static async getPlayersQuery(query: string, params: PlayerSearchParams, offset?: number) {
         let whereClauses: string[] = [];
         if(params.after) whereClauses.push("lastSeen >= $after");
         if(params.before) whereClauses.push("lastSeen <= $before");
         
         if(params.name) {
-            // Allow searches for id64, id3, or name
+            // Allow searches for id64, id3, name, or profile url
             if(params.name.startsWith("[U:1:")) {
                 let id3 = params.name.slice(5, -1);
-                if(!isNaN(Number(id3))) {
-                    params.id3 = id3;
-                }
-            } else if(!isNaN(Number(params.name)) && isFinite(Number(params.name))) {
+                if(isStringNumber(id3)) params.id3 = id3;
+            } else if(isStringNumber(params.name)) {
                 params.id64 = id64ToId3(params.name);
                 params.id3 = params.name;
+            } else if(params.name.startsWith(steamProfilesUrl)) {
+                const id64 = params.name.slice(steamProfilesUrl.length).split("/", 1)[0];
+                if(isStringNumber(id64)) params.id64 = id64ToId3(id64);
+            } else if(params.name.startsWith(steamVanityUrl)) {
+                const vanity = params.name.slice(steamVanityUrl.length).split("/", 1)[0];
+                const resolved = await SteamApi.resolveVanityUrl(vanity);
+                if(resolved) params.id64 = resolved;
             }
 
             let clause = `(names LIKE "%${this.escapeLike(params.name, true)}%" ESCAPE '\\'` +
@@ -237,9 +244,9 @@ export default class HistoryDatabase {
         return query;
     }
 
-    static getPlayers(offset: number, params: PlayerSearchParams): PastPlayer[] {
+    static async getPlayers(offset: number, params: PlayerSearchParams): Promise<PastPlayer[]> {
         const queryStart = `SELECT * FROM players`;
-        let query = this.getPlayersQuery(queryStart, params, offset);
+        let query = await this.getPlayersQuery(queryStart, params, offset);
 
         let rows = this.db.query<Stored<StoredPlayer>, {}>(query).all({ ...params, offset });
         let parsed = rows.map(row => this.parsePlayerRow(row));
@@ -271,9 +278,9 @@ export default class HistoryDatabase {
         return { ...parsed, tags };
     }
 
-    static countPlayers(params: PlayerSearchParams) {
+    static async countPlayers(params: PlayerSearchParams) {
         const queryStart = `SELECT COUNT(1) FROM players`;
-        let query = this.getPlayersQuery(queryStart, params);
+        let query = await this.getPlayersQuery(queryStart, params);
 
         let result = this.db.query<{ "COUNT(1)": number }, {}>(query).get({ ...params });
         return result["COUNT(1)"];
