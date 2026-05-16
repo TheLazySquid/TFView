@@ -151,7 +151,6 @@ export default class GameMonitor {
                 this.missedQueries.set(player.ID3, 3);
             }
 
-            Server.send("playerids", Message.PlayerIdClear, undefined);
             this.playerIds.clear();
         });
 

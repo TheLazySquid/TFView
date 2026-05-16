@@ -30,7 +30,6 @@ export enum Message {
     UpdateAvailable,
     PastPlayerUpdate,
     InitialPlayerIds,
-    PlayerIdClear,
     PlayerIdJoin,
     PlayerIdLeave,
     UserFriendIds
@@ -56,7 +55,6 @@ export type MessageTypes =
     | SentMessage<Message.UpdateAvailable, string>
     | SentMessage<Message.PastPlayerUpdate, Partial<PastPlayer> & { id: string }>
     | SentMessage<Message.InitialPlayerIds, string[]>
-    | SentMessage<Message.PlayerIdClear, void>
     | SentMessage<Message.PlayerIdJoin, string>
     | SentMessage<Message.PlayerIdLeave, string>
     | SentMessage<Message.UserFriendIds, string[]>

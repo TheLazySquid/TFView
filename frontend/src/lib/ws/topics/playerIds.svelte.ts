@@ -11,10 +11,6 @@ export default new class PlayerIds {
             for(let id of ids) this.ids.add(id);
         });
 
-        WS.on(Message.PlayerIdClear, () => {
-            this.ids.clear();
-        });
-
         WS.on(Message.PlayerIdJoin, (id) => {
             this.ids.add(id);
         });
