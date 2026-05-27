@@ -57,7 +57,7 @@
     let tab = $state("info");
 </script>
 
-<Popup type="pastPlayer" style="max-width: min(90%, 750px)" {onOpen}>
+<Popup type="pastPlayer" style="max-width: min(90%, 950px)" {onOpen}>
     {#if player}
         <Dialog.Header class="flex flex-row items-center">
             <Avatar avatarHash={player.avatarHash} name={player.lastName} />

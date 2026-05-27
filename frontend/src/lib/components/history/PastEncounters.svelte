@@ -44,7 +44,7 @@
         </thead>
         <tbody>
             {#each encounters.items as encounter}
-                <tr>
+                <tr class="*:text-nowrap">
                     <td>{formatDate(encounter.time)}</td>
                     <td><Avatar avatarHash={encounter.avatarHash} name={encounter.name} /></td>
                     <td>{encounter.name}</td>
