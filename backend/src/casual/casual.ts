@@ -1,5 +1,5 @@
 import Settings from "$src/settings/settings";
-import { mapBits } from "./mapBits";
+import { mapBits } from "$shared/maps";
 import { join } from "node:path";
 import fsp from "node:fs/promises";
 import Server from "$src/net/server";

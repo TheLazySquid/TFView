@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { casualMaps, type CasualMapCategory } from "$shared/maps";
+	import type { CasualMapCategory } from "$types/maps";
+	import { casualMaps } from "$shared/maps";
 	import { Switch } from "$lib/components/ui/switch";
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
@@ -101,10 +102,10 @@
 			</button>
 		</div>
 	</div>
-	<div class="flex flex-col gap-4 w-[550px] max-w-full max-h-full overflow-y-auto">
+	<div class="flex flex-col gap-4 w-[630px] max-w-full max-h-full overflow-y-auto">
 		{#each casualMaps as category}
 			{@const masks = getMasks(category)}
-			<div class="grid gap-x-2 w-full" style="grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));">
+			<div class="grid gap-x-2 w-full" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
 				<h2 class="font-bold verdana col-span-full flex items-center gap-2 border-b">
 					<Switch bind:checked={
 						() => Casual.selection.some((s, i) => (s & masks[i]) > 0n),

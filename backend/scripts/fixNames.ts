@@ -6,7 +6,7 @@ let playerOffset = 0;
 let players: PastPlayer[] = [];
 
 do {
-    players = HistoryDatabase.getPlayers(playerOffset, { tags: {}, sortBy: "lastSeen" });
+    players = await HistoryDatabase.getPlayers(playerOffset, { tags: {}, sortBy: "lastSeen" });
     playerOffset += players.length;
 
     for(let player of players) {
