@@ -1,2 +1,3 @@
 * Fixed encounters list overflowing with long names
 * Added Smissmas and Halloween sections to casual selection manager
+* Made all of the casual page scrollable
