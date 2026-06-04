@@ -25,6 +25,7 @@
     import PastInfo from "../player/PastInfo.svelte";
     import { formatDate, formatTimeAgo } from "$lib/utils";
     import UserFriends from "$lib/ws/topics/userFriends.svelte";
+    import Nameplate from "../player/Nameplate.svelte";
 
     let player: Player | null = $state.raw(null);
 
@@ -62,20 +63,14 @@ style="max-width: min(950px, 85%);">
     {#if player}
         <Dialog.Header class="text-2xl flex flex-row items-center">
             <Avatar avatarHash={player.avatarHash} name={player.name} />
-            <div style="color: {nameColors[player.team]};"
-                class="-mt-1" class:italic={player.nickname}>
-                { player.nickname ? player.nickname : player.name }
+            <div class="grow">
+                <Nameplate current={true} bind:player style="color: {nameColors[player.team]}" heading={true} />
             </div>
-            {#if player.nickname}
-                <div class="-mt-1" style="color: {nameColors[player.team]};">
-                    ({ player.name })
-                </div>
-            {/if}
         </Dialog.Header>
         <Tabs.Root bind:value={tab}>
             <Tabs.List class="w-full">
                 <Tabs.Trigger value="info"><InfoIcon /></Tabs.Trigger>
-                {#if !player.user}
+                {#if !player.isUser && !player.isBot}
                     <Tabs.Trigger value="encounters"><HistoryIcon /></Tabs.Trigger>
                 {/if}
                 <Tabs.Trigger value="chat"><ChatIcon /></Tabs.Trigger>
@@ -83,7 +78,7 @@ style="max-width: min(950px, 85%);">
             </Tabs.List>
             <Tabs.Content value="info">
                 <div class="grid gap-x-2" style="grid-template-columns: auto auto 1fr">
-                    {#if !player.user}
+                    {#if !player.isUser}
                         <Eye />
                         <div>Encounters</div>
                         <div>{player.encounters ?? 0}</div>
@@ -129,15 +124,17 @@ style="max-width: min(950px, 85%);">
                         </Tooltip.Root>
                     </Tooltip.Provider>
                 {/if}
-                <div>Note:</div>
-                <textarea class="resize-y p-1 h-[150px] w-full outline not-focus:outline-zinc-600"
-                bind:value={player.note} onchange={sendNote}></textarea>
-                <TagSelector bind:tagsObj={player.tags} onChange={saveTags}
-                    you={player.user} friend={UserFriends.ids.has(player.ID3)}>
-                    <div class="-mt-1">Tags:</div>
-                </TagSelector>
+                {#if !player.isBot}
+                    <div>Note:</div>
+                    <textarea class="resize-y p-1 h-[150px] w-full outline not-focus:outline-zinc-600"
+                    bind:value={player.note} onchange={sendNote}></textarea>
+                    <TagSelector bind:tagsObj={player.tags} onChange={saveTags}
+                        you={player.isUser} friend={UserFriends.ids.has(player.ID3)}>
+                        <div class="-mt-1">Tags:</div>
+                    </TagSelector>
+                {/if}
             </Tabs.Content>
-            {#if !player.user}
+            {#if !player.isUser && !player.isBot}
                 <Tabs.Content value="encounters">
                     <!-- Required for infinite loading for some reason -->
                     {#if tab === "encounters"}

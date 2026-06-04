@@ -12,7 +12,7 @@
     let { index }: { index: number } = $props();
     let player = $derived(Game.players[index]);
     let color = $derived.by(() => {
-        if(player.user && Settings.settings.highlightUser) return Settings.settings.userColor;
+        if(player.isUser && Settings.settings.highlightUser) return Settings.settings.userColor;
         if(UserFriends.ids.has(player.ID3) && Settings.settings.highlightFriends) return Settings.settings.friendColor;
 
         for(let tag of Settings.settings.tags) {
@@ -30,7 +30,7 @@
     </td>
     <td>
         <Nameplate current={true} bind:player style="color: {nameColors[player.team]}"
-            onclick={() => Popups.open("player", player)} />
+            onclick={() => Popups.open("player", player)} heading={false} />
     </td>
     {#if player.team !== 1}
         {#if columns.class}

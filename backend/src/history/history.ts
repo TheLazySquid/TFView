@@ -10,7 +10,6 @@ import { fakeCurrentGame } from "$src/fakedata/game";
 import HistoryDatabase from "./database";
 import Demos from "./demos";
 import GameMonitor from "$src/game/monitor";
-import { isBot } from "$src/util";
 import Close from "$src/close";
 
 export interface CurrentGame {
@@ -199,7 +198,7 @@ export default class History {
     }
 
     static addPlayer(player: Player) {
-        if(player.user || this.activeEncounters.has(player.ID3)) return;
+        if(player.isUser || this.activeEncounters.has(player.ID3)) return;
 
         let rowid = HistoryDatabase.recordPlayerEncounter(player, this.currentGame);
         this.activeEncounters.set(player.ID3, rowid);
@@ -208,7 +207,7 @@ export default class History {
     static updateKD(player: Player) {
         if(typeof player.kills !== "number" || typeof player.deaths !== "number") return;
 
-        if(player.user) {
+        if(player.isUser) {
             this.currentGame.kills = player.kills;
             this.currentGame.deaths = player.deaths;
 
@@ -228,7 +227,7 @@ export default class History {
     }
 
     static onJoin(player: Player) {
-        if(isBot(player.ID3) || !this.currentGame) return;
+        if(player.isBot || !this.currentGame) return;
 
         if(!player.names.includes("unconnected") && player.name === "unconnected") {
             this.joinedUnconnected.push(player.ID3);

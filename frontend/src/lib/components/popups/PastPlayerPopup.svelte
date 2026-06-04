@@ -62,7 +62,7 @@
         <Dialog.Header class="flex flex-row items-center">
             <Avatar avatarHash={player.avatarHash} name={player.lastName} />
             <div class="grow">
-                <Nameplate bind:player current={false} />
+                <Nameplate bind:player current={false} heading={true} />
             </div>
         </Dialog.Header>
         <Tabs.Root bind:value={tab}>

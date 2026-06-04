@@ -46,6 +46,9 @@ export interface Player {
     kills: number;
     deaths: number;
 
+    // Guess based on ping and id3
+    isBot: boolean;
+
     // From killfeed
     killstreak: number;
 
@@ -54,7 +57,7 @@ export interface Player {
     class?: TF2Class;
 
     // Gotten from loginusers.vdf
-    user?: boolean;
+    isUser?: boolean;
 
     // From history
     names: string[];

@@ -12,7 +12,7 @@ import { id3ToId64 } from "$shared/steamid";
 import HistoryDatabase from "$src/history/database";
 import { fakeChat, fakeKillfeed, fakePlayers } from "$src/fakedata/game";
 import { LoadedInfiniteList } from "$src/net/infiniteList";
-import { getCurrentUserId, isBot } from "$src/util";
+import { getCurrentUserId } from "$src/util";
 import KillTracker from "$src/history/killTracker";
 import Settings from "$src/settings/settings";
 import Log from "$src/log";
@@ -158,7 +158,7 @@ export default class GameMonitor {
         Settings.on("steamhistoryApiKey", (key) => {
             if(!key) return;
             for(let player of this.players) {
-                if(isBot(player.ID3)) continue;
+                if(player.isBot) continue;
                 this.updateSourcebans(player);
             }
         });
@@ -256,7 +256,7 @@ export default class GameMonitor {
 
                 if(classes.length === 1) {
                     killer.class = classes[0];
-                    if(killer.user) this.onUserClass(classes[0]);
+                    if(killer.isUser) this.onUserClass(classes[0]);
 
                     // Quick sanity check
                     if(options && !options.includes(classes[0])) {
@@ -281,7 +281,7 @@ export default class GameMonitor {
             }
 
             // Ignore bots
-            if(killer.user && victim.ID3.length > 2) {
+            if(killer.isUser && victim.ID3.length > 2) {
                 KillTracker.onKill(weapon, crit !== undefined);
             }
 
@@ -335,10 +335,11 @@ export default class GameMonitor {
                 tags: {},
                 killstreak: 0,
                 names: [],
-                avatars: []
+                avatars: [],
+                isBot: false
             }
 
-            if(playerInfo.iAccountID === this.userAccountID3) player.user = true;
+            if(playerInfo.iAccountID === this.userAccountID3) player.isUser = true;
             if(this.playerMap.has(id)) player = this.playerMap.get(id);
 
             let diff = this.updatePlayer(player, playerInfo);
@@ -382,7 +383,7 @@ export default class GameMonitor {
                 this.players.push(player as Player);
                 this.playerMap.set(id, player as Player);
 
-                if(isBot(player.ID3)) continue;
+                if(player.isBot) continue;
 
                 const summaryCallback = (summary: PlayerSummary) => {
                     player.avatarHash = summary.avatarHash;
@@ -405,7 +406,7 @@ export default class GameMonitor {
                     });
                 }
 
-                if(player.user) {
+                if(player.isUser) {
                     SteamApi.getUserSummary(player.ID3, summaryCallback);
                 } else {
                     SteamApi.getSummary(player.ID3, summaryCallback);
@@ -471,7 +472,7 @@ export default class GameMonitor {
         let diff: Partial<Player> & { ID3: string } = { ID3: info.iAccountID };
         let changed = false;
         
-        const copy = (key: string, value: any) => {
+        const copy = <T extends keyof Player>(key: T, value: Player[T]) => {
             if(typeof value === "number" && isNaN(value)) return;
             if(value === undefined || player[key] === value) return;
 
@@ -520,13 +521,13 @@ export default class GameMonitor {
                 copy("class", newClass);
 
                 // If the player is the user dispatch an event
-                if(player.user) this.onUserClass(newClass);
+                if(player.isUser) this.onUserClass(newClass);
             } else if(potentialClasses.length > 0) {
                 this.potentialClasses.set(info.iAccountID, potentialClasses);
                 // Check whether the current class makes sense
                 if(typeof player.class === "number" && !potentialClasses.includes(player.class)) {
                     copy("class", null);
-                    if(player.user) this.onUserClass(null);
+                    if(player.isUser) this.onUserClass(null);
                 }
             }
         }
@@ -546,6 +547,13 @@ export default class GameMonitor {
         copy("health", health);
         copy("kills", parseInt(info.iScore));
         copy("deaths", parseInt(info.iDeaths));
+
+        // There's maybe a chance someone can have 0 ping if they're hosting a server themselves
+        // So if they have a crazy old steam account (<2004) it's possible this could be a false positive
+        // Rare enough that it really doesn't matter
+        const isBot = player.ID3.length <= 5 && player.ping === 0;
+
+        copy("isBot", isBot);
         if(info.bAlive !== undefined) copy("alive", info.bAlive === "true");
 
         // Update the k/d of the saved user if it changed

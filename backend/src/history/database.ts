@@ -12,7 +12,6 @@ import { Message, Recieves } from "$types/messages";
 import type { Player, PlayerSummary } from "$types/lobby";
 import { id64ToId3 } from "$shared/steamid";
 import SteamApi from "$src/net/steamApi";
-import { isBot } from "$src/util";
 import Close from "$src/close";
 import { steamProfilesUrl, steamVanityUrl } from "$shared/consts";
 import { isStringNumber } from "$shared/util";
@@ -438,7 +437,7 @@ export default class HistoryDatabase {
 
     static recordPlayerEncounter(player: Player, game: CurrentGame) {
         // Ignore unconnected/bots
-        if(isBot(player.ID3)) return;
+        if(player.isBot) return;
         
         const now = Date.now();
 

@@ -82,7 +82,7 @@
                         </td>
                         <td>
                             <Nameplate current={false} bind:player={PlayerHistory.players.items[i]}
-                                onclick={() => Popups.open("pastPlayer", player.id)} /> 
+                                onclick={() => Popups.open("pastPlayer", player.id)} heading={false} /> 
                         </td>
                         <td>{formatDate(player.lastSeen)}</td>
                         <td>{player.encounters}</td>

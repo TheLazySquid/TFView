@@ -10,6 +10,7 @@
     import TextCursorInput from "@lucide/svelte/icons/text-cursor-input";
     import Images from "@lucide/svelte/icons/images";
     import Gavel from "@lucide/svelte/icons/gavel";
+    import Bot from "@lucide/svelte/icons/bot";
     import Popups from "$lib/popups";
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
@@ -19,15 +20,16 @@
     import Avatar from "./Avatar.svelte";
     import PlayerIds from "$lib/ws/topics/playerIds.svelte";
 
-    interface PastProps { player: PastPlayer; current: false }
-    interface CurrentProps { player: Player; current: true }
+    interface PastProps { player: PastPlayer; current: false; heading: boolean }
+    interface CurrentProps { player: Player; current: true; heading: boolean }
     type Props = (PastProps | CurrentProps) & { grow?: boolean} & HTMLButtonAttributes;
 
-    let { player = $bindable(), current, grow, ...restProps }: Props = $props();
+    let { player = $bindable(), current, grow, heading, ...restProps }: Props = $props();
 
     let name = $derived(current ? (player as Player).name : (player as PastPlayer).lastName);
     let id = $derived(current ? (player as Player).ID3 : (player as PastPlayer).id);
     let id64 = $derived(id3ToId64(id));
+    let isBot = $derived((player as Player).isBot);
 
     const setNickname = () => {
         Popups.open("input", {
@@ -101,9 +103,17 @@
     <ContextMenu.Trigger class={grow ? "grow" : ""}>
         <div class="flex items-center pr-2 gap-1">
             <button class="grow text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
-            class:italic={player.nickname} class:text-online={!current && PlayerIds.ids.has(id)} {...restProps}>
+            class:text-2xl={heading} class:italic={player.nickname} class:text-online={!current && PlayerIds.ids.has(id)} {...restProps}>
                 {player.nickname ? player.nickname : name}
             </button>
+            {#if isBot}
+                <Tooltip.Provider>
+                    <Tooltip.Root>
+                        <Tooltip.Trigger><Bot /></Tooltip.Trigger>
+                        <Tooltip.Content>Server-side bot</Tooltip.Content>
+                    </Tooltip.Root>
+                </Tooltip.Provider>
+            {/if}
             {#if player.nickname}
                 <Tooltip.Provider>
                     <Tooltip.Root>
@@ -190,35 +200,37 @@
                 {@render link("Ozfortress", `https://ozfortress.com/users/steam_id/${id64}`)}
             </ContextMenu.SubContent>
         </ContextMenu.Sub>
-        <ContextMenu.Item onclick={setNickname}>
-            Set Nickname
-        </ContextMenu.Item>
-        {#if player.nickname}
-            <ContextMenu.Item onclick={removeNickname}>
-                Remove Nickname
+        {#if !isBot}
+            <ContextMenu.Item onclick={setNickname}>
+                Set Nickname
             </ContextMenu.Item>
+            {#if player.nickname}
+                <ContextMenu.Item onclick={removeNickname}>
+                    Remove Nickname
+                </ContextMenu.Item>
+            {/if}
+            <ContextMenu.Item onclick={editNote}>
+                Edit Note
+            </ContextMenu.Item>
+            <ContextMenu.Sub>
+                <ContextMenu.SubTrigger>
+                    Tags
+                </ContextMenu.SubTrigger>
+                <ContextMenu.SubContent>
+                    {#each Settings.settings.tags as tag}
+                        <!-- I know there's a built in checkbox but it's causing problems -->
+                        <ContextMenu.Item onclick={() => toggleTag(tag.id)} closeOnSelect={false}>
+                            <div class="w-5">
+                                {#if player.tags[tag.id]}
+                                    <Check />
+                                {/if}
+                            </div>
+                            {tag.name}
+                        </ContextMenu.Item>
+                    {/each}
+                </ContextMenu.SubContent>
+            </ContextMenu.Sub>
         {/if}
-        <ContextMenu.Item onclick={editNote}>
-            Edit Note
-        </ContextMenu.Item>
-        <ContextMenu.Sub>
-            <ContextMenu.SubTrigger>
-                Tags
-            </ContextMenu.SubTrigger>
-            <ContextMenu.SubContent>
-                {#each Settings.settings.tags as tag}
-                    <!-- I know there's a built in checkbox but it's causing problems -->
-                    <ContextMenu.Item onclick={() => toggleTag(tag.id)} closeOnSelect={false}>
-                        <div class="w-5">
-                            {#if player.tags[tag.id]}
-                                <Check />
-                            {/if}
-                        </div>
-                        {tag.name}
-                    </ContextMenu.Item>
-                {/each}
-            </ContextMenu.SubContent>
-        </ContextMenu.Sub>
         <ContextMenu.Sub>
             <ContextMenu.SubTrigger>
                 Copy
@@ -246,8 +258,10 @@
                 </ContextMenu.SubContent>
             </ContextMenu.Sub>
         {/if}
-        <ContextMenu.Item onclick={() => Popups.open("friends", { id3: id, name })}>
-            View Known Friends
-        </ContextMenu.Item>
+        {#if !isBot}
+            <ContextMenu.Item onclick={() => Popups.open("friends", { id3: id, name })}>
+                View Known Friends
+            </ContextMenu.Item>
+        {/if}
     </ContextMenu.Content>
 </ContextMenu.Root>

@@ -17,7 +17,7 @@ export default new class Game {
             this.playersMap.clear();
 
             for(let player of this.players) {
-                if(player.user) this.userTeam = player.team;
+                if(player.isUser) this.userTeam = player.team;
                 this.playersMap.set(player.ID3, player);
             }
 
@@ -28,14 +28,14 @@ export default new class Game {
             this.players.push(player);
             this.playersMap.set(player.ID3, this.players[this.players.length - 1]);
 
-            if(player.user) this.userTeam = player.team;
+            if(player.isUser) this.userTeam = player.team;
         });
 
         WS.on(Message.PlayerLeave, (id) => {
             let index = this.players.findIndex((p) => p.ID3 === id);
             if(index === -1) return;
 
-            if(this.players[index].user) this.userTeam = -1;
+            if(this.players[index].isUser) this.userTeam = -1;
             this.players.splice(index, 1);
             this.playersMap.delete(id);
         });
@@ -50,7 +50,7 @@ export default new class Game {
             }
 
             if(data.kills !== undefined) this.sortPlayers();
-            if(player.user && data.team) this.userTeam = data.team;
+            if(player.isUser && data.team) this.userTeam = data.team;
         });
 
         WS.on(Message.CurrentServer, ({ server, definitelyNotInGame }) => {

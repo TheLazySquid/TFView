@@ -39,7 +39,7 @@
                 <div class="flex items-center gap-2">
                     <Avatar avatarHash={friend.avatarHash} name={friend.lastName} />
                     <Nameplate current={false} player={friend} grow={true} onpointerdown={e => e.stopPropagation()}
-                        onclick={() => Game.openPlayer(friend.id)} />
+                        onclick={() => Game.openPlayer(friend.id)} heading={false} />
                 </div>
             {/each}
         </div>

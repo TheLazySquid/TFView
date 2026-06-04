@@ -7,16 +7,12 @@
     import * as Resizable from "$lib/components/ui/resizable";
     import * as Card from "$lib/components/ui/card";
     import PlayerPopup from "../lib/components/popups/PlayerPopup.svelte";
-    import PastGamePopup from "../lib/components/popups/PastGamePopup.svelte";
-    import PastPlayerPopup from "$lib/components/popups/PastPlayerPopup.svelte";
     import ProfilePicturePopup from "$lib/components/popups/ProfilePicturePopup.svelte";
     import Swords from "@lucide/svelte/icons/swords";
     import Message from "@lucide/svelte/icons/message-square-more";
     import Close from "@lucide/svelte/icons/chevron-last";
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
     import WS from "$lib/ws/wsclient.svelte";
-    import FriendsPopup from "$lib/components/popups/FriendsPopup.svelte";
-    import Play from "@lucide/svelte/icons/play";
     import PlayerPopups from "$lib/components/popups/PlayerPopups.svelte";
 
     WS.init("game");

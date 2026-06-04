@@ -29,10 +29,11 @@ export const fakePlayers: Player[] = [
         kills: 9,
         deaths: 0,
         class: 1,
-        user: true,
+        isUser: true,
         tags: {},
         note: "",
-        killstreak: 9
+        killstreak: 9,
+        isBot: false
     },
     {
         name: "Screamin' Eagles",
@@ -53,7 +54,8 @@ export const fakePlayers: Player[] = [
         nickname: "Some Guy",
         note: "",
         killstreak: 0,
-        encounters: 6
+        encounters: 6,
+        isBot: false
     },
     {
         name: "Still Alive",
@@ -70,7 +72,8 @@ export const fakePlayers: Player[] = [
         deaths: 2,
         tags: {},
         note: "Awesome\nJust kidding",
-        killstreak: 2
+        killstreak: 2,
+        isBot: false
     },
     {
         name: "Mentlegen",
@@ -87,7 +90,8 @@ export const fakePlayers: Player[] = [
         deaths: 0,
         tags: {},
         note: "",
-        killstreak: 0
+        killstreak: 0,
+        isBot: false
     },
     {
         name: "Fruit Shop Owner",
@@ -105,7 +109,8 @@ export const fakePlayers: Player[] = [
         tags: {},
         note: "",
         killstreak: 1,
-        class: 0
+        class: 0,
+        isBot: true
     }
 ];
 
