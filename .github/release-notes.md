@@ -2,3 +2,4 @@
 * Added Smissmas and Halloween sections to casual selection manager
 * Made all of the casual page scrollable
 * Better detection and handling of server-side bots
+* Added fallback for when avatars fail to load
