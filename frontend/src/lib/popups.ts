@@ -50,6 +50,12 @@ export default new class Popups {
             return;
         }
 
+        // Blur the active element
+        if(document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+
+        // Open the popup
         let popup = this.callbacks[type];
         if(!popup.overlay) this.closePopup?.();
 
