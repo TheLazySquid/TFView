@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { CasualMapCategory } from "$types/maps";
-	import { casualMaps } from "$shared/maps";
+	import { casualMaps, mapBits } from "$shared/maps";
 	import { Switch } from "$lib/components/ui/switch";
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
@@ -68,6 +68,16 @@
 		});
 	}
 
+	const enableAll = () => {
+		Casual.selection = [...mapBits];
+		updateProfile();
+	}
+
+	const disableAll = () => {
+		Casual.selection.fill(0n);
+		updateProfile();
+	}
+
 	WS.init("casual");
 </script>
 
@@ -81,6 +91,15 @@
 <div class="max-h-full flex overflow-y-auto">
 	<div class="flex justify-end sticky top-0" style="width: max(270px, calc((100% - 630px) / 2));">
 		<div class="flex flex-col pt-6 gap-1 w-[230px] pr-10">
+			<div class="flex justify-around">
+				<button class="bg-input px-1 rounded-xs" onclick={enableAll}>
+					Enable All
+				</button>
+				<button class="bg-input px-1 rounded-xs" onclick={disableAll}>
+					Disable All
+				</button>
+			</div>
+			<hr />
 			{#each Casual.profiles as profile}
 				<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 				<div class="{profile.id === Casual.selectedProfileId ? "bg-primary" : "bg-accent"}
@@ -97,7 +116,7 @@
 					</button>
 				</div>
 			{/each}
-			<button class="flex justify-center" onclick={createNewProfile}>
+			<button class="flex justify-center pt-1" onclick={createNewProfile}>
 				<CirclePlus />
 			</button>
 		</div>

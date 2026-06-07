@@ -4,3 +4,4 @@
 * Better detection and handling of server-side bots
 * Added fallback for when avatars fail to load
 * Fixed certain popups re-opening when enter is pressed
+* Added enable/disable all buttons to casual page
