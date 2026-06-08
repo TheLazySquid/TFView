@@ -59,7 +59,8 @@ export class BatchRequester<T> {
             this.handleResponse(data, batch);
             this.processQueue();
         } catch(e) {
-            Log.error("Batch request failed", e);
+            const urlBase = url.split("?", 1)[0];
+            Log.error("Batch request to", urlBase, "failed", e);
 
             // Try again, up to 5 times
             for(let i = 0; i < batch.length; i++) {
