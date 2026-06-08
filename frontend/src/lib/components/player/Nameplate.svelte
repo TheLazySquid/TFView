@@ -157,7 +157,7 @@
                         <Tooltip.Trigger class="cursor-pointer">
                             <TextCursorInput />
                         </Tooltip.Trigger>
-                        <Tooltip.Content>
+                        <Tooltip.Content class="max-w-[500px]">
                             Past {player.names.length === 2 ? "name" : "names"}: {player.names.filter(n => n !== name).join(", ")}
                         </Tooltip.Content>
                     </Tooltip.Root>
