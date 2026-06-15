@@ -30,26 +30,3 @@ export async function getCurrentUserId() {
 		return null;
 	}
 }
-
-export function createWatcher(path: string, callback: (event: "rename" | "change", file: string) => void) {
-	let watcher: FSWatcher | null = null;
-	let watchTimeout: Timer | null = null;
-
-	const watchDemos = () => {
-		if(!Settings.get("tfPath")) return;
-		const fullPath = join(Settings.get("tfPath"), path);
-
-		try {
-			watcher = watch(fullPath, { persistent: false }, (event, file) => {
-				callback(event, file.toString());
-			});
-		} catch {
-			watchTimeout = setTimeout(() => watchDemos(), 5000).unref();
-		}
-	}
-
-	watchDemos();
-	Settings.on("tfPath", () => {
-		watchDemos();
-	});
-}

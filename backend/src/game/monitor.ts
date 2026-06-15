@@ -60,7 +60,7 @@ export default class GameMonitor {
             respond(Message.InitialPlayers, this.players);
         });
 
-        Server.onConnect("playerids", (respond) => {
+        Server.onConnect("playermeta", (respond) => {
             respond(Message.InitialPlayerIds, Array.from(this.playerIds));
         });
 
@@ -378,7 +378,7 @@ export default class GameMonitor {
                 if(!player.names.includes(player.name)) player.names.push(player.name);
 
                 Server.send("game", Message.PlayerJoin, player as Player);
-                Server.send("playerids", Message.PlayerIdJoin, id);
+                Server.send("playermeta", Message.PlayerIdJoin, id);
                 this.playerIds.add(id);
                 this.players.push(player as Player);
                 this.playerMap.set(id, player as Player);
@@ -440,7 +440,7 @@ export default class GameMonitor {
 
             // dispatch the change
             Server.send("game", Message.PlayerLeave, id);
-            Server.send("playerids", Message.PlayerIdLeave, id);
+            Server.send("playermeta", Message.PlayerIdLeave, id);
         }
 
         if(playersLeft) this.pruneOldEntries();

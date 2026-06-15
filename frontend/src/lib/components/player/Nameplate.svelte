@@ -11,6 +11,7 @@
     import Images from "@lucide/svelte/icons/images";
     import Gavel from "@lucide/svelte/icons/gavel";
     import Bot from "@lucide/svelte/icons/bot";
+    import EarOff from "@lucide/svelte/icons/ear-off";
     import Popups from "$lib/popups";
     import WS from "$lib/ws/wsclient.svelte";
     import { Recieves } from "$types/messages";
@@ -18,7 +19,7 @@
     import Settings from "$lib/ws/topics/settings.svelte";
     import { toast } from "svelte-sonner";
     import Avatar from "./Avatar.svelte";
-    import PlayerIds from "$lib/ws/topics/playerIds.svelte";
+    import PlayerMeta from "$lib/ws/topics/playerMeta.svelte";
 
     interface PastProps { player: PastPlayer; current: false; heading: boolean }
     interface CurrentProps { player: Player; current: true; heading: boolean }
@@ -103,7 +104,7 @@
     <ContextMenu.Trigger class={grow ? "grow" : ""}>
         <div class="flex items-center pr-2 gap-1">
             <button class="grow text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
-            class:text-2xl={heading} class:italic={player.nickname} class:text-online={!current && PlayerIds.ids.has(id)} {...restProps}>
+            class:text-2xl={heading} class:italic={player.nickname} class:text-online={!current && PlayerMeta.ids.has(id)} {...restProps}>
                 {player.nickname ? player.nickname : name}
             </button>
             {#if isBot}
@@ -171,6 +172,18 @@
                         </Tooltip.Trigger>
                         <Tooltip.Content>
                             One or more SourceBans on record
+                        </Tooltip.Content>
+                    </Tooltip.Root>
+                </Tooltip.Provider>
+            {/if}
+            {#if PlayerMeta.mutedIds.has(id)}
+                <Tooltip.Provider>
+                    <Tooltip.Root>
+                        <Tooltip.Trigger class="cursor-pointer">
+                            <EarOff />
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>
+                            You had this player muted when launching the game
                         </Tooltip.Content>
                     </Tooltip.Root>
                 </Tooltip.Provider>

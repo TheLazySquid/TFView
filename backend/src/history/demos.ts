@@ -6,10 +6,11 @@ import Log from "$src/log";
 import { EventEmitter } from "node:events";
 import Rcon from "$src/game/rcon";
 import { flags } from "$src/consts";
-import { createWatcher } from "$src/util";
 import Server from "$src/net/server";
 import { Recieves } from "$types/messages";
 import Close from "$src/close";
+import { watch, type FSWatcher } from "chokidar";
+import { basename } from "node:path";
 
 interface DemosEvents {
     create: [demo: string];
@@ -19,28 +20,15 @@ export default class Demos {
     static demosPath: string;
     static watchInterval = 5000;
     static events = new EventEmitter<DemosEvents>();
-    static recentDemos: string[] = [];
     static firstDemo = true;
 
     static init() {
-        createWatcher("demos", async (event, file) => {
-            if(event === "change" || !file.endsWith(".dem")) return;
+        this.demosPath = join(Settings.get("tfPath"), "demos");
+        this.watchDemos();
 
-            this.demosPath = join(Settings.get("tfPath"), "demos");
-            let exists = await fsp.exists(join(this.demosPath, file));
-            if(!exists) return;
-            
-            // fs.watch often fires multiple times for the same file
-            if(this.recentDemos.includes(file)) return;
-
-            this.recentDemos.push(file);
-            if(this.recentDemos.length > 10) this.recentDemos.shift();
-
-            this.closeDemo();
-
-            Log.info("Demo created:", file);
-            this.events.emit("create", file);
-            this.startSession(file);
+        Settings.on("tfPath", (path) => {
+            this.demosPath = join(path, "demos");
+            this.watchDemos();
         });
 
         Server.on(Recieves.PlayDemo, async (demo: string, { reply }) => {
@@ -51,8 +39,29 @@ export default class Demos {
         Close.on("close", () => this.closeDemo());
     }
 
+    static watcher?: FSWatcher;
+    static watchDemos() {
+        this.watcher?.close();
+
+        this.watcher = watch(this.demosPath, {
+            ignored: (file) => !file.endsWith(".dem"),
+            persistent: false,
+            ignoreInitial: true,
+            depth: 1
+        });
+
+        this.watcher.on("add", (path) => {
+            this.closeDemo();
+            
+            const file = basename(path);
+            Log.info("Demo created:", file);
+            this.events.emit("create", file);
+            this.startSession(file);
+        });
+    }
+
     static async playDemo(demo: string) {
-        const path = join(Settings.get("tfPath"), "demos", demo);
+        const path = join(this.demosPath, demo);
         if(!await fsp.exists(path)) {
             Log.error("Demo not found:", path);
             return false;

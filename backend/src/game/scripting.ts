@@ -43,7 +43,7 @@ export default class Scripting {
     static persistentRegex = /(\w+)\.persistent\.(js|ts)$/;
     static async startPersistent() {
         const watcher = watch(this.scriptPath, {
-            ignored: (file, stats) => stats?.isFile() && !this.persistentRegex.test(file),
+            ignored: (file) => !this.persistentRegex.test(file),
             persistent: false,
             ignoreInitial: false,
             depth: 1

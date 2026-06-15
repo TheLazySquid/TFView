@@ -17,6 +17,7 @@ import StartMenu from "./setup/startmenu";
 import Values from "./settings/values";
 import KillTracker from "./history/killTracker";
 import Updater from "./net/updater";
+import Mutes from "./game/mutes";
 import Close from "./close";
 import SteamApi from "./net/steamApi";
 import { feature } from "bun:bundle";
@@ -77,6 +78,7 @@ async function init() {
     Launcher.init();
     StartMenu.init();
     KillTracker.init();
+    Mutes.init();
     SteamApi.init();
     SourceBans.init();
     CustomRPC.init();

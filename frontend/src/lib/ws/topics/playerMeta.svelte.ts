@@ -2,8 +2,9 @@ import { SvelteSet } from "svelte/reactivity"
 import WS from "../wsclient.svelte";
 import { Message } from "$types/messages";
 
-export default new class PlayerIds {
+export default new class PlayerMeta {
     ids = new SvelteSet<string>();
+    mutedIds = new SvelteSet<string>();
 
     constructor() {
         WS.on(Message.InitialPlayerIds, (ids) => {
@@ -17,6 +18,12 @@ export default new class PlayerIds {
 
         WS.on(Message.PlayerIdLeave, (id) => {
             this.ids.delete(id);
+        });
+
+        WS.on(Message.MutedIds, (ids) => {
+            this.mutedIds.clear();
+            for(let id of ids) this.mutedIds.add(id);
+            console.log([...this.mutedIds])
         });
     }
 }
