@@ -1,4 +1,4 @@
-// Echoing "tfview.count()" in the console will make you say "This is message [x]"
+// Echoing "tfview.count[]" in the console will make you say "This is message [x]"
 // Where x counts up by one after each message
 let count = 0;
 

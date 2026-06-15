@@ -64,7 +64,7 @@ TFView uses a surprisngly small amount of storage space. Even with 100,000 diffe
 
 ## Scripting
 
-TFView can detect when a string of the following format is echoed in the TF2 console: `tfview.script(arg1,arg2,etc)`. It will then attempt to run the file `[HOME]/.tfview/scripts/[SCRIPT].js` (.ts is also supported). For example, running `echo "tfview.hi(arg, 123)"` will run the file `[HOME]/.tfview/scripts/hi.js`. If the file exports a `run` function, it will be called with a context object (more on that below), and then all the arguments supplied, like so: `export function run(context, arg1, arg2, etc)`. Note that the arguments will always be strings. Calling a script in this way may add a second or two of delay, and has a chance of being dropped.
+TFView can detect when a string of the following format is echoed in the TF2 console: `tfview.script[arg1|arg2|etc]`. It will then attempt to run the file `[HOME]/.tfview/scripts/[SCRIPT].js` (.ts is also supported). For example, running `echo "tfview.hi[arg|123]"` will run the file `[HOME]/.tfview/scripts/hi.js`. If the file exports a `run` function, it will be called with a context object (more on that below), and then all the arguments supplied, like so: `export function run(context, arg1, arg2, etc)`. Note that the arguments will always be strings. Calling a script in this way may add a second or two of delay, and has a chance of being dropped.
 
 You can also take a look at the [examples](./exampleScripts/) for reference.
 

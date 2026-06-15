@@ -12,7 +12,9 @@ import fsp from "node:fs/promises";
 
 export default class Scripting {
     static scriptPath = join(dataPath, "scripts");
-    static execRegex = /(?:\n|^)tfview\.(\w+)\s*\((.*)\)\s*(?=\n|$)/g;
+    static oldExecRegex = /(?:\s|^)tfview\.(\w+)\s*\(([^\n)]*)\)(?=\s|$)/g;
+    static newExecRegex = /(?:\s|^)tfview\.(\w+)\[([^\n\]]*)\](?=\s|$)/g;
+
     static init() {
         // Create the script directory if it doesn't exist
         fsp.exists(this.scriptPath).then((exists) => {
@@ -20,9 +22,18 @@ export default class Scripting {
             fsp.mkdir(this.scriptPath);
         });
 
-        LogParser.on(this.execRegex, (match) => {
+        LogParser.on(this.oldExecRegex, (match) => {
             const [, script, argsString] = match;
-            this.runScript(script, argsString);
+            const args = argsString.split(",").map(arg => arg.trim());
+
+            this.runScript(script, args);
+        });
+
+        LogParser.on(this.newExecRegex, (match) => {
+            const [, script, argsString] = match;
+            const args = argsString.split("|").map(arg => arg.trim());
+
+            this.runScript(script, args);
         });
 
         this.startPersistent();
@@ -87,9 +98,7 @@ export default class Scripting {
         }
     }
 
-    static async runScript(script: string, argsString: string) {
-        const args = argsString.split(",").map(arg => arg.trim());
-
+    static async runScript(script: string, args: string[]) {
         const persistent = this.persistent.get(script);
         if(persistent) {
             try {

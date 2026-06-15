@@ -2,7 +2,7 @@ import fsp from "node:fs/promises";
 import { join } from "path";
 
 // If you use a loadout bind, (aka a resup bind or b4nny bind), you'll know that it won't save your active loadouts between restarts
-// This script lets you save the changes by echoing "tfview.saveloadout(class, loadout)" in the console
+// This script lets you save the changes by echoing "tfview.saveloadout[class|loadout]" in the console
 // assuming you have a file "tf/cfg/initloadouts.cfg" with the following structure:
 // alias scoutRespawn "loadout1"
 // alias soldierRespawn "loadout1"
