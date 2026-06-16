@@ -69,6 +69,7 @@ async function init() {
         Demos.init();
         Updater.init();
         Scripting.init();
+        Mutes.init();
     }
     
     HistoryDatabase.init();
@@ -78,7 +79,6 @@ async function init() {
     Launcher.init();
     StartMenu.init();
     KillTracker.init();
-    Mutes.init();
     SteamApi.init();
     SourceBans.init();
     CustomRPC.init();

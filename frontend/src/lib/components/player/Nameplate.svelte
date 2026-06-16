@@ -104,7 +104,7 @@
     <ContextMenu.Trigger class={grow ? "grow" : ""}>
         <div class="flex items-center pr-2 gap-1">
             <button class="grow text-left whitespace-nowrap overflow-hidden overflow-ellipsis"
-            class:text-2xl={heading} class:italic={player.nickname} class:text-online={!current && PlayerMeta.ids.has(id)} {...restProps}>
+            class:text-2xl={heading} class:italic={player.nickname} class:text-online={!current && PlayerMeta.currentPlayers.has(id)} {...restProps}>
                 {player.nickname ? player.nickname : name}
             </button>
             {#if isBot}
@@ -176,7 +176,7 @@
                     </Tooltip.Root>
                 </Tooltip.Provider>
             {/if}
-            {#if PlayerMeta.mutedIds.has(id)}
+            {#if player.muted}
                 <Tooltip.Provider>
                     <Tooltip.Root>
                         <Tooltip.Trigger class="cursor-pointer">

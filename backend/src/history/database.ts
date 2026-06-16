@@ -15,6 +15,7 @@ import SteamApi from "$src/net/steamApi";
 import Close from "$src/close";
 import { steamProfilesUrl, steamVanityUrl } from "$shared/consts";
 import { isStringNumber } from "$shared/util";
+import Mutes from "$src/game/mutes";
 
 export default class HistoryDatabase {
     static db: Database;
@@ -269,12 +270,16 @@ export default class HistoryDatabase {
     static parsePlayerRow(row: Stored<StoredPlayer>): PastPlayer {
         let parsed = this.parseRow(row, ["names", "avatars", "tags"], ["sourceBanned"]);
 
+        // Make the tags a record instead of an array
         let tags: Record<string, boolean> = {};
         if(parsed.tags) {
             for(let tag of parsed.tags) tags[tag] = true;
         }
 
-        return { ...parsed, tags };
+        // Check if the player is currently muted
+        const muted = Mutes.isMuted(parsed.id);
+
+        return { ...parsed, tags, muted };
     }
 
     static async countPlayers(params: PlayerSearchParams) {

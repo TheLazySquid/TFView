@@ -192,7 +192,3 @@ export const fakeChat: ChatEntry[] = [
         timestamp: Date.now() - 60000
     }
 ]
-
-export const fakeMutedIds = [
-    "10403381"
-]

@@ -29,7 +29,6 @@ export enum Message {
     KillCountUpdate,
     UpdateAvailable,
     PastPlayerUpdate,
-    MutedIds,
     InitialPlayerIds,
     PlayerIdJoin,
     PlayerIdLeave,
@@ -55,7 +54,6 @@ export type MessageTypes =
     | SentMessage<Message.KillCountUpdate, { weapon: string, count: [number, number] }>
     | SentMessage<Message.UpdateAvailable, string>
     | SentMessage<Message.PastPlayerUpdate, Partial<PastPlayer> & { id: string }>
-    | SentMessage<Message.MutedIds, string[]>
     | SentMessage<Message.InitialPlayerIds, string[]>
     | SentMessage<Message.PlayerIdJoin, string>
     | SentMessage<Message.PlayerIdLeave, string>

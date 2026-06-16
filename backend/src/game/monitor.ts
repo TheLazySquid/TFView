@@ -19,6 +19,7 @@ import Log from "$src/log";
 import SourceBans from "$src/net/sourcebans";
 import Close from "$src/close";
 import EventEmitter from "node:events";
+import Mutes from "./mutes";
 
 interface GameMonitorEvents {
     userClassUpdate: [name: string | null];
@@ -161,6 +162,10 @@ export default class GameMonitor {
                 if(player.isBot) continue;
                 this.updateSourcebans(player);
             }
+        });
+
+        Mutes.events.on("change", () => {
+
         });
     }
 
@@ -340,6 +345,7 @@ export default class GameMonitor {
             }
 
             if(playerInfo.iAccountID === this.userAccountID3) player.isUser = true;
+            if(Mutes.isMuted(id)) player.muted = true;
             if(this.playerMap.has(id)) player = this.playerMap.get(id);
 
             let diff = this.updatePlayer(player, playerInfo);
@@ -594,6 +600,23 @@ export default class GameMonitor {
             this.events.emit("userClassUpdate", name);
         } else {
             this.events.emit("userClassUpdate", null);
+        }
+    }
+
+    static updateMutes() {
+        for(let player of this.players) {
+            if(player.isBot) continue;
+
+            let muted = Mutes.isMuted(player.ID3);
+
+            // Single equals sign used so undefined == false since muted is optional
+            if(player.muted != muted) continue;
+
+            player.muted = muted;
+            Server.send("game", Message.PlayerUpdate, {
+                ID3: player.ID3,
+                muted
+            });
         }
     }
 }

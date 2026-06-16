@@ -71,6 +71,9 @@ export interface Player {
 
     // From steamhistory api
     sourceBanned?: boolean;
+
+    // From voice_ban.dt
+    muted?: boolean;
 }
 
 export interface ListEvent {

@@ -115,6 +115,7 @@ export interface StoredPlayer {
 
 export type PastPlayer = Omit<StoredPlayer, 'tags'> & {
     tags: Record<string, boolean>;
+    muted?: boolean;
 }
 
 export interface DemoHeader {
