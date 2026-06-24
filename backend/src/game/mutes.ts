@@ -32,12 +32,10 @@ export default class Mutes {
     static async watchVoiceBans() {
         this.watcher?.close();
 
-        this.watcher = watch([], {
+        this.watcher = watch(this.voiceBansPath, {
             persistent: false,
             ignoreInitial: true
         });
-
-        this.watcher.add(this.voiceBansPath);
         this.watcher.on("change", () => {
             Log.info("voice_ban.dt changed");
             this.readVoiceBans();
