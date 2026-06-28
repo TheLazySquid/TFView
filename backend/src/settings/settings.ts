@@ -31,7 +31,8 @@ const defaultSettings: Partial<SettingsType> = {
     launchTf2OnStart: false,
     openUiOnStart: false,
     finishedSetup: false,
-    useCustomRPC: false
+    useCustomRPC: false,
+    leaveLastGameVisible: false
 }
 
 export default class Settings {

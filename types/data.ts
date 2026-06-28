@@ -37,6 +37,7 @@ export interface SettingsType {
     pickedIfShortcut: boolean;
     finishedSetup: boolean;
     useCustomRPC: boolean;
+    leaveLastGameVisible: boolean;
 }
 
 export interface ValuesType {

@@ -16,6 +16,7 @@
     import SteamKeyInfo from "$lib/components/settings/SteamKeyInfo.svelte";
     import MACInfo from "$lib/components/settings/MACInfo.svelte";
     import SteamHistoryInfo from "$lib/components/settings/SteamHistoryInfo.svelte";
+    import LeaveVisibleInfo from "$lib/components/settings/LeaveVisibleInfo.svelte";
     import ComponentPopup, { show } from "$lib/components/popups/ComponentPopup.svelte";
 
     WS.init("settings");
@@ -29,7 +30,8 @@
 
     const settings: Setting[] = [
         { name: "Launch TF2 when TFView is opened", id: "launchTf2OnStart", type: "switch" },
-        { name: "Use Custom Discord Rich Presence", id: "useCustomRPC", type: "switch" },
+        { name: "Use custom Discord Rich Presence", id: "useCustomRPC", type: "switch" },
+        { name: "Leave the last game you were in visible", id: "leaveLastGameVisible", type: "switch", moreInfo: LeaveVisibleInfo },
         // { name: "Open TFView UI when TFView is opened", id: "openUiOnStart", type: "switch" },
         { name: "RCON Port", id: "rconPort", type: "number" },
         { name: "RCON Password", id: "rconPassword", type: "password" },

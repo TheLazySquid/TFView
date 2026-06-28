@@ -45,7 +45,7 @@ export default new class Game {
             if(!player) return;
 
             for(let key in data) {
-                // @ts-ignore Oughta fix this, even "any" doesn't work
+                // @ts-expect-error Oughta fix this, even "any" doesn't work
                 player[key] = data[key];
             }
 

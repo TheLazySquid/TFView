@@ -14,6 +14,7 @@
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
     import WS from "$lib/ws/wsclient.svelte";
     import PlayerPopups from "$lib/components/popups/PlayerPopups.svelte";
+    import Settings from "$lib/ws/topics/settings.svelte";
 
     WS.init("game");
 
@@ -59,7 +60,7 @@
 {/snippet}
 
 <div class="w-full h-full relative">
-    {#if (Game.players.length === 0 && !Game.currentServer) || Game.definitelyNotInGame}
+    {#if (Game.players.length === 0 && !Game.currentServer) || (Game.definitelyNotInGame && !Settings.settings.leaveLastGameVisible)}
         <div class="absolute top-0 left-0 w-full h-full backdrop-blur-xs z-10 flex items-center justify-center"
         style="background-color: rgba(0,0,0,0.5)">
             <Card.Root class="w-[500px]">
