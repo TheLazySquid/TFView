@@ -44,7 +44,7 @@ export default class Demos {
         this.watcher?.close();
 
         this.watcher = watch(this.demosPath, {
-            ignored: (file) => !file.endsWith(".dem"),
+            ignored: (file, stat) => stat?.isFile() && !file.endsWith(".dem"),
             persistent: false,
             ignoreInitial: true,
             depth: 1
