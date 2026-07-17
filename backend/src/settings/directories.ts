@@ -62,9 +62,7 @@ export default class Directories {
         });
 
         Server.on(Recieves.OpenDirectoryPicker, async (type) => {
-            const defaultPath = type === "steam" ? this.steamDir : this.tfDir;
-            const title = type === "steam" ? "Select Steam Directory" : "Select tf Directory";
-            const path = await pickDirectory({ defaultPath, title });
+            let path = await pickDirectory({ defaultPath: type === "steam" ? this.steamDir : this.tfDir });
             if(!path) return;
 
             this.updateDirectory(type, path);
