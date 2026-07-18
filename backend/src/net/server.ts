@@ -7,6 +7,7 @@ import { root } from "$src/consts";
 import Settings from "$src/settings/settings";
 import { exists } from "node:fs/promises";
 import Close from "$src/close";
+import open from "tiny-open";
 
 export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" |
     "tags" | "casual" | "global" | "killcounts" | "pastplayer" | "playermeta" | "userfriends";
@@ -137,7 +138,7 @@ export default class Server {
         });
 
         const url = `http://localhost:${networkPort}`;
-        // if(Settings.get("openUiOnStart")) open(url);
+        if(Settings.get("openUiOnStart")) open(url);
 
         Log.info(`Server open on ${url}`);
 

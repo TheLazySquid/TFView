@@ -25,6 +25,7 @@
     "open": "^10.2.0",
     "rcon-srcds": "^2.1.0",
     "throttleit": "^2.1.0",
+    "tiny-open": "^1.3.0",
     "unzip-stream": "^0.3.4",
     "vdf-parser": "^1.2.1"
   }

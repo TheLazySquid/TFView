@@ -32,7 +32,7 @@
         { name: "Launch TF2 when TFView is opened", id: "launchTf2OnStart", type: "switch" },
         { name: "Use custom Discord Rich Presence", id: "useCustomRPC", type: "switch" },
         { name: "Leave the last game you were in visible", id: "leaveLastGameVisible", type: "switch", moreInfo: LeaveVisibleInfo },
-        // { name: "Open TFView UI when TFView is opened", id: "openUiOnStart", type: "switch" },
+        { name: "Open TFView UI when TFView is opened", id: "openUiOnStart", type: "switch" },
         { name: "RCON Port", id: "rconPort", type: "number" },
         { name: "RCON Password", id: "rconPassword", type: "password" },
         { name: "Steam API Key", id: "steamApiKey", type: "password", moreInfo: SteamKeyInfo },

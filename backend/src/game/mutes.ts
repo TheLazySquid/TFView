@@ -1,7 +1,7 @@
 import Settings from "$src/settings/settings";
 import { join } from "node:path";
 import { watch, type FSWatcher } from "chokidar";
-import { readFile } from "node:fs/promises";
+import { readFile, exists } from "node:fs/promises";
 import Log from "$src/log";
 import EventEmitter from "node:events";
 
@@ -45,6 +45,8 @@ export default class Mutes {
 
     static async readVoiceBans() {
         try {
+            if(!await exists(this.voiceBansPath)) return;
+
             const data = await readFile(this.voiceBansPath);
             this.mutedIds.clear();
 
