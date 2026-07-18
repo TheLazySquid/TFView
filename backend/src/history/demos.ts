@@ -17,14 +17,17 @@ interface DemosEvents {
 }
 
 export default class Demos {
-    static demosPath: string;
+    static demosPath: string | null = null;
     static watchInterval = 5000;
     static events = new EventEmitter<DemosEvents>();
     static firstDemo = true;
 
     static init() {
-        this.demosPath = join(Settings.get("tfPath"), "demos");
-        this.watchDemos();
+        const tfPath = Settings.get("tfPath");
+        if(tfPath) {
+            this.demosPath = join(tfPath, "demos");
+            this.watchDemos();
+        }
 
         Settings.on("tfPath", (path) => {
             this.demosPath = join(path, "demos");
@@ -99,7 +102,7 @@ export default class Demos {
         }
 
         const path = join(this.demosPath, name);
-        let content = await fsp.readFile(path);
+        const content = await fsp.readFile(path);
 
         const ip = content.subarray(0x10, 0x114).toString().replaceAll("\0", "");
         const map = content.subarray(0x218, 0x31C).toString().replaceAll("\0", "");

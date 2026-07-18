@@ -3,6 +3,7 @@ import { cp, rmdir, exists } from "node:fs/promises";
 import { zip } from "zip-a-folder";
 import { parseArgs } from "node:util";
 import { version, author } from "../../package.json";
+import resolveGypBuild from "./resolveGypBuild";
 
 const args = parseArgs({
     args: process.argv.slice(2),
@@ -14,6 +15,9 @@ const args = parseArgs({
         zip: {
             type: "string",
             short: "z"
+        },
+        "no-updater": {
+            type: "boolean"
         }
     }
 });
@@ -47,11 +51,16 @@ await Bun.build({
             description: "TFView",
             icon: "./resource/icon.ico"
         }
-    }
+    },
+    plugins: [
+        resolveGypBuild()
+    ]
 });
 
-console.log("Compiling updater...");
-await $`cd updater && make`.quiet();
+if(!args.values["no-updater"]) {
+    console.log("Compiling updater...");
+    await $`cd updater && make`.quiet();
+}
 
 console.log("Copying static files...");
 await cp("static", "dist/unpacked/static", { recursive: true });
