@@ -30,8 +30,7 @@ export default function resolveGypBuild(): BunPlugin {
 
 function resolveAddonPath(module: string): string {
     const path = fileURLToPath(import.meta.resolve(module));
-    const pathParts = path.replaceAll("\\", "/").split("/");
-    const modulesIndex = pathParts.lastIndexOf("node_modules");
-    const modulePath = join(...pathParts.slice(0, modulesIndex + 2));
-    return resolve(modulePath);
+    const formattedPath = path.replaceAll("\\", "/");
+    const moduleIndex = formattedPath.indexOf("/", formattedPath.lastIndexOf("/node_modules/") + 15);
+    return resolve(path.slice(0, moduleIndex + 1));
 }
