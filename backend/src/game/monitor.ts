@@ -457,7 +457,7 @@ export default class GameMonitor {
 
         // remove old chat messages
         for(let i = start; i < this.chat.items.length; i++) {
-            let item = this.chat.items[i];
+            const item = this.chat.items[i];
             if(item.type !== "event" && !this.playerMap.has(item.senderId)) {
                 this.chat.items.splice(i, 1);
                 i--;
