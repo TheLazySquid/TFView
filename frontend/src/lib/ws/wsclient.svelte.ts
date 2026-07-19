@@ -14,6 +14,7 @@ class WSClient {
     status: Status = $state("idle");
     closed = $state(false);
     connectTimeout?: Timer;
+    hasDisconnected = false;
 
     init(page: Page) {
         this.page = page;
@@ -35,10 +36,14 @@ class WSClient {
     }
 
     connectSocket() {
-        this.ws = new WebSocket(`ws://localhost:${networkPort}/ws/${this.page}`);
+        let url = `ws://localhost:${networkPort}/ws/${this.page}`;
+        if(this.hasDisconnected) url += "?reconnect=true";
+
+        this.ws = new WebSocket(url);
 
         this.ws.addEventListener("close", () => {
             this.connectSocket();
+            this.hasDisconnected = true;
             this.status = "disconnected";
             this.ready = new Promise<void>((res) => this.readyRes = res);
         }, { once: true });
@@ -58,8 +63,8 @@ class WSClient {
         }, { once: true });
 
         this.ws.addEventListener("message", (event) => {
-            let data = JSON.parse(event.data);
-            let messages = Array.isArray(data) ? data : [data];
+            const data = JSON.parse(event.data);
+            const messages = Array.isArray(data) ? data : [data];
 
             for(const message of messages) {
                 if(message.reply) {

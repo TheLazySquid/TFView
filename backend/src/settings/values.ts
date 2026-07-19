@@ -1,5 +1,5 @@
-import { join } from "node:path";
 import type { ValuesType } from "$types/data";
+import { join } from "node:path";
 import { dataPath } from "../consts";
 import { readFile } from "node:fs/promises";
 

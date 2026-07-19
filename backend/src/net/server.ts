@@ -1,5 +1,5 @@
 import { networkPort } from "$shared/consts";
-import { Recieves, type MessageTypes, type Page, type RecievesTypes, type SentMessage } from "$types/messages";
+import { Message, Recieves, type MessageTypes, type Page, type RecievesTypes, type SentMessage } from "$types/messages";
 import EventEmitter from "node:events";
 import { join } from "node:path";
 import Log from "../log";
@@ -11,7 +11,7 @@ import open from "tiny-open";
 
 export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" |
     "tags" | "casual" | "global" | "killcounts" | "pastplayer" | "playermeta" | "userfriends";
-export type WS = Bun.ServerWebSocket<{ page: Page }>;
+export type WS = Bun.ServerWebSocket<{ page: Page, reconnecting: boolean }>;
 
 const playerTopics: Topic[] = ["tags", "pastplayer", "playermeta", "userfriends", "settings"];
 const globalTopics: Topic[] = ["global"];
@@ -32,7 +32,7 @@ export default class Server {
     static server: Bun.Server<{ page: Page }>;
     static setupMode = false;
     
-    static init() {
+    static init(updated: boolean) {
         this.setupMode = !Settings.get("finishedSetup");
 
         this.on(Recieves.FinishSetup, (_, { reply }) => {
@@ -49,11 +49,11 @@ export default class Server {
 
                 // Handle websocket connections
                 if(parts[0] === "ws") {
-                    let page = req.url.split("/").pop() as Page;
+                    const page = parts.at(-1) as Page;
                     if(!topics[page]) return new Response("Invalid page", { status: 400 });
     
-                    let data = { page };
-                    if (server.upgrade(req, { data })) return;
+                    const reconnecting = url.searchParams.get("reconnect") === "true";
+                    if (server.upgrade(req, { data: { page, reconnecting } })) return;
     
                     return new Response("Upgrade failed", { status: 500 });
                 }
@@ -122,7 +122,12 @@ export default class Server {
                     this.events.emit(data.channel.toString(), data.data, actions);
                 },
                 open: (ws: WS) => {
-                    Log.info("Websocket connection established:", ws.data.page);
+                    Log.info("Websocket connection established:", ws.data.page, ws.data.reconnecting ? "(reconnecting)" : "");
+                    
+                    // Send a message if the connecting is reconnecting from an update
+                    if(updated && ws.data.reconnecting) {
+                        ws.send(JSON.stringify({ channel: Message.UpdateDone }));
+                    }
 
                     const callback = (channel: any, data: any) => {
                         ws.send(JSON.stringify({ channel, data }));
@@ -168,20 +173,20 @@ export default class Server {
     }
 
     static pendingMessages: Record<string, any[]> = {};
-    static send<C extends MessageTypes["channel"]>(topic: Topic, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {
+    static async send<C extends MessageTypes["channel"]>(topic: Topic, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {
         this.pendingMessages[topic] ??= [];
 
         const pending = this.pendingMessages[topic];
         pending.push({ channel, data });
 
         // If a message will be sent multiple times simultaneously batch them together
-        if(pending.length !== 1) return; 
-        setTimeout(() => {
-            const message = pending.length === 1 ? pending[0] : pending;
-            this.server.publish(topic, JSON.stringify(message));
-            
-            this.pendingMessages[topic] = [];
-        }, 0);
+        if(pending.length !== 1) return;
+        await new Promise((res) => setTimeout(res, 0));
+        
+        const message = pending.length === 1 ? pending[0] : pending;
+        this.server.publish(topic, JSON.stringify(message));
+        
+        this.pendingMessages[topic] = [];
     }
 
     static sendTo<C extends MessageTypes["channel"]>(ws: WS, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {

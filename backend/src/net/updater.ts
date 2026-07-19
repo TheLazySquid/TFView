@@ -49,7 +49,7 @@ export default class Updater {
             if(choice === "skip") {
                 Values.set("skippedVersion", this.updateInfo.version);
             } else if(choice === "now") {
-                this.downloadUpdate(this.updateInfo.url);
+                this.downloadUpdate(this.updateInfo);
             }
         });
 
@@ -62,10 +62,10 @@ export default class Updater {
     }
 
     static async checkForUpdate(): Promise<UpdateInfo | null> {
-        let res = await fetch(this.endpoint);
+        const res = await fetch(this.endpoint);
         if(!res.ok) throw new Error("Api request failed");
 
-        let data = await res.json() as any;
+        const data = await res.json() as any;
         Log.info(`Latest release: ${data.tag_name} (using v${version})`);
 
         if(Values.get("skippedVersion") === data.tag_name) return null;
@@ -73,7 +73,7 @@ export default class Updater {
     
         // Get the url of the asset that matches the current platform
         const suffix = isLinux ? "_linux.zip" : "_windows.zip";
-        for(let asset of data.assets) {
+        for(const asset of data.assets) {
             if(asset.name.endsWith(suffix)) {
                 return {
                     url: asset.browser_download_url,
@@ -85,12 +85,33 @@ export default class Updater {
         throw new Error("No compatible asset found");
     }
 
-    static async downloadUpdate(url: string) {
-        let res = await fetch(url);
+    static async downloadUpdate(info: UpdateInfo) {
+        const res = await fetch(info.url);
+        const size = Number(res.headers.get("content-length"));
         const unzipper = unzip.Extract({ path: join(root, "updated") });
 
         // types are messed up https://github.com/DefinitelyTyped/DefinitelyTyped/discussions/65542
-        Readable.fromWeb(res.body as any).pipe(unzipper);
+        const stream = Readable.fromWeb(res.body as any);
+        stream.pipe(unzipper);
+
+        if(Number.isNaN(size)) {
+            Log.warning("Could not determine content-length of update zip");
+        } else {
+            let downloaded = 0;
+            let sendThreshold = -1;
+    
+            stream.on("data", (chunk: Buffer) => {
+                downloaded += chunk.length;
+                const progress = downloaded / size;
+                const percentage = Math.floor(progress * 100);
+
+                if(percentage <= sendThreshold) return;
+                sendThreshold = percentage;
+
+                Server.send("global", Message.UpdateProgress, progress);
+            });
+        }
+
         await new Promise((res) => unzipper.on("close", res));
 
         // Copy the new static directory
@@ -125,6 +146,7 @@ export default class Updater {
         await fsp.rm(updatedPath, { recursive: true, force: true });
 
         // Spawn the updater and kill the process
+        await Server.send("global", Message.InstallingUpdate, null);
         Close.close();
         spawn(oldUpdater, { cwd: root, detached: true, stdio: "ignore" }).unref();
     }

@@ -32,7 +32,10 @@ export enum Message {
     InitialPlayerIds,
     PlayerIdJoin,
     PlayerIdLeave,
-    UserFriendIds
+    UserFriendIds,
+    UpdateProgress,
+    InstallingUpdate,
+    UpdateDone
 }
 
 export type MessageTypes =
@@ -58,6 +61,9 @@ export type MessageTypes =
     | SentMessage<Message.PlayerIdJoin, string>
     | SentMessage<Message.PlayerIdLeave, string>
     | SentMessage<Message.UserFriendIds, string[]>
+    | SentMessage<Message.UpdateProgress, number>
+    | SentMessage<Message.InstallingUpdate, void>
+    | SentMessage<Message.UpdateDone, void>
     | SentMessage<`list-${string}-addStart`, any>
     | SentMessage<`list-${string}-update`, { id: any, update: any }>
     | SentMessage<`list-${string}-delete`, any>

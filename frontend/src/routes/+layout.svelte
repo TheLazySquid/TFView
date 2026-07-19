@@ -1,14 +1,17 @@
 <script lang="ts">
-	import '../app.css';
-    import { page } from '$app/state';
-	import { crossfade } from 'svelte/transition';
-    import { quintOut } from 'svelte/easing';
-    import { Toaster } from '$lib/components/ui/sonner';
-    import WS from '$lib/ws/wsclient.svelte';
-	import { WifiFade } from 'svelte-svg-spinners';
+	import "../app.css";
+    import { page } from "$app/state";
+	import { crossfade } from "svelte/transition";
+    import { quintOut } from "svelte/easing";
+    import { Toaster } from "$lib/components/ui/sonner";
+    import WS from "$lib/ws/wsclient.svelte";
+	import { WifiFade } from "svelte-svg-spinners";
 	import * as AlertDialog from "$lib/components/ui/alert-dialog";
+	import * as Dialog from "$lib/components/ui/dialog";
 	import * as DropdownMenu from "$lib/components/ui/dropdown-menu";
 	import * as Tooltip from "$lib/components/ui/tooltip";
+	import { Progress } from "$lib/components/ui/progress";
+	import { Button } from "$lib/components/ui/button";
 	import Game from "@lucide/svelte/icons/gamepad-2";
 	import FolderSearch from "@lucide/svelte/icons/folder-search";
 	import UserSearch from "@lucide/svelte/icons/user-search";
@@ -17,10 +20,11 @@
 	import Map from "@lucide/svelte/icons/map";
 	import Play from "@lucide/svelte/icons/play";
 	import Tally from "@lucide/svelte/icons/tally-5";
-    import { Message, Recieves } from '$types/messages';
-    import { toast } from 'svelte-sonner';
-    import RconConnected from '$lib/ws/topics/rconConnected.svelte';
-    import { createActionToast } from '$lib/components/toasts/actions';
+    import { Message, Recieves } from "$types/messages";
+    import { toast } from "svelte-sonner";
+    import RconConnected from "$lib/ws/topics/rconConnected.svelte";
+    import { createActionToast } from "$lib/components/toasts/actions";
+    import Updater from "$lib/ws/topics/updater.svelte";
 	
 	let { children } = $props();
 
@@ -50,7 +54,7 @@
 	WS.on(Message.UpdateAvailable, (change) => {
 		createActionToast("update", `An update for TFView is available! (${change})`, [
 			{ label: "Update Now", onClick: () => WS.send(Recieves.WantsToUpdate, "now") },
-			{ label: "Later", onClick: () => WS.send(Recieves.WantsToUpdate, "later") },
+			{ label: "Later", onClick: () => Updater.startUpdate() },
 			{ label: "Skip Update", onClick: () => WS.send(Recieves.WantsToUpdate, "skip") }
 		]);
 	});
@@ -80,6 +84,28 @@
 		<p>You may close this page if you wish.</p>
 	</AlertDialog.Content>
 </AlertDialog.Root>
+
+<Dialog.Root open={Updater.status !== "idle"}>
+	<Dialog.Content style="z-index: 100" escapeKeydownBehavior="ignore" interactOutsideBehavior="ignore">
+		<Dialog.Title>Updating TFView</Dialog.Title>
+		<div class="h-[70px]">
+			{#if Updater.status === "waiting"}
+				Beginning download...
+			{:else if Updater.status === "downloading"}
+				Downloading update ({Math.round(Updater.updateProgress * 100)}%)
+				<Progress value={Updater.updateProgress} max={1} class="mt-2" />
+			{:else if Updater.status === "installing"}
+				Download complete, restarting TFView shortly...
+			{:else if Updater.status === "done"}
+				Update completed, click
+				<Button class="text-white px-1 h-6" onclick={() => location.reload()}>
+					here
+				</Button>
+				to reload the UI and get the latest changes.
+			{/if}
+		</div>
+	</Dialog.Content>
+</Dialog.Root>
 
 <div class="flex h-full">
 	<div class="w-12 border-r-2 flex flex-col items-center py-1 shrink-0">

@@ -46,6 +46,7 @@ export interface ValuesType {
     skippedVersion?: string;
     lastFriendFetch?: number;
     friendIds?: string[];
+    lastVersion?: string;
 }
 
 export type GameDir = "steam" | "tf";
