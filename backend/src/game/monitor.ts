@@ -341,7 +341,8 @@ export default class GameMonitor {
                 killstreak: 0,
                 names: [],
                 avatars: [],
-                isBot: false
+                isBot: false,
+                aliveSince: Date.now()
             }
 
             if(playerInfo.iAccountID === this.userAccountID3) player.isUser = true;
@@ -358,6 +359,8 @@ export default class GameMonitor {
                 if(diff.alive !== undefined || diff.team !== undefined) {
                     player.killstreak = 0;
                     diff.killstreak = 0;
+
+                    if(diff.alive) player.aliveSince = Date.now();
                 }
                 
                 if(diff.name) {

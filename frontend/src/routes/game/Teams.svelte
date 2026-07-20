@@ -83,6 +83,7 @@
                 <DropdownMenu.CheckboxItem onCheckedChange={saveColumns} bind:checked={columns.ping}>Ping</DropdownMenu.CheckboxItem>
                 <DropdownMenu.CheckboxItem onCheckedChange={saveColumns} bind:checked={columns.health}>Health</DropdownMenu.CheckboxItem>
                 <DropdownMenu.CheckboxItem onCheckedChange={saveColumns} bind:checked={columns.encounters}>Encounters</DropdownMenu.CheckboxItem>
+                <DropdownMenu.CheckboxItem onCheckedChange={saveColumns} bind:checked={columns.timeAlive}>Time Alive</DropdownMenu.CheckboxItem>
             </DropdownMenu.Content>
         </DropdownMenu.Root>
         {@render splitButton(Split, true, "rounded-l-sm")}

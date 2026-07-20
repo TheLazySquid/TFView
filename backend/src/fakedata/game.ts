@@ -33,7 +33,8 @@ export const fakePlayers: Player[] = [
         tags: {},
         note: "",
         killstreak: 9,
-        isBot: false
+        isBot: false,
+        aliveSince: Date.now() - 120000
     },
     {
         name: "Screamin' Eagles",
@@ -55,7 +56,8 @@ export const fakePlayers: Player[] = [
         note: "",
         killstreak: 0,
         encounters: 6,
-        isBot: false
+        isBot: false,
+        aliveSince: Date.now() - 100000
     },
     {
         name: "Still Alive",
@@ -73,7 +75,8 @@ export const fakePlayers: Player[] = [
         tags: {},
         note: "Awesome\nJust kidding",
         killstreak: 2,
-        isBot: false
+        isBot: false,
+        aliveSince: Date.now() - 700000
     },
     {
         name: "Mentlegen",
@@ -91,7 +94,8 @@ export const fakePlayers: Player[] = [
         tags: {},
         note: "",
         killstreak: 0,
-        isBot: false
+        isBot: false,
+        aliveSince: Date.now() - 30000
     },
     {
         name: "Fruit Shop Owner",
@@ -110,7 +114,8 @@ export const fakePlayers: Player[] = [
         note: "",
         killstreak: 1,
         class: 0,
-        isBot: true
+        isBot: true,
+        aliveSince: Date.now() - 40000
     }
 ];
 

@@ -4,8 +4,10 @@ const defaultColumns = {
     kd: true,
     health: true,
     ping: false,
-    encounters: false
+    encounters: false,
+    timeAlive: false
 }
 
 const saved = localStorage.getItem("game-columns");
-export let columns: typeof defaultColumns = $state(saved ? JSON.parse(saved) : defaultColumns);
+const initialValue = Object.assign({}, defaultColumns, saved ? JSON.parse(saved) : {});
+export let columns: typeof defaultColumns = $state(initialValue);

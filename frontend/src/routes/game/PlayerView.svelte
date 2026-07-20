@@ -8,6 +8,7 @@
     import { columns } from "./state.svelte";
     import UserFriends from "$lib/ws/topics/userFriends.svelte";
     import Settings from "$lib/ws/topics/settings.svelte";
+    import RelativeTime from "$lib/components/util/RelativeTime.svelte";
 
     let { index }: { index: number } = $props();
     let player = $derived(Game.players[index]);
@@ -79,5 +80,12 @@
     {/if}
     {#if columns.encounters}
         <td class="w-8 text-center">{player.encounters}</td>
+    {/if}
+    {#if columns.timeAlive}
+        <td class="w-16 text-center whitespace-nowrap text-nowrap">
+            {#if player.alive}
+                <RelativeTime time={player.aliveSince} />
+            {/if}
+        </td>
     {/if}
 </tr>

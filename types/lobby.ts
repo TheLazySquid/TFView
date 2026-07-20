@@ -51,6 +51,7 @@ export interface Player {
 
     // From killfeed
     killstreak: number;
+    aliveSince: number;
 
     // Estimated based on killfeed and health
     maxHealth?: number;

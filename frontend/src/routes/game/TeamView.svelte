@@ -5,6 +5,7 @@
     import Ping from "@lucide/svelte/icons/chart-no-axes-column-increasing"
     import HeartPulse from "@lucide/svelte/icons/heart-pulse";
     import Eye from "@lucide/svelte/icons/eye";
+    import Clock from "@lucide/svelte/icons/clock";
     import { columns } from "./state.svelte";
 
     interface Props {
@@ -52,6 +53,9 @@
                 {/if}
                 {#if columns.encounters}
                     <th class="w-9"><div class="flex w-full h-full items-center justify-center"><Eye /></div></th> 
+                {/if}
+                {#if columns.timeAlive}
+                    <th class="w-16"><div class="flex w-full h-full items-center justify-center"><Clock /></div></th> 
                 {/if}
             </tr>
         </thead>
