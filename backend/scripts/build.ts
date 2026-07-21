@@ -3,7 +3,7 @@ import { cp, rmdir, exists } from "node:fs/promises";
 import { zip } from "zip-a-folder";
 import { parseArgs } from "node:util";
 import { version, author } from "../../package.json";
-import resolveGypBuild from "./resolveGypBuild";
+import resolveNodeFiles from "./resolveNodeFiles";
 
 const args = parseArgs({
     args: process.argv.slice(2),
@@ -53,7 +53,7 @@ await Bun.build({
         }
     },
     plugins: [
-        resolveGypBuild()
+        resolveNodeFiles()
     ]
 });
 

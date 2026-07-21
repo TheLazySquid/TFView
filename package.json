@@ -4,6 +4,7 @@
   "author": "TheLazySquid",
   "private": true,
   "trustedDependencies": [
+    "ctray",
     "node-fs-dialogs"
   ],
   "workspaces": [

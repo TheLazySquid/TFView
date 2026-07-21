@@ -26,6 +26,7 @@ import SourceBans from "./net/sourcebans";
 import { Recieves } from "$types/messages";
 import CustomRPC from "./net/rpc";
 import { version } from "../../package.json";
+import createSystrayIcon from "./tray";
 
 init();
 
@@ -87,6 +88,7 @@ async function init() {
     SteamApi.init();
     SourceBans.init();
     CustomRPC.init();
+    createSystrayIcon();
 
     Server.on(Recieves.CloseApp, async (closeGame) => {
         if(closeGame) await Rcon.run("quit");
