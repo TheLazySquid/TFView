@@ -1,5 +1,5 @@
 import { $ } from "bun";
-import { cp, rmdir, exists } from "node:fs/promises";
+import { cp, rm, exists } from "node:fs/promises";
 import { zip } from "zip-a-folder";
 import { parseArgs } from "node:util";
 import { version, author } from "../../package.json";
@@ -24,7 +24,7 @@ const args = parseArgs({
 
 if(await exists("dist")) {
     console.log("Clearing dist directory...");
-    await rmdir("dist", { recursive: true });
+    await rm("dist", { recursive: true });
 }
 
 if(!await exists("static")) {
