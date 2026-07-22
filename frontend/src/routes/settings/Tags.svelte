@@ -10,7 +10,6 @@
     import { Recieves } from "$types/messages";
     import throttle from "throttleit";
     import ColorPicker from "svelte-awesome-color-picker";
-    import { watch } from "runed";
     import { Checkbox } from "$lib/components/ui/checkbox";
     
     let items: Tag[] = $state([]);
