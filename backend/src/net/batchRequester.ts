@@ -10,7 +10,7 @@ export interface QueuedRequest<T> {
 interface BatchRequesterOptions {
     name: string;
     batchSize: number;
-    getUrl: (ids: string[]) => string;
+    getUrl: (ids: string[]) => string | null;
     handleResponse: (data: any, batch: QueuedRequest<any>[]) => void;
 }
 
@@ -23,7 +23,7 @@ export class BatchRequester<T> {
 
     name: string;
     batchSize: number;
-    getUrl: (ids: string[]) => string;
+    getUrl: (ids: string[]) => string | null;
     handleResponse: (data: any, batch: QueuedRequest<T>[]) => void;
 
     constructor(options: BatchRequesterOptions) {
@@ -44,6 +44,7 @@ export class BatchRequester<T> {
         const url = this.getUrl(batch.map(r => r.id));
 
         try {
+            if(!url) throw new Error("No url for batch request");
             const res = await fetch(url);
 
             // Increase delay when ratelimited
@@ -59,18 +60,25 @@ export class BatchRequester<T> {
             this.handleResponse(data, batch);
             this.processQueue();
         } catch(e) {
-            const urlBase = url.split("?", 1)[0];
-            Log.error("Batch request to", urlBase, "failed", e);
+            if(url) {
+                const urlBase = url.split("?", 1)[0];
+                Log.error("Batch request to", urlBase, "failed", e);
+            } else {
+                Log.error("Failed to get url for batch request", e);
+            }
 
             // Try again, up to 5 times
             for(let i = 0; i < batch.length; i++) {
-                if(batch[i].failedAttempts >= 5) {
-                    Log.warning(`${this.name} query for id ${batch[i].id} failed after 5 attempts`);
-                    batch[i].rej();
+                const item = batch[i];
+                if(!item) continue;
+
+                if(item.failedAttempts >= 5) {
+                    Log.warning(`${this.name} query for id ${item.id} failed after 5 attempts`);
+                    item.rej();
                     batch.splice(i, 1);
                     i--;
                 } else {
-                    batch[i].failedAttempts++;
+                    item.failedAttempts++;
                 }
             }
 

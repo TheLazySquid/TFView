@@ -1,4 +1,3 @@
-import fsp from "node:fs/promises";
 import { join } from "node:path";
 import { root } from "$src/consts";
 import { exec } from "node:child_process";
@@ -6,6 +5,7 @@ import Server from "$src/net/server";
 import { Message, Recieves } from "$types/messages";
 import Settings from "$src/settings/settings";
 import { feature } from "bun:bundle";
+import { exists } from "$src/util";
 
 export default class StartMenu {
     static startMenuPath = 'C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs';
@@ -14,7 +14,7 @@ export default class StartMenu {
     static init() {
         if(!feature("COMPILED") || process.platform !== "win32" || Settings.get("pickedIfShortcut")) return;
         
-        let existsPromise = this.check();
+        const existsPromise = this.check();
         Server.onConnect("global", async (reply) => {
             if(Settings.get("pickedIfShortcut")) return;
 
@@ -37,7 +37,7 @@ export default class StartMenu {
     }
 
     static check() {
-        return fsp.exists(this.linkPath);
+        return exists(this.linkPath);
     }
 
     static createShortcut() {
@@ -55,7 +55,7 @@ export default class StartMenu {
             
             // There isn't really a good way to tell if this worked from the command
             exec(command, async () => {
-                let exists = await this.check();
+                const exists = await this.check();
 
                 if(exists) res();
                 else rej();

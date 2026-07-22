@@ -270,8 +270,8 @@ export const mergeWith: Record<string, string[]> = {
 }
 
 export const mergedWeapons: Record<string, string> = {};
-for(let weapon in mergeWith) {
-    for(let merge of mergeWith[weapon]) {
+for(const weapon in mergeWith) {
+    for(const merge of mergeWith[weapon]) {
         mergedWeapons[merge] = weapon;
     }
 }

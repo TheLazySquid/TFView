@@ -52,7 +52,7 @@ async function init() {
     if(!Settings.get("finishedSetup")) Log.info("Running in setup mode");
 
     const lastVersion = Values.get("lastVersion");
-    const updated = lastVersion && Bun.semver.order(version, lastVersion) > 0;
+    const updated = Boolean(lastVersion) && Bun.semver.order(version, lastVersion!) > 0;
     if(lastVersion !== version) Values.set("lastVersion", version);
 
     try {

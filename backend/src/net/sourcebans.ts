@@ -30,13 +30,16 @@ export default class SourceBans {
     }
 
     static getUrl(ids: string[]) {
+        const key = Settings.get("steamhistoryApiKey");
+        if(!key) return null;
+
         const params = new URLSearchParams({
-            key: Settings.get("steamhistoryApiKey"),
+            key,
             steamids: ids.join(","),
             shouldkey: "1"
         });
 
-        return "https://steamhistory.net/api/sourcebans?" + params.toString();
+        return `https://steamhistory.net/api/sourcebans?${params.toString()}`;
     }
 
     static onLeave(id3: string) {
@@ -58,11 +61,13 @@ export default class SourceBans {
     }
     
     static async getBans(id3: string) {
-        if(this.banInfo.has(id3)) return this.banInfo.get(id3);
+        const cached = this.banInfo.get(id3);
+        if(cached) return cached;
+
         if(!Settings.get("steamhistoryApiKey")) throw new Error("No SteamHistory API key");
-        
         const id64 = id3ToId64(id3);
         const bans = await this.bansRequester.request(id64, 0);
+        
         return bans;
     }
 }

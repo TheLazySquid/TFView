@@ -1,13 +1,13 @@
 import { networkPort } from "$shared/consts";
-import { Message, Recieves, type MessageTypes, type Page, type RecievesTypes, type SentMessage } from "$types/messages";
+import { Message, Recieves, type ExtractMessage, type ExtractRecieves, type MessageData, type MessageTypes, type Page, type RecievesTypes } from "$types/messages";
 import EventEmitter from "node:events";
 import { join } from "node:path";
 import Log from "../log";
 import { root } from "$src/consts";
 import Settings from "$src/settings/settings";
-import { exists } from "node:fs/promises";
 import Close from "$src/close";
 import open from "tiny-open";
+import { exists } from "$src/util";
 
 export type Topic = "game" | "playerhistory" | "gamehistory" | "settings" | "directories" |
     "tags" | "casual" | "global" | "killcounts" | "pastplayer" | "playermeta" | "userfriends";
@@ -59,7 +59,7 @@ export default class Server {
                 }
 
                 // Serve static files, if possible
-                let isFile = parts.at(-1).indexOf(".") !== -1;
+                const isFile = parts.at(-1)!.indexOf(".") !== -1;
 
                 if(!isFile && this.setupMode && url.pathname !== "/setup") {
                     return Response.redirect("/setup", 307);
@@ -83,23 +83,23 @@ export default class Server {
             },
             websocket: {
                 message: (ws: WS, message: string) => {
-                    let data = JSON.parse(message);
+                    const data: MessageData = JSON.parse(message);
 
                     // Handle the websocket changing topics
-                    if(data.navigate) {
+                    if("navigate" in data) {
                         if(!topics[data.navigate]) {
                             Log.error("Invalid page navigation:", data.navigate);
                             return;
                         }
 
                         // Unsubscribe from the current page's topics and subscribe to the new page's topics
-                        for(let topic of topics[ws.data.page]) ws.unsubscribe(topic);
+                        for(const topic of topics[ws.data.page]) ws.unsubscribe(topic);
 
                         const callback = (channel: any, data: any) => {
                             ws.send(JSON.stringify({ channel, data }));
                         }
                         ws.data.page = data.navigate;
-                        for(let topic of topics[data.navigate]) {
+                        for(const topic of topics[data.navigate]) {
                             ws.subscribe(topic);
                             this.events.emit(`${topic}-connect`, callback);
                         }
@@ -109,7 +109,7 @@ export default class Server {
 
                     if(data.channel === undefined) return;
 
-                    let actions = {
+                    const actions = {
                         reply: (response: any) => {
                             ws.send(JSON.stringify({
                                 reply: data.id,
@@ -133,7 +133,7 @@ export default class Server {
                         ws.send(JSON.stringify({ channel, data }));
                     }
 
-                    for(let topic of topics[ws.data.page]) {
+                    for(const topic of topics[ws.data.page]) {
                         ws.subscribe(topic);
                         this.events.emit(`${topic}-connect`, callback);
                     }
@@ -153,27 +153,27 @@ export default class Server {
     }
 
     static onConnect<C extends MessageTypes["channel"]>(topic: Topic, callback: (send: (channel: C, data:
-        Extract<MessageTypes, SentMessage<C, any>>["data"]) => void) => void) {
+        ExtractMessage<C>["data"]) => void) => void) {
         this.events.on(`${topic}-connect`, callback);
     }
 
     // I sincerely apologize for this type
-    static on<C extends RecievesTypes["channel"]>(channel: C, callback: (data: Extract<RecievesTypes, SentMessage<C, any>>["data"], action: {
-        reply: (response: Extract<RecievesTypes, SentMessage<C, any>>["replyType"]) => void,
+    static on<C extends RecievesTypes["channel"]>(channel: C, callback: (data: ExtractRecieves<C>["data"], action: {
+        reply: (response: ExtractRecieves<C>["replyType"]) => void,
         ws: WS
     }) => void) {
         this.events.on(channel.toString(), callback);
     }
 
-    static once<C extends RecievesTypes["channel"]>(channel: C, callback: (data: Extract<RecievesTypes, SentMessage<C, any>>["data"], action: {
-        reply: (response: Extract<RecievesTypes, SentMessage<C, any>>["replyType"]) => void,
+    static once<C extends RecievesTypes["channel"]>(channel: C, callback: (data: ExtractRecieves<C>["data"], action: {
+        reply: (response: ExtractRecieves<C>["replyType"]) => void,
         ws: WS
     }) => void) {
         this.events.once(channel.toString(), callback);
     }
 
     static pendingMessages: Record<string, any[]> = {};
-    static async send<C extends MessageTypes["channel"]>(topic: Topic, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {
+    static async send<C extends MessageTypes["channel"]>(topic: Topic, channel: C, data: ExtractMessage<C>["data"]) {
         this.pendingMessages[topic] ??= [];
 
         const pending = this.pendingMessages[topic];
@@ -189,11 +189,11 @@ export default class Server {
         this.pendingMessages[topic] = [];
     }
 
-    static sendTo<C extends MessageTypes["channel"]>(ws: WS, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {
+    static sendTo<C extends MessageTypes["channel"]>(ws: WS, channel: C, data: ExtractMessage<C>["data"]) {
         ws.send(JSON.stringify({ channel, data }));
     }
 
-    static sendOthers<C extends MessageTypes["channel"]>(ws: WS, topic: Topic, channel: C, data: Extract<MessageTypes, SentMessage<C, any>>["data"]) {
+    static sendOthers<C extends MessageTypes["channel"]>(ws: WS, topic: Topic, channel: C, data: ExtractMessage<C>["data"]) {
         ws.publish(topic, JSON.stringify({ channel, data }));
     }
 }

@@ -49,7 +49,7 @@ export function formatDuration(timestamp: number) {
 export function formatTimeAgo(timestamp: number) {
 	const duration = Date.now() - timestamp;
 
-	for(let time of times) {
+	for(const time of times) {
 		const amount = Math.floor(duration / time.length);
 		if(amount > 0) {
 			return `${amount} ${time.name}${amount > 1 ? "s" : ""} ago`;

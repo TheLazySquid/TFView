@@ -5,6 +5,7 @@ import fsp from "node:fs/promises";
 import Server from "$src/net/server";
 import { Message, Recieves } from "$types/messages";
 import type { CasualConfig } from "$types/data";
+import { exists } from "$src/util";
 
 export default class Casual {
 	static config: CasualConfig;
@@ -14,10 +15,8 @@ export default class Casual {
 	}
 
 	static async init() {
-		this.config = Settings.get("casual");
-
-		this.checkCasual();
-		Settings.on("tfPath", () => this.checkCasual());
+		this.updateConfig();
+		Settings.on("tfPath", () => this.updateConfig());
 
 		Server.onConnect("casual", (reply) => {
 			reply(Message.CasualConfig, this.config);
@@ -68,26 +67,34 @@ export default class Casual {
 			this.config.profiles.splice(index, 1);
 			if(this.config.selectedProfile === id) {
 				index = Math.min(index, this.config.profiles.length - 1);
-				this.config.selectedProfile = this.config.profiles[index].id;
+
+				const newSelection = this.config.profiles[index];
+				if(newSelection) this.config.selectedProfile = newSelection.id;
 			}
 
 			Server.send("casual", Message.CasualConfig, this.config);
-			this.setCasualCriteria(this.config.profiles[index].selection);
+			this.setCasualCriteria(this.config.profiles[index]!.selection);
 			this.saveConfig();
 		});
 	}
 	
-	static async checkCasual() {
-		if(Settings.get("casual")) return;
+	static async updateConfig() {
+		const savedConfig = Settings.get("casual");
+		if(savedConfig) {
+			this.config = savedConfig;
+		} else {
+			const selection = await this.readCasualCriteria();
+			if(!selection) return;
+	
+			const id = crypto.randomUUID();
+			const defaultConfig: CasualConfig = {
+				profiles: [{ name: "Default Profile", id, selection }],
+				selectedProfile: id
+			};
 
-		const selection = await this.readCasualCriteria();
-		if(!selection) return;
-
-		const id = crypto.randomUUID();
-		Settings.set("casual", {
-			profiles: [{ name: "Default Profile", id, selection }],
-			selectedProfile: id
-		});
+			Settings.set("casual", defaultConfig);
+			this.config = defaultConfig;
+		}
 	}
 
 	static getCriteriaPath() {
@@ -97,11 +104,11 @@ export default class Casual {
 
 	static async readCasualCriteria() {
 		const path = this.getCriteriaPath();
-		if(!path || !await fsp.exists(path)) return;
+		if(!path || !await exists(path)) return;
 
 		const data = await fsp.readFile(path);
 		const lines = data.toString().replaceAll("\r\n", "\n").split("\n").filter(l => l);
-		const selection = lines.map(line => parseInt(line.slice(line.indexOf(":") + 2)));
+		const selection = lines.map(line => parseInt(line.slice(line.indexOf(":") + 2), 10));
 
 		return selection;
 	}
@@ -115,12 +122,12 @@ export default class Casual {
 
 		for(let i = 0; i < numbers.length; i++) {
 			// Blank the corresponding mapBits, then set the new ones
-			numbers[i] &= ~(mapBits[i] ?? 0n);
-			numbers[i] |= BigInt(selection[i] ?? 0n);
+			numbers[i]! &= ~(mapBits[i] ?? 0n);
+			numbers[i]! |= BigInt(selection[i] ?? 0n);
 		}
 
 		const path = this.getCriteriaPath();
 		const text = numbers.map((n) => `selected_maps_bits: ${n}`).join("\n");
-		await fsp.writeFile(path, text);
+		if(path) await fsp.writeFile(path, text);
 	}
 }

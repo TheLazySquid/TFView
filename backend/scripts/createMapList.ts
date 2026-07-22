@@ -11,8 +11,8 @@ const stringsPath = join(tfPath, "resource", "tf_english.txt");
 const itemsPath = join(tfPath, "scripts", "items", "items_game.txt");
 
 // The files are in different encodings, for some reason
-let stringsBuffer = await readFile(stringsPath, "utf16le");
-let itemsBuffer = await readFile(itemsPath, "utf-8");
+const stringsBuffer = await readFile(stringsPath, "utf16le");
+const itemsBuffer = await readFile(itemsPath, "utf-8");
 
 const strings = parse<any>(stringsBuffer).lang.Tokens;
 const items = parse<any>(itemsBuffer).items_game;
@@ -49,13 +49,17 @@ for(const group of mapGroups) {
 
 	for(const map of Object.values<any>(group.maplist)) {
 		if(!map.enabled) continue;
-		category.maps.push(mapInfo[map.name]);
+		
+		const info = mapInfo[map.name];
+		if(!info) throw new Error(`Map ${map.name} not found in master_maps_list`);
+			
+		category.maps.push(info);
 	}
 
 	category.maps.sort((a, b) => a.name.localeCompare(b.name));
 
 	types[group.mm_type] ??= [];
-	types[group.mm_type].push(category);
+	types[group.mm_type]!.push(category);
 }
 
 // Get the bit mask for our known maps
@@ -64,12 +68,15 @@ const categories = Object.values(types).flat();
 
 for(const category of categories) {
 	for(const map of category.maps) {
+		const mapMask = masks[map.number];
+		if(!mapMask) throw new Error(`Map ${map.name} has an invalid number ${map.number}`);
+		
 		const mask = 1n << map.bit;
-		if((masks[map.number] & mask) > 0n) {
+		if((mapMask & mask) > 0n) {
 			console.error(`Map ${map.name} already has its bit set`);
 		}
 		
-		masks[map.number] |= mask;
+		masks[map.number]! |= mask;
 	}
 }
 

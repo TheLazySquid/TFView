@@ -1,6 +1,6 @@
 import LogParser from "./logParser";
 import Log from "$src/log";
-import { join } from "path";
+import { join } from "node:path";
 import { dataPath } from "$src/consts";
 import type { PersistentScript, PersistentScriptContext, ScriptContext } from "$types/scripting";
 import Server from "$src/net/server";
@@ -9,6 +9,7 @@ import Settings from "$src/settings/settings";
 import Rcon from "./rcon";
 import { watch } from "chokidar";
 import fsp from "node:fs/promises";
+import { exists } from "$src/util";
 
 export default class Scripting {
     static scriptPath = join(dataPath, "scripts");
@@ -17,22 +18,24 @@ export default class Scripting {
 
     static init() {
         // Create the script directory if it doesn't exist
-        fsp.exists(this.scriptPath).then((exists) => {
+        exists(this.scriptPath).then((exists) => {
             if(exists) return;
             fsp.mkdir(this.scriptPath);
         });
 
         LogParser.on(this.oldExecRegex, (match) => {
             const [, script, argsString] = match;
-            const args = argsString.split(",").map(arg => arg.trim());
+            if(!script || !argsString) return;
 
+            const args = argsString.split(",").map(arg => arg.trim());
             this.runScript(script, args);
         });
 
         LogParser.on(this.newExecRegex, (match) => {
             const [, script, argsString] = match;
-            const args = argsString.split("|").map(arg => arg.trim());
+            if(!script || !argsString) return;
 
+            const args = argsString.split("|").map(arg => arg.trim());
             this.runScript(script, args);
         });
 
@@ -43,7 +46,7 @@ export default class Scripting {
     static persistentRegex = /(\w+)\.persistent\.(js|ts)$/;
     static async startPersistent() {
         const watcher = watch(this.scriptPath, {
-            ignored: (file, stat) => stat?.isFile() && !this.persistentRegex.test(file),
+            ignored: (file, stat) => Boolean(stat?.isFile() && !this.persistentRegex.test(file)),
             persistent: false,
             ignoreInitial: false,
             depth: 1
@@ -51,13 +54,18 @@ export default class Scripting {
 
         // Create scripts initially and when they're added
         watcher.on("add", (path) => {
-            const [, name] = path.match(this.persistentRegex);
+            const match = path.match(this.persistentRegex);
+            const name = match?.[1];
+            if(!name) return;
+
             this.runPersistent(path, name);
         });
 
         // Close the script when it's deleted
         watcher.on("unlink", (path) => {
-            const [, name] = path.match(this.persistentRegex);
+            const match = path.match(this.persistentRegex);
+            const name = match?.[1];
+            if(!name) return;
 
             const existing = this.persistent.get(name);
             if(!existing) return;
@@ -69,9 +77,13 @@ export default class Scripting {
 
         // Re-run the script when it updates (we can reuse the same context)
         watcher.on("change", (path) => {
-            const [, name] = path.match(this.persistentRegex);
+            const match = path.match(this.persistentRegex);
+            const name = match?.[1];
+            if(!name) return;
 
             const existing = this.persistent.get(name);
+            if(!existing) return;
+
             existing.exports?.close?.call(null, existing.context);
             existing.cleanup.forEach((cb) => cb());
             

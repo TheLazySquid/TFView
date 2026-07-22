@@ -1,4 +1,4 @@
-import type { Player } from "$types/lobby";
+import type { CurrentServerInfo, Player } from "$types/lobby";
 import { Message, Recieves } from "$types/messages";
 import { flags } from "$src/consts";
 import LogParser from "../game/logParser";
@@ -75,8 +75,9 @@ export default class History {
         Close.on("close", () => this.updateCurrentGame());
     }
 
-    static getCurrentServer() {
-        if(!this.currentGame) return null;
+    static getCurrentServer(): CurrentServerInfo | null {
+        if(!this.currentGame?.hostname || !this.currentGame.ip) return null;
+
         return {
             start: this.currentGame.startTime,
             map: this.currentGame.map,
@@ -86,34 +87,35 @@ export default class History {
     }
 
     static mapChangeRegex = /(?:\n|^)Team Fortress\r?\nMap: (.+)/g;
-    static statusRegex = /(?:\n|^)hostname: (.+)\n.*\nudp\/ip  : (.+)\n[\S\s]+\nmap     : (.+) at:/g;
+    static statusRegex = /(?:\n|^)hostname: (.+)\n.*\nudp\/ip {2}: (.+)\n[\S\s]+\nmap {5}: (.+) at:/g;
     static listenToLog() {
-        LogParser.on(this.mapChangeRegex, async (data) => {
+        LogParser.on(this.mapChangeRegex, async ([, map]) => {
+            if(!map) return;
             this.onGameEnd();
 
-            let start = await this.checkStart();
+            const start = await this.checkStart();
             if(!start) {
                 Log.info("Demo playback detected, not recording game");
                 return;
             }
 
-            this.startGame(data[1]);
+            this.startGame(map);
 
             // Figure out hostname and ip
             Rcon.run("status");
         });
 
-        LogParser.on(this.statusRegex, async (data) => {      
-            let [_, hostname, ip, map] = data;
+        LogParser.on(this.statusRegex, async ([, hostname, ip, map]) => {
+            if(!hostname || !ip || !map) return;     
             if(ip.includes("?.?.?.?")) ip = "Local Server";
             
             if(!this.currentGame) {
                 if(this.startPromise) {
                     // Wait for the game to be created, rather than creating it ourself
-                    let start = await this.checkStart();
+                    const start = await this.checkStart();
                     if(!start) return;
                 } else {
-                    let start = await this.checkStart();
+                    const start = await this.checkStart();
                     if(!start) return;
                     
                     this.startGame(map, hostname, ip);
@@ -121,10 +123,12 @@ export default class History {
             }
 
             // update the current game to include hostname/ip
+            if(!this.currentGame) return;
             if(hostname === this.currentGame.hostname && ip === this.currentGame.ip) return; 
 
             this.currentGame.hostname = hostname;
             this.currentGame.ip = ip;
+            
             Server.send("game", Message.CurrentServer, { server: this.getCurrentServer(), definitelyNotInGame: false });
 
             HistoryDatabase.updateCurrentHostname(this.currentGame);
@@ -133,31 +137,31 @@ export default class History {
     }
 
     static startPromise: Promise<boolean> | null = null;
-    static checkStart(): Promise<boolean> {
+    static async checkStart(): Promise<boolean> {
         if(this.startPromise) return this.startPromise;
 
-        this.startPromise = new Promise(async (res) => {
-            let status = await Rcon.run("ds_status");
-            let fails = 0;
-            
-            while(status === null) {
-                status = await Rcon.run("ds_status");
-                if(status !== null) break;
+        const { promise, resolve } = Promise.withResolvers<boolean>();
+        promise.finally(() => this.startPromise = null);
+        this.startPromise = promise;
 
-                fails++;
-                if(fails < 5) continue;
+        let status = await Rcon.run("ds_status");
+        let fails = 0;
+        
+        while(status === null) {
+            status = await Rcon.run("ds_status");
+            if(status !== null) break;
 
-                // It would be more annoying to have a game not recorded than to have one be recorded twice
-                Log.warning("Failed to get ds_status after 5 attempts, recording anyways");
-                res(true);
-                return;
-            }
+            fails++;
+            if(fails < 5) continue;
 
-            res(status !== "");
-        });
+            // It would be more annoying to have a game not recorded than to have one be recorded twice
+            Log.warning("Failed to get ds_status after 5 attempts, recording anyways");
+            resolve(true);
+            return promise;
+        }
 
-        this.startPromise.finally(() => this.startPromise = null);
-        return this.startPromise;
+        resolve(status !== "");
+        return promise;
     }
 
     static startGame(map: string, hostname?: string, ip?: string) {
@@ -174,7 +178,7 @@ export default class History {
         this.events.emit("startGame", map);
 
         // Track the players currently in game
-        for(let player of GameMonitor.players) {
+        for(const player of GameMonitor.players) {
             this.addPlayer(player);
         }
         this.updateCurrentGame();
@@ -200,7 +204,10 @@ export default class History {
     static addPlayer(player: Player) {
         if(player.isUser || this.activeEncounters.has(player.ID3)) return;
 
-        let rowid = HistoryDatabase.recordPlayerEncounter(player, this.currentGame);
+        if(!this.currentGame) return;
+        const rowid = HistoryDatabase.recordPlayerEncounter(player, this.currentGame);
+
+        if(rowid === undefined) return;
         this.activeEncounters.set(player.ID3, rowid);
     }
 
@@ -208,16 +215,19 @@ export default class History {
         if(typeof player.kills !== "number" || typeof player.deaths !== "number") return;
 
         if(player.isUser) {
-            this.currentGame.kills = player.kills;
-            this.currentGame.deaths = player.deaths;
-
-            HistoryDatabase.pastGames.update(this.currentGame.rowid, {
-                kills: this.currentGame.kills,
-                deaths: this.currentGame.deaths
-            });
+            if(this.currentGame) {
+                this.currentGame.kills = player.kills;
+                this.currentGame.deaths = player.deaths;
+    
+                HistoryDatabase.pastGames.update(this.currentGame.rowid, {
+                    kills: this.currentGame.kills,
+                    deaths: this.currentGame.deaths
+                });
+            }
         } else {
             if(!this.activeEncounters.has(player.ID3)) return;
-            let rowid = this.activeEncounters.get(player.ID3);
+            const rowid = this.activeEncounters.get(player.ID3);
+            if(!rowid) return;
     
             HistoryDatabase.updateEncounter(rowid, {
                 kills: player.kills,
@@ -240,24 +250,24 @@ export default class History {
     static updatePlayerName(player: Player) {
         if(!this.currentGame || !this.activeEncounters.has(player.ID3)) return;
 
-        let rowid = this.activeEncounters.get(player.ID3);
+        const rowid = this.activeEncounters.get(player.ID3);
 
         // If needed remove "unconnected" from the player's names
-        let joinedUnconnectedIndex = this.joinedUnconnected.indexOf(player.ID3);
+        const joinedUnconnectedIndex = this.joinedUnconnected.indexOf(player.ID3);
         if(joinedUnconnectedIndex !== -1) {
             this.joinedUnconnected.splice(joinedUnconnectedIndex, 1);
             player.names = player.names.filter(name => name !== "unconnected");
         }
         if(!player.names.includes(player.name)) player.names.push(player.name);
 
-        HistoryDatabase.updatePlayerName(player.ID3, rowid, player.name, player.names);
+        if(rowid) HistoryDatabase.updatePlayerName(player.ID3, rowid, player.name, player.names);
     }
 
     static updatePlayerAvatar(player: Player) {
         if(!this.currentGame || !this.activeEncounters.has(player.ID3)) return;
 
-        let rowid = this.activeEncounters.get(player.ID3);
-        HistoryDatabase.updateEncounter(rowid, { avatarHash: player.avatarHash });
+        const rowid = this.activeEncounters.get(player.ID3);
+        if(rowid) HistoryDatabase.updateEncounter(rowid, { avatarHash: player.avatarHash });
     }
     
     static onGameEnd() {

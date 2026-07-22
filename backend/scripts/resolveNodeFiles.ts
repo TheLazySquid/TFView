@@ -1,5 +1,6 @@
-import type { BunPlugin } from "bun";
+// @ts-expect-error No types available and I don't care enough to do it myself
 import { resolve } from "node-gyp-build";
+import type { BunPlugin } from "bun";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { readdirSync } from "node:fs";

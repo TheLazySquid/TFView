@@ -10,5 +10,8 @@
   "workspaces": [
     "backend",
     "frontend"
-  ]
+  ],
+  "devDependencies": {
+    "@biomejs/biome": "2.5.5"
+  }
 }

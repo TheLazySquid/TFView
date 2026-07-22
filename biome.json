@@ -1,0 +1,62 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.5.5/schema.json",
+	"files": {
+		"includes": [
+            "backend/**/*",
+            "frontend/**/*",
+            "shared/**/*",
+            "types/**/*",
+            "!backend/dist",
+            "!backend/static",
+            "!frontend/.svelte-kit"
+        ]
+	},
+	"overrides": [
+		{
+			"includes": ["**/*.svelte"],
+			"linter": {
+				"rules": {
+					"style": {
+						"useConst": "off",
+						"useImportType": "off"
+					},
+					"correctness": {
+						"noUnusedVariables": "off",
+						"noUnusedImports": "off",
+						"noSelfAssign": "off"
+					}
+				}
+			}
+		}
+	],
+	"css": {
+		"linter": {
+			"enabled": false
+		}
+	},
+	"linter": {
+		"enabled": true,
+        "rules": {
+            "complexity": {
+                "noThisInStatic": "off",
+                "noStaticOnlyClass": "off",
+                "useLiteralKeys": "off",
+                "noBannedTypes": "off"
+            },
+            "suspicious": {
+                "noExplicitAny": "off",
+                "noAssignInExpressions": "off",
+                "useIterableCallbackReturn": "off"
+            },
+            "style": {
+                "noNonNullAssertion": "off"
+            }
+        }
+	},
+	"formatter": {
+		"enabled": false
+	},
+	"assist": {
+		"enabled": false
+	}
+}

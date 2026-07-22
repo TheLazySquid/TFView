@@ -39,8 +39,11 @@ const multi = new MultiBar({
 const bar = multi.create(demos.length, parsed, { filename: demos[parsed] });
 
 while(parsed < demos.length) {
-    bar.update(parsed, { filename: demos[parsed] });
-    recordDemo(demos[parsed]);
+    const filename = demos[parsed];
+    if(!filename) break;
+
+    bar.update(parsed, { filename });
+    recordDemo(filename);
 
     parsed++;
     await progressFile.write(JSON.stringify({ filesParsed: parsed }));
@@ -52,8 +55,10 @@ function recordDemo(name: string) {
     const parts = name.replace(".dem", "").replace("_", "-").split("-");
     if(parts.length !== 6) return;
 
-    let numbers = parts.map(part => parseInt(part));
-    const date = new Date(numbers[0], numbers[1] - 1, numbers[2], numbers[3], numbers[4], numbers[5]);
+    const [year, month, day, hour, minute, second] = parts.map(part => parseInt(part, 10));
+    if(!year || !month || !day || !hour || !minute || !second) return;
+
+    const date = new Date(year, month - 1, day, hour, minute, second);
 
     // Assumes you have https://codeberg.org/demostf/parser installed
     const command = `parse_demo "${join(demosPath, name)}"`;
@@ -61,14 +66,14 @@ function recordDemo(name: string) {
     try {
         const output: ParsedDemo = JSON.parse(execSync(command).toString());
     
-        let players: Record<number, PastGamePlayer> = {};
-        let seenIds = new Set<string>();
+        const players: Record<number, PastGamePlayer> = {};
+        const seenIds = new Set<string>();
         let playerId = 0;
         let playerKills = 0;
         let playerDeaths = 0;
 
-        for(let player of Object.values(output.users)) {
-            let id3 = player.steamId.slice(5, -1); // Remove [U:1: and ]
+        for(const player of Object.values(output.users)) {
+            const id3 = player.steamId.slice(5, -1); // Remove [U:1: and ]
             if(seenIds.has(id3)) continue;
             seenIds.add(id3);
 
@@ -88,7 +93,7 @@ function recordDemo(name: string) {
 
         // Get the playerid from our name in the header otherwise
         if(!playerId) {
-            for(let player of Object.values(output.users)) {
+            for(const player of Object.values(output.users)) {
                 if(player.name === output.header.nick) {
                     playerId = player.userId;
                     break;
@@ -99,15 +104,19 @@ function recordDemo(name: string) {
         if(!playerId) return;
         delete players[playerId];
 
-        for(let kill of output.deaths) {
-            if(players[kill.killer]) players[kill.killer].kills++;
-            if(players[kill.victim]) players[kill.victim].deaths++;
+        for(const kill of output.deaths) {
+            const killer = players[kill.killer];
+            if(killer) killer.kills++;
+
+            const victim = players[kill.victim];
+            if(victim) victim.deaths++;
+           
             if(kill.killer === playerId) playerKills++;
             if(kill.victim === playerId) playerDeaths++;
         }
     
         // Record games
-        let gameResult = HistoryDatabase.db.query(`INSERT INTO games (map, ip, start, duration, players, kills, deaths, demos)
+        const gameResult = HistoryDatabase.db.query(`INSERT INTO games (map, ip, start, duration, players, kills, deaths, demos)
             VALUES($map, $ip, $start, $duration, $players, $kills, $deaths, $demos)`).run({
             map: output.header.map,
             ip: output.header.server,
@@ -118,9 +127,9 @@ function recordDemo(name: string) {
             demos: JSON.stringify([name])
         });
 
-        let rowid = gameResult.lastInsertRowid;
+        const rowid = gameResult.lastInsertRowid;
 
-        for(let player of Object.values(players)) {
+        for(const player of Object.values(players)) {
             // Record encounters
             HistoryDatabase.db.query(`INSERT INTO encounters (playerId, map, name, gameId, time, kills, deaths)
                 VALUES($playerId, $map, $name, $gameId, $time, $kills, $deaths)`).run({
@@ -134,7 +143,7 @@ function recordDemo(name: string) {
             });
         
             // Record players
-            let data = HistoryDatabase.getPlayerData(player.id);
+            const data = HistoryDatabase.getPlayerData(player.id);
             if(data) {
                 if(player.time > data.lastSeen) {
                     data.lastName = player.name;
@@ -157,7 +166,7 @@ function recordDemo(name: string) {
                 });
             } else {
                 // Try to get avatarHash/createdTimestamp from the reference database
-                let referenceData = referenceDb.query<Stored<StoredPlayer>, {}>(`SELECT * FROM players WHERE id = $id`)
+                const referenceData = referenceDb.query<Stored<StoredPlayer>, {}>(`SELECT * FROM players WHERE id = $id`)
                     .get({ id: player.id });
 
                 HistoryDatabase.db.query(`INSERT INTO players (id, lastName, lastSeen, names, encounters, avatarHash, createdTimestamp)
@@ -167,8 +176,8 @@ function recordDemo(name: string) {
                     lastSeen: player.time,
                     names: JSON.stringify([player.name]),
                     encounters: 1,
-                    avatarHash: referenceData?.avatarHash,
-                    createdTimestamp: referenceData?.createdTimestamp
+                    avatarHash: referenceData?.avatarHash ?? null,
+                    createdTimestamp: referenceData?.createdTimestamp ?? null
                 });
             }
         }

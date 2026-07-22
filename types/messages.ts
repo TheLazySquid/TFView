@@ -2,6 +2,14 @@ import type { SourceBanInfo } from "./apis";
 import type { CasualConfig, CasualProfile, GameDir, GameDirectories, PastPlayer, SettingsType, StoredPastGame } from "./data";
 import type { CurrentServerInfo, KickReason, Player } from "./lobby";
 
+export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup" | "casual" | "killcounts";
+
+export interface NavigateMessage {
+    naviage: Page;
+}
+
+export type MessageData = { navigate: Page } | { channel: string, data: any, id?: string };
+
 export interface FriendsError { status: "error" }
 export interface FriendsPrivate { status: "private" }
 export interface FriendsSuccess { status: "success", friends: PastPlayer[] }
@@ -68,7 +76,8 @@ export type MessageTypes =
     | SentMessage<`list-${string}-update`, { id: any, update: any }>
     | SentMessage<`list-${string}-delete`, any>
 
-// Recieving messages
+export type ExtractMessage<C extends MessageTypes["channel"]> = Extract<MessageTypes, SentMessage<C, any>>;
+
 export type RecievedMessage<Channel, Data, Reply = void> = { channel: Channel, data: Data, replyType: Reply };
 
 export enum Recieves {
@@ -108,12 +117,12 @@ export enum Recieves {
 export type RecievesTypes = 
     | RecievedMessage<Recieves.Chat, string>
     | RecievedMessage<Recieves.ChatTeam, string>
-    | RecievedMessage<Recieves.GetGame, number, StoredPastGame>
-    | RecievedMessage<Recieves.GetPlayer, string, PastPlayer>
+    | RecievedMessage<Recieves.GetGame, number, StoredPastGame | null>
+    | RecievedMessage<Recieves.GetPlayer, string, PastPlayer | null>
     | RecievedMessage<Recieves.UpdateSetting, { key: keyof SettingsType, value: any }>
     | RecievedMessage<Recieves.GetSetting, keyof SettingsType, any>
     | RecievedMessage<Recieves.SetNickname, { id: string, nickname: string | null }>
-    | RecievedMessage<Recieves.SetNote, { id: string, note: string }>
+    | RecievedMessage<Recieves.SetNote, { id: string, note: string | null }>
     | RecievedMessage<Recieves.SetTags, { id: string, tags: Record<string, boolean> }>
     | RecievedMessage<Recieves.DeleteGame, number, true | string>
     | RecievedMessage<Recieves.KickPlayer, { userId: string, reason: KickReason }>
@@ -139,4 +148,4 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.PlayDemo, string, boolean>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
-export type Page = "game" | "playerhistory" | "gamehistory" | "settings" | "setup" | "casual" | "killcounts";
+export type ExtractRecieves<C extends RecievesTypes["channel"]> = Extract<RecievesTypes, RecievedMessage<C, any, any>>;

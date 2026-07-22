@@ -1,5 +1,5 @@
-import { join } from "path";
-import fsp from "fs/promises";
+import { join } from "node:path";
+import fsp from "node:fs/promises";
 import { root } from "./consts";
 
 export default class Log {

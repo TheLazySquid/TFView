@@ -2,8 +2,7 @@ import { parse } from "vdf-parser";
 import { id64ToId3 } from "$shared/steamid";
 import Settings from "./settings/settings";
 import { join } from "node:path";
-import fsp from "node:fs/promises";
-import { watch, type FSWatcher } from "node:fs";
+import { readFile, access, constants } from "node:fs/promises";
 
 export async function getCurrentUserId() {
     const steamPath = Settings.get("steamPath");
@@ -11,13 +10,13 @@ export async function getCurrentUserId() {
 
 	try {		
 		const loginusersPath = join(steamPath, "config", "loginusers.vdf");
-		let loginusers = (await fsp.readFile(loginusersPath)).toString();
+		const loginusers = (await readFile(loginusersPath)).toString();
 	
 		const vdf = parse<any>(loginusers);
 		let id64: string | null = null;
 		let mostRecent = 0;
 	
-		for(let [id, data] of Object.entries<any>(vdf.users)) {
+		for(const [id, data] of Object.entries<any>(vdf.users)) {
 			if(data.Timestamp > mostRecent) {
 				mostRecent = data.Timestamp;
 				id64 = id;
@@ -28,5 +27,14 @@ export async function getCurrentUserId() {
 		return id64ToId3(id64);
 	} catch {
 		return null;
+	}
+}
+
+export async function exists(path: string) {
+	try {
+		await access(path, constants.F_OK);
+		return true;
+	} catch {
+		return false;
 	}
 }

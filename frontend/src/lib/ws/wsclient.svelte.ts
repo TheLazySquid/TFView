@@ -1,4 +1,4 @@
-import type { MessageTypes, Page, RecievedMessage, RecievesTypes, SentMessage } from "$types/messages";
+import type { ExtractMessage, ExtractRecieves, MessageTypes, Page, RecievesTypes } from "$types/messages";
 import { networkPort } from "$shared/consts";
 
 type Status = "idle" | "connecting" | "connected" | "disconnected";
@@ -13,7 +13,7 @@ class WSClient {
     ready = new Promise<void>((res) => this.readyRes = res);
     status: Status = $state("idle");
     closed = $state(false);
-    connectTimeout?: Timer;
+    connectTimeout?: ReturnType<typeof setTimeout>;
     hasDisconnected = false;
 
     init(page: Page) {
@@ -85,13 +85,13 @@ class WSClient {
         this.switchCallbacks.delete(callback);
     }
 
-    on<C extends MessageTypes["channel"]>(channel: C, callback: (data: Extract<MessageTypes, SentMessage<C, any>>["data"]) => void) {
+    on<C extends MessageTypes["channel"]>(channel: C, callback: (data: ExtractMessage<C>["data"]) => void) {
         let listeners = this.listeners.get(channel);
         if(listeners) listeners.push(callback);
         else this.listeners.set(channel, [callback]);
     }
 
-    off<C extends MessageTypes["channel"]>(channel: C, callback: (data: Extract<MessageTypes, SentMessage<C, any>>["data"]) => void) {
+    off<C extends MessageTypes["channel"]>(channel: C, callback: (data: ExtractMessage<C>["data"]) => void) {
         let listeners = this.listeners.get(channel);
         if(!listeners) return;
 
@@ -100,17 +100,16 @@ class WSClient {
         listeners.splice(index, 1);
     }
 
-    send<C extends RecievesTypes["channel"]>(channel: C, data: Extract<RecievesTypes, RecievedMessage<C, any, any>>["data"]) {
+    send<C extends RecievesTypes["channel"]>(channel: C, data: ExtractRecieves<C>["data"]) {
         if(!this.ws || this.ws.readyState === 3) return;
         this.ws.send(JSON.stringify({ channel, data }));
     }
 
-    sendAndRecieve<C extends RecievesTypes["channel"]>(channel: C, data: Extract<RecievesTypes, RecievedMessage<C, any, any>>["data"]):
-        Promise<Extract<RecievesTypes, RecievedMessage<C, any, any>>["replyType"]> {
-        return new Promise(async (res) => {
-            await this.ready;
+    async sendAndRecieve<C extends RecievesTypes["channel"]>(channel: C, data: ExtractRecieves<C>["data"]): Promise<ExtractRecieves<C>["replyType"]> {
+        await this.ready;
 
-            let id = crypto.randomUUID();
+        return new Promise((res) => {
+            const id = crypto.randomUUID();
             this.ws!.send(JSON.stringify({ id, channel, data }));
             this.replies.set(id, res);
         });

@@ -1,9 +1,9 @@
 import { Recieves } from "$types/messages";
 import Log from "$src/log";
 import Server from "$src/net/server";
-import { join } from "path";
+import { join } from "node:path";
 import Settings from "$src/settings/settings";
-import { getCurrentUserId } from "$src/util";
+import { exists, getCurrentUserId } from "$src/util";
 import fsp from "node:fs/promises";
 import { parse, stringify } from "vdf-parser";
 import { kill } from "node:process";
@@ -14,12 +14,12 @@ export default class LaunchOptionsCheck {
 
     static init() {
         Server.on(Recieves.CheckLaunchOptions, async (_, { reply }) => {
-            let string = await this.readLaunchOptions();
+            const string = await this.readLaunchOptions();
             if(!string) return reply(false);
     
-            let parts = string.split(" ");
+            const parts = string.split(" ");
     
-            for(let option of this.options) {
+            for(const option of this.options) {
                 if(!parts.includes(option)) return reply(false);
             }
     
@@ -38,7 +38,7 @@ export default class LaunchOptionsCheck {
     }
 
     static async getConfigPath() {
-        let userId = await getCurrentUserId();
+        const userId = await getCurrentUserId();
         if(!userId) return;
 
         return join(Settings.get("steamPath"), "userdata", userId, "config", "localconfig.vdf");
@@ -46,7 +46,7 @@ export default class LaunchOptionsCheck {
 
     static async readLaunchOptions() {
         const path = await this.getConfigPath();
-        if(!path || !await fsp.exists(path)) return;
+        if(!path || !await exists(path)) return;
 
         const config = await fsp.readFile(path);
         const vdf = parse<any>(config.toString());
@@ -59,14 +59,15 @@ export default class LaunchOptionsCheck {
 
     static async autoApplyLaunchOptions() {
         const path = await this.getConfigPath();
-        const config = await fsp.readFile(path);
+        if(!path) return;
 
+        const config = await fsp.readFile(path);
         const vdf = parse<any>(config.toString());
         const game = vdf.UserLocalConfigStore.Software.Valve.steam.apps["440"];
         
         if(game.LaunchOptions) {
-            let parts = game.LaunchOptions.split(" ");
-            for(let option of this.options) {
+            const parts = game.LaunchOptions.split(" ");
+            for(const option of this.options) {
                 if(!parts.includes(option)) {
                     parts.push(option);
                 }
@@ -80,8 +81,8 @@ export default class LaunchOptionsCheck {
 
         // kill steam so that the changes are applied
         // Tested on both windows and linux, which was a massive pain
-        let processes = await find("name", "steam", true);
-        for(let process of processes) {
+        const processes = await find("name", "steam", true);
+        for(const process of processes) {
             kill(process.pid);
         }
 

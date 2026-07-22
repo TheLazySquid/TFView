@@ -7,6 +7,7 @@ import { Message, Recieves } from "$types/messages";
 import type { GameDir, GameDirectories } from "$types/data";
 import { parse } from "vdf-parser";
 import { pickDirectory } from "node-fs-dialogs";
+import { exists } from "$src/util";
 
 const tfPath = ["steamapps", "common", "Team Fortress 2", "tf"];
 
@@ -24,7 +25,7 @@ export default class Directories {
         if(!this.steamDir) {
             this.steamDir = process.platform === "win32" ?
                 "C:\\Program Files (x86)\\Steam" :
-                os.homedir() + "/.local/share/Steam";
+                `${os.homedir()}/.local/share/Steam`;
 
             Settings.set("steamPath", this.steamDir);
         }
@@ -36,7 +37,7 @@ export default class Directories {
                 const libraryCfg = await fsp.readFile(libraryCfgPath);
                 const vdf = parse<any>(libraryCfg.toString());
                 
-                for(let folder of Object.values<any>(vdf.libraryfolders)) {
+                for(const folder of Object.values<any>(vdf.libraryfolders)) {
                     if(Object.keys(folder.apps).includes("440")) {
                         this.tfDir = join(folder.path, ...tfPath);
                         break;
@@ -98,21 +99,21 @@ export default class Directories {
 
     static async validateSteam() {
         if(basename(this.steamDir) !== "Steam") return false;
-        if(!await fsp.exists(this.steamDir)) return false;
+        if(!await exists(this.steamDir)) return false;
         if(await this.missingChildren(this.steamDir, ["userdata", "config"])) return false;
         return true;
     }
 
     static async validateTf() {
         if(basename(this.tfDir) !== "tf") return false;
-        if(!await fsp.exists(this.tfDir)) return false;
+        if(!await exists(this.tfDir)) return false;
         if(await this.missingChildren(this.tfDir, ["tf2_misc_dir.vpk", "steam.inf"])) return false;
         return true;
     }
 
     static async missingChildren(dir: string, children: string[]) {
-        for(let child of children) {
-            if(!await fsp.exists(join(dir, child))) return true;
+        for(const child of children) {
+            if(!await exists(join(dir, child))) return true;
         }
         
         return false;

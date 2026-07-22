@@ -75,10 +75,10 @@ export default class GameMonitor {
             else Rcon.run(`say_team ${msg}`);
         });
 
-        const updatePlayerData = (ws: WS, id: string, key: "nickname" | "note", value: string) => {
+        const updatePlayerData = (ws: WS, id: string, key: "nickname" | "note", value: string | null) => {
             HistoryDatabase.setPlayerUserData(id, key, value);
 
-            let player = this.players.find(p => p.ID3 === id);
+            const player = this.players.find(p => p.ID3 === id);
             if(!player) return;
             player[key] = value;
 
@@ -99,7 +99,7 @@ export default class GameMonitor {
         Server.on(Recieves.SetTags, ({ id, tags }, { ws }) => {
             HistoryDatabase.setPlayerTags(id, tags);
 
-            let player = this.players.find(p => p.ID3 === id);
+            const player = this.players.find(p => p.ID3 === id);
             if(!player) return;
             player.tags = tags;
 
@@ -148,7 +148,7 @@ export default class GameMonitor {
         // When the game ends make all players ready to be removed
         // Since odds are most will leave before the next game starts
         History.events.on("endGame", () => {
-            for(let player of this.players) {
+            for(const player of this.players) {
                 this.missedQueries.set(player.ID3, 3);
             }
 
@@ -158,7 +158,7 @@ export default class GameMonitor {
         // If the steamhistory api key changes try to fetch all the bans again
         Settings.on("steamhistoryApiKey", (key) => {
             if(!key) return;
-            for(let player of this.players) {
+            for(const player of this.players) {
                 if(player.isBot) continue;
                 this.updateSourcebans(player);
             }
@@ -180,7 +180,7 @@ export default class GameMonitor {
         if(!Rcon.connected) return runAgain();
 
         // This can potentially take a long time when loading into a map
-        let text = await Rcon.run("g15_dumpplayer", 5000);
+        const text = await Rcon.run("g15_dumpplayer", 5000);
         runAgain();
 
         // check if the game ended
@@ -211,18 +211,19 @@ export default class GameMonitor {
     }
 
     static killfeedRegex = /(?:\n|^)(.+) (?:killed (.+) with (.+)\.( \(crit\))?|(suicided\.))/g;
-    static chatRegex = /(?:\n|^)(?:\*SPEC\* )?(\*DEAD\* ?)?(\(TEAM\) |\(Spectator\) )?(.+) :  (.+)/g;
+    static chatRegex = /(?:\n|^)(?:\*SPEC\* )?(\*DEAD\* ?)?(\(TEAM\) |\(Spectator\) )?(.+) : {2}(.+)/g;
     static listenToLog() {
         // parse the killfeed
         LogParser.on(this.killfeedRegex, (match) => {
-            let [_, firstName, secondName, weapon, crit, suicide] = match;
+            const [_, firstName, secondName, weapon, crit, suicide] = match;
         
-            let killerName = suicide === undefined ? firstName : undefined;
-            let victimName = suicide === undefined ? secondName : firstName;
+            const killerName = suicide === undefined ? firstName : undefined;
+            const victimName = suicide === undefined ? secondName : firstName;
+            if(!victimName) return;
 
-            let killer = this.players.find(p => p.name === killerName);
-            let victim = this.players.find(p => p.name === victimName);
-            if((suicide === undefined && !killer) || !victim) return;
+            const killer = this.players.find(p => p.name === killerName);
+            const victim = this.players.find(p => p.name === victimName);
+            if(!victim) return;
 
             let entry: KillfeedEntry;
             if(suicide) {
@@ -235,6 +236,8 @@ export default class GameMonitor {
                     timestamp: Date.now()
                 }
             } else {
+                if(!killer || !weapon) return;
+
                 entry = {
                     killer: killerName,
                     victim: victimName,
@@ -250,9 +253,9 @@ export default class GameMonitor {
             this.killfeed.push(entry);
 
             // Deaths are handled in the player update
-            if(!killer) return;
+            if(!killer || !weapon) return;
             killer.killstreak++;
-            let message: Partial<Player> & { ID3: string } = { ID3: killer.ID3, killstreak: killer.killstreak };
+            const message: Partial<Player> & { ID3: string } = { ID3: killer.ID3, killstreak: killer.killstreak };
 
             // See if we can guess the player's class
             const classes = killClasses[weapon];
@@ -261,18 +264,18 @@ export default class GameMonitor {
 
                 if(classes.length === 1) {
                     killer.class = classes[0];
-                    if(killer.isUser) this.onUserClass(classes[0]);
+                    if(killer.isUser) this.onUserClass(classes[0]!);
 
                     // Quick sanity check
-                    if(options && !options.includes(classes[0])) {
+                    if(options && !options.includes(classes[0]!)) {
                         this.potentialClasses.delete(killer.ID3);
                     }
 
                     message.class = classes[0];
                 } else if(options) {
-                    let possibilities: TF2Class[] = [];
+                    const possibilities: TF2Class[] = [];
 
-                    for(let option of options) {
+                    for(const option of options) {
                         if(classes.includes(option)) possibilities.push(option);
                     }
 
@@ -294,15 +297,17 @@ export default class GameMonitor {
         });
 
         // parse the chat
-        LogParser.on(this.chatRegex, (match) => {
-            let player = this.players.find(p => p.name === match[3]);
+        LogParser.on(this.chatRegex, ([ _, dead, team, name, text ]) => {
+            if(!name || !text) return;
+            
+            const player = this.players.find(p => p.name === name);
             if(!player) return;
 
-            let message: ChatMessage = {
-                dead: match[1] !== undefined,
-                team: match[2] !== undefined,
-                name: match[3],
-                text: match[4],
+            const message: ChatMessage = {
+                dead: dead !== undefined,
+                team: team !== undefined,
+                name,
+                text,
                 senderTeam: player.team,
                 senderId: player.ID3,
                 timestamp: Date.now()
@@ -314,13 +319,16 @@ export default class GameMonitor {
 
     static g15Regex = /m_(.+)\[(\d+)\] \S+ \((.+)\)(?:\n|$)/g;
     static parseG15(text: string) {
-        let info: Partial<G15Player>[] = [];
+        const info: Partial<G15Player>[] = [];
         for(let i = 0; i <= 101; i++) info.push({});
 
-        let match: RegExpExecArray;
+        let match: RegExpExecArray | null;
         while(match = this.g15Regex.exec(text)) {
-            let index = parseInt(match[2]);
-            info[index][match[1]] = match[3];
+            const [_, key, indexStr, value] = match;
+            if(!key || !indexStr) continue;
+
+            const playerInfo = info[parseInt(indexStr, 10)];
+            if(playerInfo) playerInfo[key as keyof G15Player] = value;
         }
 
         const ids = new Set<string>();
@@ -328,13 +336,16 @@ export default class GameMonitor {
         // add/update players
         for(let i = 0; i <= 101; i++) {
             const playerInfo = info[i];
+            if(!playerInfo) continue;
+
             const id = playerInfo.iAccountID;
-            ids.add(id);
             if(playerInfo.iUserID === "0" || id === undefined || playerInfo.szName === undefined) continue;
+            ids.add(id);
             
             this.missedQueries.delete(id);
             
-            let player: Partial<Player> = {
+            const existing = this.playerMap.get(id);
+            const startingPlayer: Partial<Player> = existing ?? {
                 kills: 0,
                 deaths: 0,
                 tags: {},
@@ -342,14 +353,13 @@ export default class GameMonitor {
                 names: [],
                 avatars: [],
                 isBot: false,
-                aliveSince: Date.now()
+                aliveSince: Date.now(),
+                isUser: playerInfo.iAccountID === this.userAccountID3,
+                muted: Mutes.isMuted(id)
             }
 
-            if(playerInfo.iAccountID === this.userAccountID3) player.isUser = true;
-            if(Mutes.isMuted(id)) player.muted = true;
-            if(this.playerMap.has(id)) player = this.playerMap.get(id);
-
-            let diff = this.updatePlayer(player, playerInfo);
+            const diff = this.updatePlayer(startingPlayer, playerInfo as G15Player);
+            const player = startingPlayer as Player;
 
             // dispatch the changes
             if(this.playerMap.has(id)) {
@@ -410,7 +420,6 @@ export default class GameMonitor {
                     Server.send("game", Message.PlayerUpdate, {
                         ID3: player.ID3,
                         names: player.names,
-                        avatars: player.avatars,
                         ...summary
                     });
                 }
@@ -427,12 +436,15 @@ export default class GameMonitor {
         // remove players that have left
         let playersLeft = false;
         for(let i = 0; i < this.players.length; i++) {
-            const id = this.players[i].ID3;
+            const player = this.players[i];
+            if(!player) continue;
+
+            const id = player.ID3;
             if(ids.has(id)) continue;
 
             // Allow the player to be missing up to 3 times before removing them
             // Since for some reason dumpplayer will randomly not return some players
-            let missingFor = this.missedQueries.get(id) ?? 0;
+            const missingFor = this.missedQueries.get(id) ?? 0;
             if(missingFor < 3) {
                 this.missedQueries.set(id, missingFor + 1);
                 continue;
@@ -461,7 +473,7 @@ export default class GameMonitor {
         // remove old chat messages
         for(let i = start; i < this.chat.items.length; i++) {
             const item = this.chat.items[i];
-            if(item.type !== "event" && !this.playerMap.has(item.senderId)) {
+            if(item && item.type !== "event" && !this.playerMap.has(item.senderId)) {
                 this.chat.items.splice(i, 1);
                 i--;
             }
@@ -470,19 +482,23 @@ export default class GameMonitor {
         // remove old killfeed entries
         for(let i = start; i < this.killfeed.items.length; i++) {
             const entry = this.killfeed.items[i];
-            if(entry.type !== "event" && !this.playerMap.has(entry.killerId) && !this.playerMap.has(entry.victimId)) {
+            if(
+                entry && entry.type !== "event" &&
+                (!entry.killerId || !this.playerMap.has(entry.killerId)) &&
+                !this.playerMap.has(entry.victimId)
+            ) {
                 this.killfeed.items.splice(i, 1);
                 i--;
             }
         }
     }
 
-    static updatePlayer(player: Partial<Player>, info: Partial<G15Player>) {
-        let diff: Partial<Player> & { ID3: string } = { ID3: info.iAccountID };
+    static updatePlayer(player: Partial<Player>, info: G15Player) {
+        const diff: Partial<Player> & { ID3: string } = { ID3: info.iAccountID };
         let changed = false;
         
         const copy = <T extends keyof Player>(key: T, value: Player[T]) => {
-            if(typeof value === "number" && isNaN(value)) return;
+            if(typeof value === "number" && Number.isNaN(value)) return;
             if(value === undefined || player[key] === value) return;
 
             diff[key] = value;
@@ -492,13 +508,13 @@ export default class GameMonitor {
 
         // Check if the person just respawned, and then try to infer what class they might be on
         // And also guess their max hp for the healthbar in the frontend
-        const health = parseInt(info.iHealth);
+        const health = parseInt(info.iHealth, 10);
         if(player.alive === false && info.bAlive === "true") {
             // Guess the player's max health
             let bestDistance = Infinity;
             let maxHealth = 0;
-            for(let max of possibleMaxHps) {
-                let distance = Math.abs(health - max);
+            for(const max of possibleMaxHps) {
+                const distance = Math.abs(health - max);
                 if(distance < bestDistance) {
                     bestDistance = distance;
                     maxHealth = max;
@@ -511,12 +527,12 @@ export default class GameMonitor {
             const healthClasses = startingHealths[health];
 
             // This will be undefined in casual, but it seems to work fine in private servers
-            const ammoClasses = startingAmmo[parseInt(info.iAmmo)];
+            const ammoClasses = startingAmmo[parseInt(info.iAmmo, 10)];
 
             let potentialClasses: TF2Class[] = [];
             if(healthClasses && ammoClasses) {
                 // Get all classes that satisfy both
-                for(let tfclass of healthClasses) {
+                for(const tfclass of healthClasses) {
                     if(ammoClasses.includes(tfclass)) {
                         potentialClasses.push(tfclass);
                     }
@@ -526,7 +542,7 @@ export default class GameMonitor {
             else if(ammoClasses) potentialClasses = ammoClasses;
 
             if(potentialClasses.length === 1) {
-                const newClass = potentialClasses[0];
+                const newClass = potentialClasses[0]!;
                 copy("class", newClass);
 
                 // If the player is the user dispatch an event
@@ -551,16 +567,16 @@ export default class GameMonitor {
         copy("ID3", info.iAccountID);
         copy("ID64", id3ToId64(info.iAccountID));
         copy("userId", info.iUserID);
-        copy("ping", parseInt(info.iPing));
-        copy("team", parseInt(info.iTeam));
+        copy("ping", parseInt(info.iPing, 10));
+        copy("team", parseInt(info.iTeam, 10));
         copy("health", health);
-        copy("kills", parseInt(info.iScore));
-        copy("deaths", parseInt(info.iDeaths));
+        copy("kills", parseInt(info.iScore, 10));
+        copy("deaths", parseInt(info.iDeaths, 10));
 
         // There's maybe a chance someone can have 0 ping if they're hosting a server themselves
         // So if they have a crazy old steam account (<2004) it's possible this could be a false positive
         // Rare enough that it really doesn't matter
-        const isBot = player.ID3.length <= 5 && player.ping === 0;
+        const isBot = player.ID3!.length <= 5 && player.ping === 0;
 
         copy("isBot", isBot);
         if(info.bAlive !== undefined) copy("alive", info.bAlive === "true");
@@ -574,14 +590,17 @@ export default class GameMonitor {
         return diff;
     }
     
-    static addFakeMessage(msg: string, team: boolean) {   
-        let message: ChatMessage = {
-            name: this.players[0].name,
-            senderTeam: this.players[0].team,
+    static addFakeMessage(msg: string, team: boolean) {
+        const player = this.players[0];
+        if(!player) return;
+
+        const message: ChatMessage = {
+            name: player.name,
+            senderTeam: player.team,
             dead: false,
             team,
             text: msg,
-            senderId: this.players[0].ID3,
+            senderId: player.ID3,
             timestamp: Date.now()
         }
         this.chat.push(message);
@@ -607,13 +626,11 @@ export default class GameMonitor {
     }
 
     static updateMutes() {
-        for(let player of this.players) {
+        for(const player of this.players) {
             if(player.isBot) continue;
 
-            let muted = Mutes.isMuted(player.ID3);
-
-            // Single equals sign used so undefined == false since muted is optional
-            if(player.muted != muted) continue;
+            const muted = Mutes.isMuted(player.ID3);
+            if((player.muted ?? false) !== muted) continue;
 
             player.muted = muted;
             Server.send("game", Message.PlayerUpdate, {

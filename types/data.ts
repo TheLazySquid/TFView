@@ -84,9 +84,11 @@ export interface CurrentGame {
     ip?: string;
 }
 
+export type StoredValue<T> = T extends (string | number | null) ? T
+    : T extends boolean ? number : string;
+
 export type Stored<T> = {
-    [K in keyof T]: T[K] extends (string | number | null) ? T[K]
-        : T[K] extends boolean ? number : string;
+    [K in keyof T]-?: undefined extends T[K] ? StoredValue<T[K]> | null : StoredValue<T[K]>
 }
 
 export interface PlayerEncounter {

@@ -25,7 +25,7 @@ if(await progressFile.exists()) {
 }
 
 if(!Values.get("killCounts")) Values.set("killCounts", {});
-let killCounts = Values.get("killCounts");
+const killCounts = Values.get("killCounts") ?? {};
 
 const multi = new MultiBar({
     format: "{bar} | {filename} | {value}/{total}"
@@ -33,8 +33,11 @@ const multi = new MultiBar({
 const bar = multi.create(demos.length, parsed, { filename: demos[parsed] });
 
 while(parsed < demos.length) {
-    bar.update(parsed, { filename: demos[parsed] });
-    recordDemo(demos[parsed]);
+    const filename = demos[parsed];
+    if(!filename) break;
+
+    bar.update(parsed, { filename });
+    recordDemo(filename);
 
     parsed++;
     await progressFile.write(JSON.stringify({ filesParsed: parsed }));
@@ -52,14 +55,14 @@ function recordDemo(name: string) {
     
         let playerId = 0;
 
-        for(let player of Object.values(output.users)) {
-            let id3 = player.steamId.slice(5, -1); // Remove [U:1: and ]
+        for(const player of Object.values(output.users)) {
+            const id3 = player.steamId.slice(5, -1); // Remove [U:1: and ]
             if(id3 === steamId) playerId = player.userId;
         }
 
         // Get the playerid from our name in the header otherwise
         if(!playerId) {
-            for(let player of Object.values(output.users)) {
+            for(const player of Object.values(output.users)) {
                 if(player.name === output.header.nick) {
                     playerId = player.userId;
                     break;
@@ -67,17 +70,19 @@ function recordDemo(name: string) {
             }
         }
 
-        for(let kill of output.deaths) {
+        for(const kill of output.deaths) {
             if(kill.killer !== playerId) continue;
+
             // ignore bots
-            if(!kill.victim || output.users[kill.victim].steamId.length <= 7) continue;
+            const victim = output.users[kill.victim];
+            if(!victim || victim.steamId.length <= 7) continue;
 
             killCounts[kill.weapon] ??= [0, 0];
-            killCounts[kill.weapon][0]++;
+            killCounts[kill.weapon]![0]++;
         }
 
         Values.save();
-    } catch(e) {
+    } catch {
         multi.log(`Failed to parse demo: ${name}`);
     }
 }

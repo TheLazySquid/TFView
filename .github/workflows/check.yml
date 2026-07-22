@@ -1,0 +1,27 @@
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun i --frozen-lockfile
+
+      - name: Check linting
+        run: bun run lint
+
+      - name: Check backend types
+        run: cd backend && bunx tsc
+
+      - name: Check frontend types
+        run: cd frontend && bunx svelte-check

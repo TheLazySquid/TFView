@@ -19,7 +19,7 @@ export default class Rcon {
     static events = new EventEmitter<RconEvents>();
 
     static init() {
-        // @ts-ignore for some reason bundlers get confused with the import
+        // @ts-expect-error for some reason bundlers get confused with the import
         const Rcon: typeof RconServer = RconServer.default ?? RconServer;
 
         this.server = new Rcon({
@@ -109,7 +109,7 @@ export default class Rcon {
             this.server.execute(command)
                 .then((response) => res(response.toString()))
                 .catch(() => res(null))
-                .finally(() => clearTimeout(timeout));
+                .finally(() => timeout && clearTimeout(timeout));
         });
     }
 }

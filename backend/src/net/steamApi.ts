@@ -23,10 +23,9 @@ export default class SteamApi {
 			batchSize: 100,
 			getUrl: (ids) => this.getRequestUrl("ISteamUser/GetPlayerSummaries/v2", { steamids: ids.join(",") }),
 			handleResponse: (data: SteamPlayerSummaries, batch) => {
-				for(let summary of data.response.players) {
-					let waiting = batch.find((s) => s.id === summary.steamid);
+				for(const summary of data.response.players) {
+					const waiting = batch.find((s) => s.id === summary.steamid);
 					if(waiting) waiting.res(summary);
-					else waiting.rej();
 				}
 			}
 		});
@@ -46,28 +45,32 @@ export default class SteamApi {
 	}
 
 	static getRequestUrl(path: string, params: Record<string, any> = {}) {
-		let searchParams = new URLSearchParams({
-			key: Settings.get("steamApiKey"),
+		const key = Settings.get("steamApiKey");
+		if(!key) return null;
+		
+		const searchParams = new URLSearchParams({
+			key,
 			...params
 		});
 		
-		return this.apiBase + path + "/?" + searchParams.toString();
+		return `${this.apiBase}${path}/?${searchParams.toString()}`;
 	}
 
 	static query<T>(path: string, params: Record<string, any> = {}) {
 		return new Promise<T>((res, rej) => {
 			const url = this.getRequestUrl(path, params);
+			if(!url) return rej("No steam api key");
 
 			fetch(url).then((resp) => {
 				if(resp.status !== 200) return rej(resp.status);
-				return resp.json().then(res, rej);
+				return resp.json().then((val) => res(val as T), rej);
 			}, rej)
 		});
 	}
 
 	static processSteamSummary(id3: string, steamSummary: SteamPlayerSummary): PlayerSummary {
-		let playerData = HistoryDatabase.getPlayerData(id3);
-		let avatars = playerData?.avatars ? playerData.avatars : [];
+		const playerData = HistoryDatabase.getPlayerData(id3);
+		const avatars = playerData?.avatars ? playerData.avatars : [];
 
 		if(playerData) {
 			if(!avatars.includes(steamSummary.avatarhash)) avatars.push(steamSummary.avatarhash);
@@ -91,8 +94,8 @@ export default class SteamApi {
 		const id64 = id3ToId64(id3);
 
 		// Check if we have the summary stored
-		let playerData = HistoryDatabase.getPlayerData(id3);
-		let avatars = playerData?.avatars ? playerData.avatars : [];
+		const playerData = HistoryDatabase.getPlayerData(id3);
+		const avatars = playerData?.avatars ? playerData.avatars : [];
 
 		if(playerData) {
 			if(playerData.avatarHash && !avatars.includes(playerData.avatarHash)) {
@@ -102,7 +105,7 @@ export default class SteamApi {
 
 		const shouldQuery = !flags.noSteamApi && Settings.get("steamApiKey");
 
-		if(playerData && playerData.avatarHash && playerData.createdTimestamp) {
+		if(playerData?.avatarHash && playerData.createdTimestamp) {
 			callback({
 				avatarHash: playerData.avatarHash,
 				avatars,
@@ -161,6 +164,7 @@ export default class SteamApi {
 
 		try {
 			const friendIds = await this.getFriendIds(userId);
+			if(!friendIds) return;
 
 			Values.set("friendIds", friendIds);
 			Server.send("userfriends", Message.UserFriendIds, friendIds);
@@ -182,6 +186,8 @@ export default class SteamApi {
 	static async getPlayerFriends(id3: string): Promise<FriendsResult> {
 		try {
 			const friendIds = await this.getFriendIds(id3);
+			if(!friendIds) return { status: "error" };
+
 			const ingameFriends = friendIds.filter(id => GameMonitor.playerIds.has(id));
 			const otherFriends = friendIds.filter(id => !GameMonitor.playerIds.has(id));
 
@@ -201,7 +207,7 @@ export default class SteamApi {
 			// Private profile, expected
 			if(e === 401) return { status: "private" };
 
-			Log.error("Failed to fetch friends for " + id3, e);
+			Log.error(`Failed to fetch friends for ${id3}`, e);
 			return { status: "error" };
 		}
 	}

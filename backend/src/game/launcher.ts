@@ -12,7 +12,7 @@ export default class Launcher {
         }
 
         Server.on(Recieves.LaunchGame, (_, { ws }) => {
-            let failed = this.launchGame();
+            const failed = this.launchGame();
             if(!failed) return;
            
             Server.sendTo(ws, Message.Error, "Failed to launch TF2, missing steam path");

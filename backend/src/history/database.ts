@@ -17,6 +17,10 @@ import { steamProfilesUrl, steamVanityUrl } from "$shared/consts";
 import { isStringNumber } from "$shared/util";
 import Mutes from "$src/game/mutes";
 
+interface CountResult {
+    "COUNT(1)": number;
+}
+
 export default class HistoryDatabase {
     static db: Database;
     static pastGames: InfiniteList<PastGame, GameSearchParams>;
@@ -52,7 +56,7 @@ export default class HistoryDatabase {
         });
 
         Server.on(Recieves.GetPlayer, (id, { reply }) => {
-            let data = this.getPlayerData(id);
+            const data = this.getPlayerData(id);
             reply(data);
         });
 
@@ -100,25 +104,27 @@ export default class HistoryDatabase {
         )`);
 
         const dbVersion = this.db.prepare<{ "user_version": number }, []>(`PRAGMA main.user_version;`)
-            .get().user_version;
+            .get()?.user_version;
 
-        // Add the players.avatars and encounters.avatarHash columns if they don't exist
-        if(!newDb && dbVersion < 1) {
-            Log.info("Migrating history database to version 1");
-            this.db.run(`ALTER TABLE players ADD COLUMN avatars TEXT NOT NULL DEFAULT '[]';`);
-            this.db.run(`ALTER TABLE encounters ADD COLUMN avatarHash TEXT;`);
-        }
-
-        // Remove the games.players column
-        if(!newDb && dbVersion < 2) {
-            Log.info("Migrating history database to version 2");
-            this.db.run(`ALTER TABLE games DROP COLUMN players`);
-        }
-
-        // Add the sourceBanned column to players
-        if(!newDb && dbVersion < 3) {
-            Log.info("Migrating history database to version 3");
-            this.db.run(`ALTER TABLE players ADD COLUMN sourceBanned INTEGER;`);
+        if(dbVersion) {
+            // Add the players.avatars and encounters.avatarHash columns if they don't exist
+            if(!newDb && dbVersion < 1) {
+                Log.info("Migrating history database to version 1");
+                this.db.run(`ALTER TABLE players ADD COLUMN avatars TEXT NOT NULL DEFAULT '[]';`);
+                this.db.run(`ALTER TABLE encounters ADD COLUMN avatarHash TEXT;`);
+            }
+    
+            // Remove the games.players column
+            if(!newDb && dbVersion < 2) {
+                Log.info("Migrating history database to version 2");
+                this.db.run(`ALTER TABLE games DROP COLUMN players`);
+            }
+    
+            // Add the sourceBanned column to players
+            if(!newDb && dbVersion < 3) {
+                Log.info("Migrating history database to version 3");
+                this.db.run(`ALTER TABLE players ADD COLUMN sourceBanned INTEGER;`);
+            }
         }
 
         this.db.prepare(`PRAGMA main.user_version = ${this.version};`).run();
@@ -145,15 +151,15 @@ export default class HistoryDatabase {
     }
 
     static parseRow<T>(row: Stored<T>, objects: (keyof T)[], booleans: (keyof T)[] = []): T {
-        let parsed = row as T;
+        const parsed = row as T;
 
-        for(let key of objects) {
+        for(const key of objects) {
             if (typeof row[key] === "string") {
                 parsed[key] = JSON.parse(row[key]);
             }
         }
 
-        for(let key of booleans) {
+        for(const key of booleans) {
             parsed[key] = Boolean(row[key]) as any;
         }
 
@@ -162,13 +168,13 @@ export default class HistoryDatabase {
 
     // Queries for past games
     static getGamesQuery(query: string, params: GameSearchParams, offset?: number) {
-        let whereClauses: string[] = [];
+        const whereClauses: string[] = [];
         if(params.map) whereClauses.push(`map LIKE "%${this.escapeLike(params.map)}%" ESCAPE '\\'`);
         if(params.hostname) whereClauses.push(`hostname LIKE "%${this.escapeLike(params.hostname)}%" ESCAPE '\\'`);
         if(params.after) whereClauses.push("start >= $after");
         if(params.before) whereClauses.push("start <= $before");
 
-        if(whereClauses.length > 0) query += " WHERE " + whereClauses.join(" AND ");
+        if(whereClauses.length > 0) query += ` WHERE ${whereClauses.join(" AND ")}`;
         query += ` ORDER BY start DESC LIMIT ${pageSize}`;
         if(offset !== undefined) query += ` OFFSET $offset`;
 
@@ -177,44 +183,46 @@ export default class HistoryDatabase {
 
     static getGames(offset: number, params: GameSearchParams) {
         const queryStart = `SELECT start, duration, map, hostname, ip, kills, deaths, rowid FROM games`;
-        let query = this.getGamesQuery(queryStart, params, offset);
+        const query = this.getGamesQuery(queryStart, params, offset);
 
         return this.db.query<PastGame, {}>(query).all({ ...params, offset });
     }
 
-    static getGame(id: number): StoredPastGame {
-        let game = this.db.query<Stored<StoredPastGame>, {}>(`SELECT *, rowid FROM games WHERE rowid = $rowid`)
+    static getGame(id: number): StoredPastGame | null {
+        const game = this.db.query<Stored<StoredPastGame>, {}>(`SELECT *, rowid FROM games WHERE rowid = $rowid`)
             .get({ rowid: id });
+        if(!game) return null;
+
         return this.parseRow(game, ["demos"]);
     }
 
     static countGames(params: GameSearchParams) {
         const queryStart = `SELECT COUNT(1) FROM games`;
-        let query = this.getGamesQuery(queryStart, params);
+        const query = this.getGamesQuery(queryStart, params);
 
-        let result = this.db.query<{ "COUNT(1)": number }, {}>(query).get({ ...params });
+        const result = this.db.query<CountResult, {}>(query).get({ ...params })!;
         return result["COUNT(1)"];
     }
 
     // Queries for past players
     static async getPlayersQuery(query: string, params: PlayerSearchParams, offset?: number) {
-        let whereClauses: string[] = [];
+        const whereClauses: string[] = [];
         if(params.after) whereClauses.push("lastSeen >= $after");
         if(params.before) whereClauses.push("lastSeen <= $before");
         
         if(params.name) {
             // Allow searches for id64, id3, name, or profile url
             if(params.name.startsWith("[U:1:")) {
-                let id3 = params.name.slice(5, -1);
+                const id3 = params.name.slice(5, -1);
                 if(isStringNumber(id3)) params.id3 = id3;
             } else if(isStringNumber(params.name)) {
                 params.id64 = id64ToId3(params.name);
                 params.id3 = params.name;
             } else if(params.name.startsWith(steamProfilesUrl)) {
-                const id64 = params.name.slice(steamProfilesUrl.length).split("/", 1)[0];
+                const id64 = params.name.slice(steamProfilesUrl.length).split("/", 1)[0]!;
                 if(isStringNumber(id64)) params.id64 = id64ToId3(id64);
             } else if(params.name.startsWith(steamVanityUrl)) {
-                const vanity = params.name.slice(steamVanityUrl.length).split("/", 1)[0];
+                const vanity = params.name.slice(steamVanityUrl.length).split("/", 1)[0]!;
                 const resolved = await SteamApi.resolveVanityUrl(vanity);
                 if(resolved) params.id64 = resolved;
             }
@@ -229,13 +237,13 @@ export default class HistoryDatabase {
         }
 
         if(params.tags) {
-            for(let tag in params.tags) {
+            for(const tag in params.tags) {
                 if(!params.tags[tag]) continue;
                 whereClauses.push(`tags LIKE "%""${this.escapeLike(tag, true)}""%" ESCAPE '\\'`);
             }
         }
 
-        if(whereClauses.length > 0) query += " WHERE " + whereClauses.join(" AND ");
+        if(whereClauses.length > 0) query += ` WHERE ${whereClauses.join(" AND ")}`;
         if(params.sortBy === "encounters") query += ` ORDER BY encounters DESC `;
         else query += ` ORDER BY lastSeen DESC `;
         query += ` LIMIT ${pageSize}`;
@@ -246,16 +254,16 @@ export default class HistoryDatabase {
 
     static async getPlayers(offset: number, params: PlayerSearchParams): Promise<PastPlayer[]> {
         const queryStart = `SELECT * FROM players`;
-        let query = await this.getPlayersQuery(queryStart, params, offset);
+        const query = await this.getPlayersQuery(queryStart, params, offset);
 
-        let rows = this.db.query<Stored<StoredPlayer>, {}>(query).all({ ...params, offset });
-        let parsed = rows.map(row => this.parsePlayerRow(row));
+        const rows = this.db.query<Stored<StoredPlayer>, {}>(query).all({ ...params, offset });
+        const parsed = rows.map(row => this.parsePlayerRow(row));
         
         // Fetch any missing avatarHashes, with low priority
-        for(let data of parsed) {
+        for(const data of parsed) {
             if(data.avatarHash) continue;
             
-            let id = data.id;
+            const id = data.id;
             SteamApi.getSummary(id, (summary) => {
                 this.pastPlayers.update(id, summary);
                 Server.send("pastplayer", Message.PastPlayerUpdate, {
@@ -268,12 +276,12 @@ export default class HistoryDatabase {
     }
 
     static parsePlayerRow(row: Stored<StoredPlayer>): PastPlayer {
-        let parsed = this.parseRow(row, ["names", "avatars", "tags"], ["sourceBanned"]);
+        const parsed = this.parseRow(row, ["names", "avatars", "tags"], ["sourceBanned"]);
 
         // Make the tags a record instead of an array
-        let tags: Record<string, boolean> = {};
+        const tags: Record<string, boolean> = {};
         if(parsed.tags) {
-            for(let tag of parsed.tags) tags[tag] = true;
+            for(const tag of parsed.tags) tags[tag] = true;
         }
 
         // Check if the player is currently muted
@@ -284,15 +292,15 @@ export default class HistoryDatabase {
 
     static async countPlayers(params: PlayerSearchParams) {
         const queryStart = `SELECT COUNT(1) FROM players`;
-        let query = await this.getPlayersQuery(queryStart, params);
+        const query = await this.getPlayersQuery(queryStart, params);
 
-        let result = this.db.query<{ "COUNT(1)": number }, {}>(query).get({ ...params });
+        const result = this.db.query<CountResult, {}>(query).get({ ...params })!;
         return result["COUNT(1)"];
     }
 
     // Queries for past encounters
     static getEncountersQuery(query: string, params: EncounterSearchParams, offset?: number) {
-        let whereClauses: string[] = [];
+        const whereClauses: string[] = [];
         if(params.id) whereClauses.push("playerId = $id");
         if(params.gameId) whereClauses.push("gameId = $gameId");
         if(params.map) whereClauses.push(`map LIKE "%${this.escapeLike(params.map)}%" ESCAPE '\\'`);
@@ -300,7 +308,7 @@ export default class HistoryDatabase {
         if(params.after) whereClauses.push("time >= $after");
         if(params.before) whereClauses.push("time <= $before");
 
-        if(whereClauses.length > 0) query += " WHERE " + whereClauses.join(" AND ");
+        if(whereClauses.length > 0) query += ` WHERE ${whereClauses.join(" AND ")}`;
         query += ` ORDER BY time DESC LIMIT ${pageSize}`;
         if(offset !== undefined) query += ` OFFSET $offset`;
 
@@ -309,27 +317,28 @@ export default class HistoryDatabase {
 
     static countEncounters(params: EncounterSearchParams): number {
         const queryStart = `SELECT COUNT(1) FROM encounters`;
-        let query = this.getEncountersQuery(queryStart, params);
+        const query = this.getEncountersQuery(queryStart, params);
 
-        let result = this.db.query<{ "COUNT(1)": number }, {}>(query).get({ ...params });
+        const result = this.db.query<CountResult, {}>(query).get({ ...params })!;
         return result["COUNT(1)"];
     }
 
     static getEncounters(offset: number, params: EncounterSearchParams): PlayerEncounter[] {
         const queryStart = `SELECT * FROM encounters`;
-        let query = this.getEncountersQuery(queryStart, params, offset);
+        const query = this.getEncountersQuery(queryStart, params, offset);
 
         return this.db.query<PlayerEncounter, {}>(query).all({ ...params, offset });
     }
 
     // Saving player data
-    static getPlayerData(id: string): PastPlayer {
-        let player = this.db.query<Stored<StoredPlayer> | null, {}>(`SELECT * FROM players WHERE id = $id`).get({ id });
+    static getPlayerData(id: string): PastPlayer | null {
+        const player = this.db.query<Stored<StoredPlayer> | null, {}>(`SELECT * FROM players WHERE id = $id`).get({ id });
         if(!player) return null;
+
         return this.parsePlayerRow(player);
     }
 
-    static setPlayerUserData(id: string, key: "nickname" | "note", value: string) {
+    static setPlayerUserData(id: string, key: "nickname" | "note", value: string | null) {
         try {
             this.db.query(`UPDATE players SET ${key} = $value WHERE id = $id`).run({ value, id });
     
@@ -341,7 +350,7 @@ export default class HistoryDatabase {
 
     static setPlayerTags(id: string, tags: Record<string, boolean>) {
         try {
-            let activeTags = Object.entries(tags).filter(([_, e]) => e).map(([t]) => t);
+            const activeTags = Object.entries(tags).filter(([_, e]) => e).map(([t]) => t);
             this.db.query(`UPDATE players SET tags = $tags WHERE id = $id`)
                 .run({ tags: JSON.stringify(activeTags), id });
     
@@ -353,9 +362,9 @@ export default class HistoryDatabase {
 
     static setPlayerSummary(id: string, summary: PlayerSummary) {
         try {
-            let avatarHash = summary.avatarHash;
+            const avatarHash = summary.avatarHash;
             // We can't see the createdTimestamp of private profiles
-            let createdTimestamp = summary.createdTimestamp ?? -1;
+            const createdTimestamp = summary.createdTimestamp ?? -1;
 
             this.db.query(`UPDATE players SET avatarHash = $avatarHash, createdTimestamp = $createdTimestamp, 
                 avatars = $avatars WHERE id = $id`)
@@ -382,11 +391,11 @@ export default class HistoryDatabase {
     }
 
     static createCurrentGame(game: CurrentGame) {
-        let val = this.db.query(`INSERT INTO games (map, hostname, ip, start, duration, kills, deaths)
+        const val = this.db.query(`INSERT INTO games (map, hostname, ip, start, duration, kills, deaths)
             VALUES($map, $hostname, $ip, $start, $duration, $kills, $deaths)`).run({
             map: game.map,
-            hostname: game.hostname,
-            ip: game.ip,
+            hostname: game.hostname ?? null,
+            ip: game.ip ?? null,
             start: game.startTime,
             duration: 0, kills: 0, deaths: 0
         });
@@ -424,10 +433,13 @@ export default class HistoryDatabase {
     }
 
     static updateCurrentHostname(game: CurrentGame) {
-        let { hostname, ip, rowid } = game;
+        const { rowid, hostname, ip } = game;
 
-        this.db.query(`UPDATE games SET hostname = $hostname, ip = $ip WHERE rowid = $rowid`)
-            .run({ hostname, ip, rowid });
+        this.db.query(`UPDATE games SET hostname = $hostname, ip = $ip WHERE rowid = $rowid`).run({
+            hostname: hostname ?? null,
+            ip: ip ?? null,
+            rowid
+        });
 
         console.log("Updating:", rowid, hostname, ip);
         this.pastGames.update(rowid, { hostname, ip });
@@ -446,7 +458,7 @@ export default class HistoryDatabase {
         
         const now = Date.now();
 
-        let val = this.db.query(`INSERT INTO encounters (playerId, map, name, gameId, time, kills, deaths, avatarHash)
+        const val = this.db.query(`INSERT INTO encounters (playerId, map, name, gameId, time, kills, deaths, avatarHash)
             VALUES($playerId, $map, $name, $gameId, $time, $kills, $deaths, $avatarHash)`).run({
             playerId: player.ID3,
             map: game.map,
@@ -455,12 +467,12 @@ export default class HistoryDatabase {
             time: now,
             kills: player.kills,
             deaths: player.deaths,
-            avatarHash: player.avatarHash
+            avatarHash: player.avatarHash ?? null
         });
 
         // Add the new name if it doesn't already exist
         let names: string[] = [];
-        let playerData = this.getPlayerData(player.ID3);
+        const playerData = this.getPlayerData(player.ID3);
         if(playerData) names = playerData.names;
 
         if(!names.includes(player.name)) names.push(player.name);
@@ -498,7 +510,7 @@ export default class HistoryDatabase {
 
     static updateEncounter(rowid: number, info: Partial<PlayerEncounter>) {
         const fields = [];
-        for(let key in info) {
+        for(const key in info) {
             fields.push(`${key} = $${key}`);
         }
 
@@ -512,16 +524,18 @@ export default class HistoryDatabase {
             this.db.query(`DELETE FROM games WHERE rowid = $rowid`).run({ rowid });
 
             // Remove 1 from the encounters of each player in the game
-            let players = this.db.query<{ playerId: string }, {}>(`SELECT playerId FROM encounters WHERE gameId = $rowid`).all({ rowid });
+            const players = this.db.query<{ playerId: string }, {}>(`SELECT playerId FROM encounters WHERE gameId = $rowid`).all({ rowid });
 
-            let encounters: (number | null)[] = [];
-            for(let player of players) {
+            const encounters: (number | null)[] = [];
+            for(const player of players) {
                 // Get the number of encounters for each player, then decrease by 1
-                let val = this.db.query<{ encounters: number }, {}>(`SELECT encounters FROM players WHERE id = $id`).get({ id: player.playerId });
-                if(!val) encounters.push(null);
-
-                encounters.push(val.encounters - 1);
-                this.db.query(`UPDATE players SET encounters = $encounters WHERE id = $id`).run({ encounters: val.encounters - 1, id: player.playerId });
+                const val = this.db.query<{ encounters: number }, {}>(`SELECT encounters FROM players WHERE id = $id`).get({ id: player.playerId });
+                if(val) {
+                    encounters.push(val.encounters - 1);
+                    this.db.query(`UPDATE players SET encounters = $encounters WHERE id = $id`).run({ encounters: val.encounters - 1, id: player.playerId });
+                } else {
+                    encounters.push(null);
+                }
             }
 
             // Delete the encounters for the game
@@ -530,9 +544,11 @@ export default class HistoryDatabase {
             // Update infinite lists
             this.pastGames.delete(rowid);
             for(let i = 0; i < players.length; i++) {
-                if(encounters[i] === null) continue;
-                let playerId = players[i].playerId;
-                this.pastPlayers.update(playerId, { encounters: encounters[i] });
+                const player = players[i];
+                const playerEncounters = encounters[i];
+                if(!player || !playerEncounters) continue;
+
+                this.pastPlayers.update(player.playerId, { encounters: playerEncounters });
             }
         });
 

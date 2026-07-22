@@ -29,6 +29,9 @@ export default class KillTracker {
             Values.set("killCounts", killCounts);
         }
 
-        Server.send("killcounts", Message.KillCountUpdate, { weapon, count: killCounts[weapon] });
+        Server.send("killcounts", Message.KillCountUpdate, {
+            weapon,
+            count: killCounts[weapon]!
+        });
     }
 }

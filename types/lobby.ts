@@ -1,4 +1,4 @@
-export const enum TF2Class {
+export enum TF2Class {
     Scout,
     Soldier,
     Pyro,
@@ -55,7 +55,7 @@ export interface Player {
 
     // Estimated based on killfeed and health
     maxHealth?: number;
-    class?: TF2Class;
+    class?: TF2Class | null;
 
     // Gotten from loginusers.vdf
     isUser?: boolean;
@@ -68,7 +68,7 @@ export interface Player {
     // user-generated
     tags: Record<string, boolean>;
     nickname?: string | null;
-    note: string;
+    note: string | null;
 
     // From steamhistory api
     sourceBanned?: boolean;

@@ -17,7 +17,7 @@
 	import UserSearch from "@lucide/svelte/icons/user-search";
 	import Settings from "@lucide/svelte/icons/settings";
 	import Power from "@lucide/svelte/icons/power";
-	import Map from "@lucide/svelte/icons/map";
+	import MapIcon from "@lucide/svelte/icons/map";
 	import Play from "@lucide/svelte/icons/play";
 	import Tally from "@lucide/svelte/icons/tally-5";
     import { Message, Recieves } from "$types/messages";
@@ -32,7 +32,7 @@
 		{ Icon: Game, href: "/", title: "Game View" },
 		{ Icon: UserSearch, href: "/playerHistory", title: "Player History" },
 		{ Icon: FolderSearch, href: "/gameHistory", title: "Game History" },
-		{ Icon: Map, href: "/casual", title: "Casual Map Selection" },
+		{ Icon: MapIcon, href: "/casual", title: "Casual Map Selection" },
 		{ Icon: Tally, href: "/killTracker", title: "Weapon Kill Counts" }, 
 		{ Icon: Settings, href: "/settings", title: "Settings" }
 	]

@@ -56,10 +56,10 @@ export default new class Popups {
         }
 
         // Open the popup
-        let popup = this.callbacks[type];
+        const popup = this.callbacks[type];
         if(!popup.overlay) this.closePopup?.();
 
-        let { close, name } = await popup.callback(args);
+        const { close, name } = await popup.callback(args);
 
         if(!popup.overlay) {
             this.closePopup = close;
@@ -79,7 +79,7 @@ export default new class Popups {
         this.closePopup?.();
 
         this.popupStack.pop();
-        let popup = this.popupStack.pop()!;
+        const popup = this.popupStack.pop()!;
 
         this.open(popup.type, popup.args);
     }

@@ -26,7 +26,7 @@ export const startingHealths: Record<number, TF2Class[]> = {
     [300]: [TF2Class.Heavy]
 }
 
-export const possibleMaxHps = Object.keys(startingHealths).map(key => parseInt(key));
+export const possibleMaxHps = Object.keys(startingHealths).map(key => parseInt(key, 10));
 
 export const startingAmmo: Record<number, TF2Class[]> = {
     [3]: [TF2Class.Demo], // Persian persuader

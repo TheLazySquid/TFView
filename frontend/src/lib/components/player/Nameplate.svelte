@@ -58,7 +58,7 @@
                 player.note = note;
                 WS.send(Recieves.SetNote, { id, note });
             },
-            defaultValue: player.note,
+            defaultValue: player.note ?? undefined,
             textarea: true
         });
     }

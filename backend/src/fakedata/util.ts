@@ -88,9 +88,9 @@ export const playerNames = [
     "10001011101"
 ]
 
-export const playerIds = [];
+export const playerIds: string[] = [];
 
-for(let player of fakePlayers) {
+for(const player of fakePlayers) {
     playerIds.push(player.ID3);
 }
 

@@ -82,9 +82,11 @@ export default class LogParser {
     }
 
     static parseLog(text: string) {
-        let match: RegExpExecArray;
+        let match: RegExpExecArray | null;
         for(let i = 0; i < this.listeners.length; i++) {
             const listener = this.listeners[i];
+            if(!listener) continue;
+
             while(match = listener.regex.exec(text)) {
                 listener.callback(match);
             }

@@ -21,7 +21,7 @@
         if(data.id !== player?.id) return;
     
         for(let key in data) {
-            // @ts-ignore
+            // @ts-expect-error
             player[key] = data[key];
         }
     }
@@ -31,7 +31,7 @@
 
     const onOpen = async (id: string) => {
         player = await WS.sendAndRecieve(Recieves.GetPlayer, id);
-        return player.lastName;
+        return player?.lastName ?? "Unknown Player";
     }
 
     const sendNoteFn = () => {

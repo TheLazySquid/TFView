@@ -9,7 +9,7 @@ export const isLinux = process.platform === "linux";
 export const friendCheckInterval = 1000 * 60 * 60; // 1 hour
 
 // Read flags
-export let flags = {
+export const flags = {
     fakeData: false,
     noNet: false,
     noMAC: false,
@@ -22,7 +22,7 @@ for(const arg of Bun.argv) {
     const flag = arg.slice(2);
 
     if(!(flag in flags)) throw new Error(`Unknown flag: ${flag}`);
-    flags[flag] = true;
+    flags[flag as keyof typeof flags] = true;
 }
 
 // Disable both MAC and steamApi if noNet or fakeData is set

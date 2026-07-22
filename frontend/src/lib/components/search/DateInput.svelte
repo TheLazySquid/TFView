@@ -26,7 +26,7 @@
 
     const update = () => {
         ignoreNext = true;
-        if(isNaN(input.valueAsNumber)) timestamp = undefined;
+        if(Number.isNaN(input.valueAsNumber)) timestamp = undefined;
         else timestamp = input.valueAsNumber;
 
         searchList.updateSearch();

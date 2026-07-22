@@ -1,14 +1,15 @@
 import { Recieves } from "$types/messages";
 import Log from "$src/log";
 import Server from "$src/net/server";
-import { join, dirname } from "path";
+import { join, dirname } from "node:path";
 import Settings from "$src/settings/settings";
 import fsp from "node:fs/promises";
+import { exists } from "$src/util";
 
 export default class AutoexecCheck {
     static init() {
         Server.on(Recieves.GetRconPassword, async (mastercomfig, { reply }) => {
-            let password = Settings.get("rconPassword");
+            let password: string | undefined = Settings.get("rconPassword");
             if(password) return reply(password);
 
             password = await this.getRconPassword(mastercomfig);
@@ -45,7 +46,7 @@ export default class AutoexecCheck {
 
     static async getAutoexecLines(mastercomfig: boolean) {
         const path = this.getAutoexec(mastercomfig);
-        if(!path || !await fsp.exists(path)) return [];
+        if(!path || !await exists(path)) return [];
 
         const autoexec = await fsp.readFile(path);
         return autoexec.toString().replaceAll("\r\n", "\n").split("\n");
@@ -55,7 +56,7 @@ export default class AutoexecCheck {
         const lines = await this.getAutoexecLines(mastercomfig);
         if(!lines) return;
 
-        for(let line of lines) {
+        for(const line of lines) {
             if(line.startsWith("rcon_password")) {
                 return line.replace("rcon_password", "").trim();
             }
@@ -66,9 +67,9 @@ export default class AutoexecCheck {
         const lines = await this.getAutoexecLines(mastercomfig);
         if(!lines) return false;
 
-        for(let line of lines) {
+        for(const line of lines) {
             if(line.startsWith("rcon_password")) {
-                let password = line.replace("rcon_password", "").trim();
+                const password = line.replace("rcon_password", "").trim();
                 if(password !== Settings.get("rconPassword")) return false;
                 break;
             }
@@ -84,6 +85,8 @@ export default class AutoexecCheck {
         if(valid) return;
 
         const path = this.getAutoexec(mastercomfig);
+        if(!path) return;
+
         const lines = await this.getAutoexecLines(mastercomfig);
         
         // Add missing lines at the end

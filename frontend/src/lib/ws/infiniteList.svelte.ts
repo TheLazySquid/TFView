@@ -85,7 +85,7 @@ export class InfiniteList<T, Params extends Record<string, any>> {
         if(!item) return;
 
         for(let key in update) {
-            // @ts-ignore trust me the alternative is worse
+            // @ts-expect-error trust me the alternative is worse
             item[key] = update[key];
         }
     }

@@ -9,8 +9,8 @@ do {
     players = await HistoryDatabase.getPlayers(playerOffset, { tags: {}, sortBy: "lastSeen" });
     playerOffset += players.length;
 
-    for(let player of players) {
-        let names = [];
+    for(const player of players) {
+        let names: string[] = [];
         let encounterOffset = 0;
         let encounters: PlayerEncounter[] = [];
         
@@ -18,7 +18,7 @@ do {
             encounters = HistoryDatabase.getEncounters(encounterOffset, { id: player.id });
             encounterOffset += encounters.length;
 
-            for(let encounter of encounters) {
+            for(const encounter of encounters) {
                 if(!names.includes(encounter.name)) {
                     names.push(encounter.name);
                 }

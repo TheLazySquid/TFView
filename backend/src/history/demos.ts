@@ -11,6 +11,7 @@ import { Recieves } from "$types/messages";
 import Close from "$src/close";
 import { watch, type FSWatcher } from "chokidar";
 import { basename } from "node:path";
+import { exists } from "$src/util";
 
 interface DemosEvents {
     create: [demo: string];
@@ -45,9 +46,10 @@ export default class Demos {
     static watcher?: FSWatcher;
     static watchDemos() {
         this.watcher?.close();
+        if(!this.demosPath) return;
 
         this.watcher = watch(this.demosPath, {
-            ignored: (file, stat) => stat?.isFile() && !file.endsWith(".dem"),
+            ignored: (file, stat) => Boolean(stat?.isFile() && !file.endsWith(".dem")),
             persistent: false,
             ignoreInitial: true,
             depth: 1
@@ -64,8 +66,10 @@ export default class Demos {
     }
 
     static async playDemo(demo: string) {
+        if(!this.demosPath) return false;
+
         const path = join(this.demosPath, demo);
-        if(!await fsp.exists(path)) {
+        if(!await exists(path)) {
             Log.error("Demo not found:", path);
             return false;
         }
@@ -90,7 +94,7 @@ export default class Demos {
     static watchingDemo: string | null = null;
     static lastPos = 0;
     static async startSession(name: string) {
-        if(flags.noMAC) return;
+        if(flags.noMAC || !this.demosPath) return;
         
         const key = Settings.get("masterbaseKey");
         if(!key) return;
@@ -139,9 +143,9 @@ export default class Demos {
     static ws: WebSocket | null = null;
     static async openDemoWebsocket(key: string, sessionIdJson: string) {
         // The session id is a number but it's way too big to safely store in a 64 bit float
-        let id = sessionIdJson.slice(sessionIdJson.lastIndexOf(":") + 1, -1).trim();
+        const id = sessionIdJson.slice(sessionIdJson.lastIndexOf(":") + 1, -1).trim();
 
-        let params = new URLSearchParams({
+        const params = new URLSearchParams({
             api_key: key,
             session_id: id
         });
@@ -164,8 +168,10 @@ export default class Demos {
     } 
 
     static async updateDemo() {
+        if(!this.watchingDemo) return;
+
         Rcon.run("ds_status").then((status) => {
-            if(status && status.startsWith("(Demo Support) Not currently recording")) {
+            if(status?.startsWith("(Demo Support) Not currently recording")) {
                 this.closeDemo();
             }
         });
@@ -177,7 +183,7 @@ export default class Demos {
 
             stream.on("data", (buffer) => {
                 this.lastPos += buffer.length;
-                this.ws.send(buffer as any); // Types are weird here
+                if(this.ws) this.ws.send(buffer as any); // Types are weird here
             });
         } catch {
             Log.warning("Failed to read demo file, has it been deleted?");

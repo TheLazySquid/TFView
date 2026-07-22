@@ -11,10 +11,10 @@ interface Options<T, Params> {
 export class InfiniteList<T, Params> {
 	constructor(private options: Options<T, Params>) {
 		Server.on(`list-${options.listId}`, async ({ offset, params }, { reply }) => {
-			let items = await Promise.resolve(options.getBatch(offset, params));
+			const items = await Promise.resolve(options.getBatch(offset, params));
 			
 			if(offset === 0) {
-				let total = await Promise.resolve(options.getTotal(params));
+				const total = await Promise.resolve(options.getTotal(params));
 				reply({ items, total });
 			} else {
 				reply({ items });
@@ -52,10 +52,10 @@ export class LoadedInfiniteList<T, Params> {
 
 	constructor(private options: LoadedOptions<T, Params>) {
 		Server.on(`list-${options.listId}`, ({ offset, params }, { reply }) => {
-			let items = this.getBatch(offset, params);
+			const items = this.getBatch(offset, params);
 			
 			if(offset === 0) {
-				let total = this.getTotal(params);
+				const total = this.getTotal(params);
 				reply({ items, total });
 			} else {
 				reply({ items });
@@ -73,7 +73,7 @@ export class LoadedInfiniteList<T, Params> {
 	}
 
 	getFiltered(params: Params) {
-		let id = this.options.getParamsId(params);
+		const id = this.options.getParamsId(params);
 		if(this.lastId === id && this.filteredItems) {
 			return this.filteredItems;
 		}
@@ -89,7 +89,7 @@ export class LoadedInfiniteList<T, Params> {
 	}
 
 	getBatch(offset: number, params: Params): T[] {
-		let filtered = this.getFiltered(params);
+		const filtered = this.getFiltered(params);
 
 		if(!this.options.reverse) {
 			return filtered.slice(offset, offset + pageSize);

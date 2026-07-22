@@ -11,6 +11,7 @@ import fsp from "node:fs/promises";
 import { spawn, execSync } from "node:child_process";
 import Close from "$src/close";
 import { feature } from "bun:bundle";
+import { exists } from "$src/util";
 
 interface UpdateInfo {
     url: string;
@@ -118,7 +119,7 @@ export default class Updater {
         const newStatic = join(root, "updated", "static");
         const oldStatic = join(root, "static");
         
-        if(await fsp.exists(newStatic)) {
+        if(await exists(newStatic)) {
             await fsp.rm(oldStatic, { recursive: true, force: true });
             await fsp.rename(newStatic, oldStatic);
         }
@@ -133,7 +134,7 @@ export default class Updater {
         const newUpdater = join(root, "updated", `updater${extension}`);
         const oldUpdater = join(root, `updater${extension}`);
         
-        if(await fsp.exists(newUpdater)) {
+        if(await exists(newUpdater)) {
             await fsp.rm(oldUpdater, { force: true });
             await fsp.rename(newUpdater, oldUpdater);
         }
@@ -146,7 +147,7 @@ export default class Updater {
         await fsp.rm(updatedPath, { recursive: true, force: true });
 
         // Spawn the updater and kill the process
-        await Server.send("global", Message.InstallingUpdate, null);
+        await Server.send("global", Message.InstallingUpdate, undefined);
         Close.close();
         spawn(oldUpdater, { cwd: root, detached: true, stdio: "ignore" }).unref();
     }
