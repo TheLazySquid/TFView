@@ -24,4 +24,4 @@ jobs:
         run: cd backend && bunx tsc
 
       - name: Check frontend types
-        run: cd frontend && bunx svelte-check
+        run: cd frontend && bunx svelte-kit sync && bunx svelte-check
