@@ -3,6 +3,9 @@
   "version": "0.6.6",
   "author": "TheLazySquid",
   "private": true,
+  "scripts": {
+    "lint": "biome lint"
+  },
   "trustedDependencies": [
     "ctray",
     "node-fs-dialogs"
