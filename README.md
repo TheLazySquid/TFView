@@ -93,6 +93,16 @@ Scripts are given a context object which allows them to interact with TF2 and TF
 
 By default, scripts are re-run every time they are called. By naming a script `[SCRIPT].persistent.js` it will instead be run on startup, with its exported `init` function being called with the context object. If a persistent script is deleted or updated its exported `close` function will be called with the context object. Like with a normal script, the `run` function will be called with the context and arguments when `echo "tfview.script(...args)"` is called. This is useful if state needs to be "remembered" between runs.
 
+## Common Issues
+
+#### Players Don't Appear
+
+This can be due to incorrect rcon setup or missing launch options. Check [Necessary Setup](#necessary-setup) section above to make sure these are correct.
+
+#### Players and Games Aren't Being Logged
+
+This can be caused by HUDs and configs which modify the `con_logfile` variable. TFView requires this to be set to `console.log` in order to read the output of certain commands. To check whether this is the issue, load into a game and check what `con_logfile` is in the console. It is a problem if it is anything other than `console.log`. To fix this, either remove the HUD/config causing this issue, or edit it to reset `con_logfile` back to `console.log` after it is done changing it.
+
 ## Development
 
 This project features two parts, a frontend written in [svelte](https://svelte.dev/) and a backend in typescript which is turned into an executable via [bun](https://bun.com/). There is also a small updater in the backend which handles the final stages of updating, written in C++. The backend records data to a sqlite database located at `[HOME]/.tfview/history.sqlite`. This database is used regardless of whether you're using the development or release version, so if you doing something risky you may want to take a backup.
