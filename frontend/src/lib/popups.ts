@@ -14,6 +14,12 @@ export interface ConfirmOptions {
     onCancel?: () => void;
 }
 
+export interface SelectOptions {
+    title: string;
+    options: { value: string, label: string }[];
+    onConfirm: (choice: string) => void;
+}
+
 export interface PopupArguments {
     player: Player;
     game: number;
@@ -21,6 +27,7 @@ export interface PopupArguments {
     profilePicture: { hash: string, name: string };
     input: InputOptions;
     confirm: ConfirmOptions;
+    select: SelectOptions;
     friends: { name: string, id3: string };
     sourceBans: { name: string, id3: string };
 }

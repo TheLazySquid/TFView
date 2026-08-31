@@ -15,6 +15,11 @@ export interface FriendsPrivate { status: "private" }
 export interface FriendsSuccess { status: "success", friends: PastPlayer[] }
 export type FriendsResult = FriendsError | FriendsPrivate | FriendsSuccess;
 
+export interface NewProfile { action: "new", name: string };
+export interface OverwriteProfile { action: "overwrite", id: string };
+export interface DiscardChanges { action: "discard" };
+export type CasualChangedAction = NewProfile | OverwriteProfile | DiscardChanges;
+
 // Sending messages from the backend
 export type SentMessage<Channel, Data> = { channel: Channel, data: Data };
 
@@ -43,7 +48,8 @@ export enum Message {
     UserFriendIds,
     UpdateProgress,
     InstallingUpdate,
-    UpdateDone
+    UpdateDone,
+    CasualSelectionChanged
 }
 
 export type MessageTypes =
@@ -72,6 +78,7 @@ export type MessageTypes =
     | SentMessage<Message.UpdateProgress, number>
     | SentMessage<Message.InstallingUpdate, void>
     | SentMessage<Message.UpdateDone, void>
+    | SentMessage<Message.CasualSelectionChanged, boolean>
     | SentMessage<`list-${string}-addStart`, any>
     | SentMessage<`list-${string}-update`, { id: any, update: any }>
     | SentMessage<`list-${string}-delete`, any>
@@ -111,7 +118,8 @@ export enum Recieves {
     WantsToUpdate,
     GetFriends,
     GetSourcebans,
-    PlayDemo
+    PlayDemo,
+    HandleCasualChanged
 }
 
 export type RecievesTypes = 
@@ -146,6 +154,7 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.GetFriends, string, FriendsResult>
     | RecievedMessage<Recieves.GetSourcebans, string, SourceBanInfo[] | null>
     | RecievedMessage<Recieves.PlayDemo, string, boolean>
+    | RecievedMessage<Recieves.HandleCasualChanged, CasualChangedAction>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
 export type ExtractRecieves<C extends RecievesTypes["channel"]> = Extract<RecievesTypes, RecievedMessage<C, any, any>>;

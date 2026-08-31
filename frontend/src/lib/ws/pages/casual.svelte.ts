@@ -7,6 +7,7 @@ export default new class Casual {
 	selectedProfileId = $state("");
 	selectedProfile?: CasualProfile = $state();
 	selection: bigint[] = $state(new Array(8).fill(0n));
+	selectionManuallyChanged = $state(false);
 	
 	constructor() {
 		WS.on(Message.CasualConfig, (config) => {
@@ -18,6 +19,10 @@ export default new class Casual {
 
 			if(!selected) return;
 			this.selection = selected.selection.map(BigInt);
+		});
+
+		WS.on(Message.CasualSelectionChanged, (changed) => {
+			this.selectionManuallyChanged = changed;
 		});
 	}
 }

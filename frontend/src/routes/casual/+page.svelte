@@ -12,6 +12,9 @@
     import Popups from "$lib/popups";
     import type { CasualProfile } from "$types/data";
     import ConfirmPopup from "$lib/components/popups/ConfirmPopup.svelte";
+	import * as Dialog from "$lib/components/ui/dialog";
+    import SelectPopup from "$lib/components/popups/SelectPopup.svelte";
+    import { Button } from "$lib/components/ui/button";
 
 	const updateProfile = () => {
 		if(!Casual.selectedProfile) return;
@@ -78,6 +81,25 @@
 		updateProfile();
 	}
 
+	const createNewWithChanges = () => {
+		Popups.open("input", {
+			title: "Create New Casual Profile",
+			callback: (name) => {
+				WS.send(Recieves.HandleCasualChanged, { action: "new", name });
+			}
+		});
+	}
+
+	const overwriteWithChanges = () => {
+		Popups.open("select", {
+			title: "Select Profile to Overwrite",
+			options: Casual.profiles.map((p) => ({ value: p.id, label: p.name })),
+			onConfirm: (id) => {
+				WS.send(Recieves.HandleCasualChanged, { action: "overwrite", id });
+			}
+		});
+	}
+
 	WS.init("casual");
 </script>
 
@@ -87,6 +109,25 @@
 
 <InputPopup />
 <ConfirmPopup />
+<SelectPopup />
+
+<Dialog.Root open={Casual.selectionManuallyChanged}>
+	<Dialog.Content class="z-50" escapeKeydownBehavior="ignore" interactOutsideBehavior="ignore">
+		<Dialog.Title>Casual Selection Changed Externally</Dialog.Title>
+		<div>
+			It seems like your casual map selection has been updated outside of TFView. What do you want to do with the changes?
+		</div>
+		<Button class="text-white" onclick={createNewWithChanges}>
+			Create New Profile
+		</Button>
+		<Button class="text-white" onclick={overwriteWithChanges}>
+			Overwrite Profile
+		</Button>
+		<Button class="text-white" onclick={() => WS.send(Recieves.HandleCasualChanged, { action: "discard" })}>
+			Discard External Changes
+		</Button>
+	</Dialog.Content>
+</Dialog.Root>
 
 <div class="max-h-full flex overflow-y-auto">
 	<div class="flex justify-end sticky top-0" style="width: max(270px, calc((100% - 630px) / 2));">
