@@ -201,6 +201,18 @@ export default class SteamApi {
 				const playerdata = HistoryDatabase.getPlayerData(id);
 				if(playerdata) friends.push(playerdata);
 			}
+
+			// Request missing avatars with low priority
+			for(const friend of friends) {
+				if(friend.avatarHash) continue;
+
+				const id = friend.id;
+				SteamApi.getSummary(id, (summary) => {
+					Server.send("pastplayer", Message.PastPlayerUpdate, {
+						id, ...summary
+					});
+				}, true);
+			}
 	
 			return { status: "success", friends };
 		} catch(e) {

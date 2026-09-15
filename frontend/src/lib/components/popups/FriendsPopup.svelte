@@ -6,10 +6,12 @@
     import Nameplate from "../player/Nameplate.svelte";
     import Game from "$lib/ws/pages/game.svelte";
     import WS from "$lib/ws/wsclient.svelte";
-    import { Recieves, type FriendsResult } from "$types/messages";
+    import { Message, Recieves, type FriendsResult } from "$types/messages";
+    import { onDestroy } from "svelte";
+    import type { PastPlayer } from "$types/data";
 
     let name = $state.raw("");
-    let friends: FriendsResult | null = $state.raw(null);
+    let friends: FriendsResult | null = $state(null);
 
     const onOpen = (opts: PopupArguments["friends"]) => {
         name = opts.name;
@@ -19,6 +21,19 @@
             .then(f => friends = f);
 
         return opts.name;
+    }
+
+    WS.on(Message.PastPlayerUpdate, onUpdate);
+    onDestroy(() => WS.off(Message.PastPlayerUpdate, onUpdate));
+
+    function onUpdate(data: Partial<PastPlayer> & { id: string }) {
+        if(!friends || friends.status !== "success") return;
+        
+        const updateFriend = friends.friends.find((f) => f.id === data.id);
+        for(const key in data) {
+            // @ts-expect-error
+            updateFriend[key] = data[key];
+        }
     }
 </script>
 
