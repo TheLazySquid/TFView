@@ -30,7 +30,6 @@ export interface SettingsType {
     highlightUser: boolean;
     friendColor: string;
     highlightFriends: boolean;
-    masterbaseKey?: string;
     casual?: CasualConfig;
     launchTf2OnStart: boolean;
     openUiOnStart: boolean;

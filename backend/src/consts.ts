@@ -12,7 +12,6 @@ export const friendCheckInterval = 1000 * 60 * 60; // 1 hour
 export const flags = {
     fakeData: false,
     noNet: false,
-    noMAC: false,
     noSteamApi: false,
     noUpdateCheck: false
 }
@@ -27,7 +26,6 @@ for(const arg of Bun.argv) {
 
 // Disable both MAC and steamApi if noNet or fakeData is set
 if(flags.noNet || flags.fakeData) {
-    flags.noMAC = true;
     flags.noSteamApi = true;
     flags.noUpdateCheck = true;
 }

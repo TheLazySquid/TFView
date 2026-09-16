@@ -14,7 +14,6 @@
     import InputPopup from "$lib/components/popups/InputPopup.svelte";
     import type { Component } from "svelte";
     import SteamKeyInfo from "$lib/components/settings/SteamKeyInfo.svelte";
-    import MACInfo from "$lib/components/settings/MACInfo.svelte";
     import SteamHistoryInfo from "$lib/components/settings/SteamHistoryInfo.svelte";
     import LeaveVisibleInfo from "$lib/components/settings/LeaveVisibleInfo.svelte";
     import ComponentPopup, { show } from "$lib/components/popups/ComponentPopup.svelte";
@@ -36,7 +35,6 @@
         { name: "RCON Port", id: "rconPort", type: "number" },
         { name: "RCON Password", id: "rconPassword", type: "password" },
         { name: "Steam API Key", id: "steamApiKey", type: "password", moreInfo: SteamKeyInfo },
-        { name: "MegaAntiCheat API Key", id: "masterbaseKey", type: "password", moreInfo: MACInfo },
         { name: "SteamHistory API Key", id: "steamhistoryApiKey", type: "password", moreInfo: SteamHistoryInfo }
     ]
 
