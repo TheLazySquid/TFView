@@ -33,6 +33,10 @@ jobs:
       - name: Install required packages
         if: matrix.os == 'ubuntu-latest'
         run: sudo apt-get update && sudo apt-get install -y make pkg-config libgtk-3-dev libappindicator3-dev
+      
+      - name: Install required packages
+        if: matrix.os == 'windows-2022'
+        run: python3 -m pip install setuptools
 
       - name: Install dependencies
         run: bun i --frozen-lockfile
