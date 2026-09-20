@@ -8,14 +8,27 @@ await Settings.init();
 
 const tfPath = Settings.get("tfPath");
 const stringsPath = join(tfPath, "resource", "tf_english.txt");
-const itemsPath = join(tfPath, "scripts", "items", "items_game.txt");
 
 // The files are in different encodings, for some reason
 const stringsBuffer = await readFile(stringsPath, "utf16le");
-const itemsBuffer = await readFile(itemsPath, "utf-8");
-
 const strings = parse<any>(stringsBuffer).lang.Tokens;
-const items = parse<any>(itemsBuffer).items_game;
+
+let schemaText: string;
+if(process.argv.includes("-R")) {
+	const apiKey = Settings.get("steamApiKey");
+	if(!apiKey) throw new Error("Trying to fetch schema but no Steam API key available");
+
+	const res = await fetch(`https://api.steampowered.com/IEconItems_440/GetSchemaOverview/v0001/?key=${apiKey}`);
+	const json = await res.json();
+	
+	const schemaRes = await fetch(json.result.items_game_url);
+	schemaText = await schemaRes.text();
+} else {
+	const itemsPath = join(tfPath, "scripts", "items", "items_game.txt");
+	schemaText = await readFile(itemsPath, "utf-8");
+}
+
+const items = parse<any>(schemaText).items_game;
 
 // Get information about the maps
 const mapInfo: Record<string, CasualMap> = {};
