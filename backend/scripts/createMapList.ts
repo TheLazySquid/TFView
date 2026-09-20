@@ -19,7 +19,7 @@ if(process.argv.includes("-R")) {
 	if(!apiKey) throw new Error("Trying to fetch schema but no Steam API key available");
 
 	const res = await fetch(`https://api.steampowered.com/IEconItems_440/GetSchemaOverview/v0001/?key=${apiKey}`);
-	const json = await res.json();
+	const json = await res.json() as any;
 	
 	const schemaRes = await fetch(json.result.items_game_url);
 	schemaText = await schemaRes.text();
