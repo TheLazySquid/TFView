@@ -9,7 +9,7 @@ export const mapBits = [
     4294967295n,
     4294967295n,
     4294967295n,
-    1n,
+    127n,
 ];
 
 export const casualMaps: CasualMapCategory[] = [
@@ -35,6 +35,7 @@ export const casualMaps: CasualMapCategory[] = [
             { name: "Mossrock", bit: 6n, number: 3 },
             { name: "Mountain Lab", bit: 3n, number: 1 },
             { name: "Overgrown", bit: 25n, number: 5 },
+            { name: "Premuda", bit: 5n, number: 7 },
             { name: "Snowplow", bit: 22n, number: 1 },
             { name: "Steel", bit: 19n, number: 0 },
             { name: "Sulfur", bit: 23n, number: 4 },
@@ -71,6 +72,7 @@ export const casualMaps: CasualMapCategory[] = [
             { name: "Granary", bit: 4n, number: 0 },
             { name: "Gullywash", bit: 6n, number: 0 },
             { name: "Metalworks", bit: 16n, number: 1 },
+            { name: "Mojave", bit: 6n, number: 7 },
             { name: "Powerhouse", bit: 24n, number: 1 },
             { name: "Process", bit: 14n, number: 1 },
             { name: "Reckoner", bit: 22n, number: 4 },
@@ -91,8 +93,10 @@ export const casualMaps: CasualMapCategory[] = [
             { name: "Boardwalk", bit: 17n, number: 6 },
             { name: "Brazil", bit: 10n, number: 3 },
             { name: "Cachoeira", bit: 24n, number: 5 },
+            { name: "Camp Saxton", bit: 2n, number: 7 },
             { name: "Cascade", bit: 3n, number: 4 },
             { name: "Demolition", bit: 20n, number: 6 },
+            { name: "Dryfield", bit: 1n, number: 7 },
             { name: "Harvest", bit: 28n, number: 0 },
             { name: "Highpass", bit: 27n, number: 1 },
             { name: "Kong King", bit: 12n, number: 1 },
@@ -106,6 +110,7 @@ export const casualMaps: CasualMapCategory[] = [
             { name: "Rotunda", bit: 18n, number: 4 },
             { name: "Sawmill", bit: 24n, number: 0 },
             { name: "Sharkbay", bit: 17n, number: 4 },
+            { name: "Shorelight", bit: 3n, number: 7 },
             { name: "Snowtower", bit: 11n, number: 5 },
             { name: "Suijin", bit: 25n, number: 1 },
             { name: "Viaduct", bit: 8n, number: 0 },
@@ -149,6 +154,7 @@ export const casualMaps: CasualMapCategory[] = [
             { name: "Hightower", bit: 0n, number: 1 },
             { name: "Nightfall", bit: 7n, number: 1 },
             { name: "Pipeline", bit: 22n, number: 0 },
+            { name: "Redwood", bit: 4n, number: 7 },
         ]
     },
     {

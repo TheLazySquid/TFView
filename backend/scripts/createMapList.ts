@@ -69,7 +69,7 @@ const categories = Object.values(types).flat();
 for(const category of categories) {
 	for(const map of category.maps) {
 		const mapMask = masks[map.number];
-		if(!mapMask) throw new Error(`Map ${map.name} has an invalid number ${map.number}`);
+		if(mapMask === undefined) throw new Error(`Map ${map.name} has an invalid number ${map.number}`);
 		
 		const mask = 1n << map.bit;
 		if((mapMask & mask) > 0n) {
