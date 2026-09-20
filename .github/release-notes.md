@@ -1,3 +1,4 @@
+* Added a tfview icon to the systray
 * Updated list of casual maps
 * Added option to enable time alive column in game 
 * tfview/respawned.cfg is automatically `exec`'d when respawning
