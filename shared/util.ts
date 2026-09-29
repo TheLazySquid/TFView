@@ -18,7 +18,7 @@ export function resolveSteamId(input: string) {
     }
     
     if(input.startsWith(steamProfilesUrl)) {
-        return toNumberStringOrNull(input.slice(steamProfilesUrl.length).split("/", 1)[0]);
+        return toNumberStringOrNull(input.slice(steamProfilesUrl.length).split("/", 1)[0]!);
     }
 
     if(!isStringNumber(input)) return null;
