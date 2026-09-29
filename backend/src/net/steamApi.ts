@@ -12,6 +12,7 @@ import { Message, Recieves, type FriendsResult } from "$types/messages";
 import { getCurrentUserId } from "$src/util";
 import { BatchRequester } from "./batchRequester";
 import GameMonitor from "$src/game/monitor";
+import { steamVanityUrl } from "$shared/consts";
 
 export default class SteamApi {
 	static apiBase = "https://api.steampowered.com/"
@@ -90,7 +91,7 @@ export default class SteamApi {
 	// The steam api allegedly has a ratelimit of 100k/day but it seems like steam will randomly
 	// decide to shadowban you and just make 90% of your requests return 429s
 	// It is unclear what triggers this or whether it ever goes away
-	static getSummary(id3: string, callback: (summary: PlayerSummary) => void, deprioritize = false) {
+	static getSummary(id3: string, callback: (summary: PlayerSummary) => void, deprioritize = false, onFail?: () => void) {
 		const id64 = id3ToId64(id3);
 
 		// Check if we have the summary stored
@@ -122,7 +123,7 @@ export default class SteamApi {
 					const summary = this.processSteamSummary(id3, steamSummary);
 					HistoryDatabase.setPlayerSummary(id3, summary)
 					callback(summary);
-				}, () => {});
+				}, () => onFail?.());
 			}
 		} else if(shouldQuery) {
 			if(deprioritize && this.summaryRequester.batchFull) return;
@@ -132,7 +133,7 @@ export default class SteamApi {
 				const summary = this.processSteamSummary(id3, steamSummary);
 				HistoryDatabase.setPlayerSummary(id3, summary)
 				callback(summary);
-			}, () => {});
+			}, () => onFail?.());
 		}
 	}
 
@@ -227,10 +228,11 @@ export default class SteamApi {
 	static lastVanityLookup: string | null = null;
 	static lastVanityPromise: Promise<string | null>;
 	static async resolveVanityUrl(url: string) {
-		if(url === this.lastVanityLookup) return this.lastVanityPromise;
+		const slug = url.slice(steamVanityUrl.length).split("/", 1)[0]!;
+		if(slug === this.lastVanityLookup) return this.lastVanityPromise;
 
-		const promise = this.runResolveVanityUrl(url);
-		this.lastVanityLookup = url;
+		const promise = this.runResolveVanityUrl(slug);
+		this.lastVanityLookup = slug;
 		this.lastVanityPromise = promise;
 		return promise;
 	}

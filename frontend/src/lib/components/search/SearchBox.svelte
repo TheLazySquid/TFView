@@ -11,9 +11,10 @@
         list: InfiniteList<any, any>;
         children: Snippet;
         defaultParams?: Record<string, any>;
+        buttons?: Snippet;
     }
 
-    let { title, list, singular, plural, children, defaultParams = {} }: Props = $props();
+    let { title, list, singular, plural, children, buttons, defaultParams = {} }: Props = $props();
     setContext("searchList", list);
 </script>
 
@@ -28,5 +29,7 @@
         {#if list.total !== undefined}
             <div>{list.total} total {list.total === 1 ? singular : plural}</div>
         {/if}
+        <div class="grow"></div>
+        {@render buttons?.()}
     </div>
 </div>

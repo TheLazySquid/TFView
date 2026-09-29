@@ -3,6 +3,7 @@ import type { Player } from "$types/lobby";
 export interface InputOptions {
     title: string;
     defaultValue?: string;
+    description?: string;
     textarea?: boolean;
     callback: (value: string) => void;
 }
@@ -30,6 +31,7 @@ export interface PopupArguments {
     select: SelectOptions;
     friends: { name: string, id3: string };
     sourceBans: { name: string, id3: string };
+    createPlayer: undefined;
 }
 
 interface PopupReturned {

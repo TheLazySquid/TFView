@@ -27,7 +27,7 @@
     onDestroy(() => WS.off(Message.PastPlayerUpdate, onUpdate));
 
     function onUpdate(data: Partial<PastPlayer> & { id: string }) {
-        if(!friends || friends.status !== "success") return;
+        if(friends?.status !== "success") return;
         
         const updateFriend = friends.friends.find((f) => f.id === data.id);
         for(const key in data) {

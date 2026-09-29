@@ -1,14 +1,10 @@
 import Settings from "$src/settings/settings";
 import { join } from "node:path";
-import fsp from "node:fs/promises";
-import fs from "node:fs";
 import Log from "$src/log";
 import { EventEmitter } from "node:events";
 import Rcon from "$src/game/rcon";
-import { flags } from "$src/consts";
 import Server from "$src/net/server";
 import { Recieves } from "$types/messages";
-import Close from "$src/close";
 import { watch, type FSWatcher } from "chokidar";
 import { basename } from "node:path";
 import { exists } from "$src/util";

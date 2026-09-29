@@ -1,1 +1,1 @@
-* Removed systray integration while issues are being investigated
+* Added option to manually add player to history

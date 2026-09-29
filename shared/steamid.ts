@@ -1,6 +1,8 @@
 // Slimmed down version of node-steamid, only needs to work with players
+export const id64Flags = (1n << 56n) | (1n << 52n) | (1n << 32n);
+
 export function id3ToId64(id3: string) {
-    const int = (1n << 56n) | (1n << 52n) | (1n << 32n) | BigInt(id3);
+    const int = id64Flags | BigInt(id3);
     return int.toString();
 }
 

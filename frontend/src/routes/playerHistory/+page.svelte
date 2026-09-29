@@ -1,4 +1,5 @@
 <script lang="ts">
+    import type { PastPlayer } from "$types/data";
     import Avatar from "$lib/components/player/Avatar.svelte";
     import PlayerHistory from "$lib/ws/pages/playerHistory.svelte";
     import InfiniteLoading from "svelte-infinite-loading";
@@ -12,9 +13,11 @@
     import WS from "$lib/ws/wsclient.svelte";
     import { formatDate } from "$lib/utils";
     import ReturnToTop from "$lib/components/history/ReturnToTop.svelte";
-    import type { PastPlayer } from "$types/data";
     import UserFriends from "$lib/ws/topics/userFriends.svelte";
     import PlayerPopups from "$lib/components/popups/PlayerPopups.svelte";
+    import { Button } from "$lib/components/ui/button";
+    import { Recieves } from "$types/messages";
+    import { toast } from "svelte-sonner";
 
     WS.init("playerhistory");
 
@@ -26,6 +29,23 @@
             }
         }
         return "";
+    }
+
+    function createPlayer() {
+        Popups.open("input", {
+            callback: async (input) => {
+                const result = await WS.sendAndRecieve(Recieves.CreatePlayer, input);
+                
+                if(result.status === "error") {
+                    toast.error(result.message);
+                } else {
+                    toast.success("Successfully created player record");
+                    Popups.open("pastPlayer", result.id);
+                }
+            },
+            title: "Create Player Record",
+            description: "Enter player ID or profile URL"
+        });
     }
 </script>
 
@@ -64,6 +84,9 @@
                 lastSeen: "Last Seen",
                 encounters: "Times Encountered"
             }} />
+            {#snippet buttons()}
+                <Button class="text-white" onclick={createPlayer}>Add Player</Button>
+            {/snippet}
         </Search.SearchBox>
         <table class="w-full">
             <thead class="sticky top-0 bg-background">

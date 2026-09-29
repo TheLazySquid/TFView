@@ -8,13 +8,12 @@ import Log from "$src/log";
 import { createFakeHistory } from "$src/fakedata/history";
 import { InfiniteList } from "$src/net/infiniteList";
 import Server from "$src/net/server";
-import { Message, Recieves } from "$types/messages";
+import { Message, Recieves, type CreateUserResult } from "$types/messages";
 import type { Player, PlayerSummary } from "$types/lobby";
-import { id64ToId3 } from "$shared/steamid";
 import SteamApi from "$src/net/steamApi";
 import Close from "$src/close";
-import { steamProfilesUrl, steamVanityUrl } from "$shared/consts";
-import { isStringNumber } from "$shared/util";
+import { steamVanityUrl } from "$shared/consts";
+import { resolveSteamId } from "$shared/util";
 import Mutes from "$src/game/mutes";
 
 interface CountResult {
@@ -58,6 +57,21 @@ export default class HistoryDatabase {
         Server.on(Recieves.GetPlayer, (id, { reply }) => {
             const data = this.getPlayerData(id);
             reply(data);
+        });
+
+        Server.on(Recieves.CreatePlayer, async (input, { reply }) => {
+            if(input.startsWith(steamVanityUrl)) {
+                const id = await SteamApi.resolveVanityUrl(input);
+
+                if(!id) reply({ status: "error", message: "Could not resolve vanity URL" });
+                else reply(await this.createPlayerFromId(id));
+            } else {
+                const id = resolveSteamId(input);
+                
+                if(!id) reply({ status: "error", message: "Invalid Steam ID" });
+                else reply(await this.createPlayerFromId(id));
+            }
+
         });
 
         Close.on("close", () => this.db.close());
@@ -212,25 +226,17 @@ export default class HistoryDatabase {
         
         if(params.name) {
             // Allow searches for id64, id3, name, or profile url
-            if(params.name.startsWith("[U:1:")) {
-                const id3 = params.name.slice(5, -1);
-                if(isStringNumber(id3)) params.id3 = id3;
-            } else if(isStringNumber(params.name)) {
-                params.id64 = id64ToId3(params.name);
-                params.id3 = params.name;
-            } else if(params.name.startsWith(steamProfilesUrl)) {
-                const id64 = params.name.slice(steamProfilesUrl.length).split("/", 1)[0]!;
-                if(isStringNumber(id64)) params.id64 = id64ToId3(id64);
-            } else if(params.name.startsWith(steamVanityUrl)) {
-                const vanity = params.name.slice(steamVanityUrl.length).split("/", 1)[0]!;
-                const resolved = await SteamApi.resolveVanityUrl(vanity);
-                if(resolved) params.id64 = resolved;
+            if(params.name.startsWith(steamVanityUrl)) {
+                const resolved = await SteamApi.resolveVanityUrl(params.name);
+                if(resolved) params.id = resolved;
+            } else {
+                const resolved = resolveSteamId(params.name);
+                if(resolved) params.id = resolved;
             }
 
             let clause = `(names LIKE "%${this.escapeLike(params.name, true)}%" ESCAPE '\\'` +
                 ` OR nickname LIKE "%${this.escapeLike(params.name)}%" ESCAPE '\\'`;
-            if(params.id3) clause += ` OR id = $id3`;
-            if(params.id64) clause += ` OR id = $id64`;
+            if(params.id) clause += ` OR id = $id`;
             clause += ")";
 
             whereClauses.push(clause);
@@ -450,6 +456,47 @@ export default class HistoryDatabase {
             demos: JSON.stringify(game.demos),
             rowid: game.rowid
         });
+    }
+
+    static createPlayerFromId(id: string): Promise<CreateUserResult> {
+        return new Promise<CreateUserResult>((res) => {
+            const existing = this.getPlayerData(id);
+            if(existing) {
+                res({ status: "error", message: "Player already exists" });
+                return;
+            }
+
+            SteamApi.getSummary(id, (summary) => {
+                const now = Date.now();
+        
+                this.db.query(`INSERT INTO players (id, lastSeen, lastName, names, avatars, avatarHash, encounters)
+                    VALUES($id, $lastSeen, $lastName, $names, $avatars, $avatarHash, $encounters)`).run({
+                    id,
+                    lastSeen: now,
+                    lastName: summary.name,
+                    names: JSON.stringify([summary.name]),
+                    avatars: JSON.stringify([summary.avatarHash]),
+                    avatarHash: summary.avatarHash,
+                    encounters: 0
+                });
+
+                this.pastPlayers.addStart({
+                    id,
+                    lastSeen: now,
+                    lastName: summary.name,
+                    names: [summary.name],
+                    avatarHash: summary.avatarHash,
+                    avatars: [summary.avatarHash],
+                    tags: {},
+                    encounters: 0
+                });
+
+                res({ status: "success", id });
+            }, false, () => {
+                res({ status: "error", message: "Failed to fetch player summary" });
+            });
+        });
+
     }
 
     static recordPlayerEncounter(player: Player, game: CurrentGame) {

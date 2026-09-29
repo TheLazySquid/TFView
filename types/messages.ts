@@ -20,6 +20,10 @@ export interface OverwriteProfile { action: "overwrite", id: string };
 export interface DiscardChanges { action: "discard" };
 export type CasualChangedAction = NewProfile | OverwriteProfile | DiscardChanges;
 
+export interface CreateUserSuccess { status: "success", id: string };
+export interface CreateUserError { status: "error", message: string };
+export type CreateUserResult = CreateUserSuccess | CreateUserError;
+
 // Sending messages from the backend
 export type SentMessage<Channel, Data> = { channel: Channel, data: Data };
 
@@ -119,7 +123,8 @@ export enum Recieves {
     GetFriends,
     GetSourcebans,
     PlayDemo,
-    HandleCasualChanged
+    HandleCasualChanged,
+    CreatePlayer
 }
 
 export type RecievesTypes = 
@@ -155,6 +160,7 @@ export type RecievesTypes =
     | RecievedMessage<Recieves.GetSourcebans, string, SourceBanInfo[] | null>
     | RecievedMessage<Recieves.PlayDemo, string, boolean>
     | RecievedMessage<Recieves.HandleCasualChanged, CasualChangedAction>
+    | RecievedMessage<Recieves.CreatePlayer, string, CreateUserResult>
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
 export type ExtractRecieves<C extends RecievesTypes["channel"]> = Extract<RecievesTypes, RecievedMessage<C, any, any>>;

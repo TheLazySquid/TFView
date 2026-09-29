@@ -33,6 +33,9 @@
     <Dialog.Header>
         <Dialog.Title>{options?.title}</Dialog.Title>
     </Dialog.Header>
+    {#if options?.description}
+        <div>{options.description}</div>
+    {/if}
     {#if options?.textarea}
         <textarea class="resize-y p-1 h-[200px] outline not-focus:outline-zinc-600" bind:value={value}></textarea>
     {:else}

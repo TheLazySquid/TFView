@@ -23,7 +23,7 @@
         popup.closePopup();
     }
 
-    let selectedLabel = $derived(options!?.options.find((o) => o.value === selectedValue)?.label ?? "Select Option");
+    let selectedLabel = $derived.by(() => options?.options.find((o) => o.value === selectedValue)?.label ?? "Select Option");
 </script>
 
 <Popup type="select" {onOpen} overlay={true} bind:this={popup}>

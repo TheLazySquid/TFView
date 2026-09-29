@@ -119,7 +119,7 @@ export interface CurrentServerInfo {
 
 export interface PlayerSummary {
     avatarHash: string;
-    avatars: string[]
+    avatars: string[];
     createdTimestamp: number;
     name: string;
 }

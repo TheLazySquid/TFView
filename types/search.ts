@@ -7,8 +7,7 @@ export interface GameSearchParams {
 
 export interface PlayerSearchParams {
     name?: string;
-    id64?: string;
-    id3?: string;
+    id?: string;
     tags: Record<string, boolean>;
     after?: number;
     before?: number;
