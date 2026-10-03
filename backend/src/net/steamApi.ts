@@ -14,6 +14,13 @@ import { BatchRequester } from "./batchRequester";
 import GameMonitor from "$src/game/monitor";
 import { steamVanityUrl } from "$shared/consts";
 
+interface GetSummaryOptions {
+	forceQuery?: boolean;
+	deprioritize?: boolean;
+	onFail?: () => void;
+	updateDatabase?: boolean;
+}
+
 export default class SteamApi {
 	static apiBase = "https://api.steampowered.com/"
 	static summaryRequester: BatchRequester<SteamPlayerSummary>;
@@ -91,7 +98,7 @@ export default class SteamApi {
 	// The steam api allegedly has a ratelimit of 100k/day but it seems like steam will randomly
 	// decide to shadowban you and just make 90% of your requests return 429s
 	// It is unclear what triggers this or whether it ever goes away
-	static getSummary(id3: string, callback: (summary: PlayerSummary) => void, deprioritize = false, onFail?: () => void) {
+	static getSummary(id3: string, callback: (summary: PlayerSummary) => void, options: GetSummaryOptions = {}) {
 		const id64 = id3ToId64(id3);
 
 		// Check if we have the summary stored
@@ -105,8 +112,13 @@ export default class SteamApi {
 		}
 
 		const shouldQuery = !flags.noSteamApi && Settings.get("steamApiKey");
+		const onSummary = (steamSummary: SteamPlayerSummary) => {
+			const summary = this.processSteamSummary(id3, steamSummary);
+			if(options.updateDatabase !== false) HistoryDatabase.setPlayerSummary(id3, summary);
+			callback(summary);
+		}
 
-		if(playerData?.avatarHash && playerData.createdTimestamp) {
+		if(!options.forceQuery && playerData?.avatarHash && playerData.createdTimestamp) {
 			callback({
 				avatarHash: playerData.avatarHash,
 				avatars,
@@ -116,24 +128,16 @@ export default class SteamApi {
 
 			if(shouldQuery) {
 				// If the query isn't priority don't start a second batch of summaries
-				if(deprioritize && this.summaryRequester.batchFull) return;
+				if(options.deprioritize && this.summaryRequester.batchFull) return;
 
 				// This query will probably happen on its own, but just in case it doesn't
-				this.summaryRequester.request(id64, 30000).then((steamSummary) => {
-					const summary = this.processSteamSummary(id3, steamSummary);
-					HistoryDatabase.setPlayerSummary(id3, summary)
-					callback(summary);
-				}, () => onFail?.());
+				this.summaryRequester.request(id64, 30000).then(onSummary, () => options.onFail?.());
 			}
 		} else if(shouldQuery) {
-			if(deprioritize && this.summaryRequester.batchFull) return;
+			if(options.deprioritize && this.summaryRequester.batchFull) return;
 	
 			// Let summaries accumilate if there's multiple in the same event loop
-			this.summaryRequester.request(id64, 0).then((steamSummary) => {
-				const summary = this.processSteamSummary(id3, steamSummary);
-				HistoryDatabase.setPlayerSummary(id3, summary)
-				callback(summary);
-			}, () => onFail?.());
+			this.summaryRequester.request(id64, 0).then(onSummary, () => options.onFail?.());
 		}
 	}
 
@@ -212,7 +216,7 @@ export default class SteamApi {
 					Server.send("pastplayer", Message.PastPlayerUpdate, {
 						id, ...summary
 					});
-				}, true);
+				}, { deprioritize: true });
 			}
 	
 			return { status: "success", friends };

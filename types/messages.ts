@@ -20,7 +20,7 @@ export interface OverwriteProfile { action: "overwrite", id: string };
 export interface DiscardChanges { action: "discard" };
 export type CasualChangedAction = NewProfile | OverwriteProfile | DiscardChanges;
 
-export interface CreateUserSuccess { status: "success", id: string };
+export interface CreateUserSuccess { status: "success", alreadyExisted: boolean, id: string };
 export interface CreateUserError { status: "error", message: string };
 export type CreateUserResult = CreateUserSuccess | CreateUserError;
 

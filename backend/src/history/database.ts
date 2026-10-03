@@ -64,12 +64,12 @@ export default class HistoryDatabase {
                 const id = await SteamApi.resolveVanityUrl(input);
 
                 if(!id) reply({ status: "error", message: "Could not resolve vanity URL" });
-                else reply(await this.createPlayerFromId(id));
+                else reply(await this.createOrUpdatePlayer(id));
             } else {
                 const id = resolveSteamId(input);
                 
                 if(!id) reply({ status: "error", message: "Invalid Steam ID" });
-                else reply(await this.createPlayerFromId(id));
+                else reply(await this.createOrUpdatePlayer(id));
             }
 
         });
@@ -275,7 +275,7 @@ export default class HistoryDatabase {
                 Server.send("pastplayer", Message.PastPlayerUpdate, {
                     id, ...summary
                 });
-            }, true);
+            }, { deprioritize: true });
         }
 
         return parsed;
@@ -376,7 +376,11 @@ export default class HistoryDatabase {
                 avatars = $avatars WHERE id = $id`)
                 .run({ id, avatarHash, createdTimestamp, avatars: JSON.stringify(summary.avatars) });
 
-            this.pastPlayers.update(id, { avatarHash, createdTimestamp });
+            this.pastPlayers.update(id, {
+                avatarHash,
+                createdTimestamp,
+                avatars: summary.avatars
+            });
         } catch(e) {
             Log.error(`Failed to set user data for player ${id}`, e);
         }
@@ -447,7 +451,6 @@ export default class HistoryDatabase {
             rowid
         });
 
-        console.log("Updating:", rowid, hostname, ip);
         this.pastGames.update(rowid, { hostname, ip });
     }
 
@@ -458,15 +461,34 @@ export default class HistoryDatabase {
         });
     }
 
-    static createPlayerFromId(id: string): Promise<CreateUserResult> {
+    static createOrUpdatePlayer(id: string): Promise<CreateUserResult> {
         return new Promise<CreateUserResult>((res) => {
-            const existing = this.getPlayerData(id);
-            if(existing) {
-                res({ status: "error", message: "Player already exists" });
-                return;
-            }
-
             SteamApi.getSummary(id, (summary) => {
+                const existing = this.getPlayerData(id);
+                if(existing) {
+                    const names = [...existing.names];
+                    if(!names.includes(summary.name)) names.push(summary.name);
+
+                    this.db.query(`UPDATE players SET avatarHash = $avatarHash, createdTimestamp = $createdTimestamp, 
+                        avatars = $avatars, names = $names WHERE id = $id`).run({
+                        avatarHash: summary.avatarHash,
+                        createdTimestamp: summary.createdTimestamp ?? -1,
+                        avatars: JSON.stringify(summary.avatars),
+                        names: JSON.stringify(names),
+                        id
+                    });
+
+                    this.pastPlayers.update(id, {
+                        avatarHash: summary.avatarHash,
+                        createdTimestamp: summary.createdTimestamp ?? -1,
+                        avatars: summary.avatars,
+                        names: names
+                    });
+
+                    res({ status: "success", id, alreadyExisted: true });
+                    return;    
+                }
+
                 const now = Date.now();
         
                 this.db.query(`INSERT INTO players (id, lastSeen, lastName, names, avatars, avatarHash, encounters)
@@ -491,9 +513,13 @@ export default class HistoryDatabase {
                     encounters: 0
                 });
 
-                res({ status: "success", id });
-            }, false, () => {
-                res({ status: "error", message: "Failed to fetch player summary" });
+                res({ status: "success", id, alreadyExisted: false });
+            }, {
+                forceQuery: true,
+                updateDatabase: false,
+                onFail: () => {
+                    res({ status: "error", message: "Failed to fetch player summary" });
+                }
             });
         });
 

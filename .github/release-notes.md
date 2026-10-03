@@ -1,1 +1,1 @@
-* Added option to manually add player to history
+* Made "add player" option also update name/avatar

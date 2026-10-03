@@ -39,7 +39,12 @@
                 if(result.status === "error") {
                     toast.error(result.message);
                 } else {
-                    toast.success("Successfully created player record");
+                    if(result.alreadyExisted) {
+                        toast.success("Successfully updated player record");
+                    } else {
+                        toast.success("Successfully created player record");
+                    }
+
                     Popups.open("pastPlayer", result.id);
                 }
             },
