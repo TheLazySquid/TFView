@@ -371,7 +371,7 @@ export default class GameMonitor {
                     diff.killstreak = 0;
 
                     if(diff.alive) {
-                        player.aliveSince = Date.now();
+                        diff.aliveSince = player.aliveSince = Date.now();
                         if(player.isUser) Rcon.run("exec tfview/respawned.cfg");
                     }
                 }
