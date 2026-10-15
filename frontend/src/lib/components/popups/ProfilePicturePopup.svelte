@@ -4,10 +4,17 @@
 
     let avatarHash = $state("");
     let playerName = $state("");
+    let showFullRes = $state(false);
 
     const onOpen = ({ hash, name }: { hash: string, name: string }) => {
         avatarHash = hash;
         playerName = name;
+        showFullRes = false;
+
+        const image = new Image();
+        image.src = `https://avatars.steamstatic.com/${hash}_full.jpg`;
+        image.addEventListener("load", () => showFullRes = true);
+
         return `${name}'s Profile Picture`;
     }
 </script>
@@ -15,7 +22,7 @@
 <Popup type="profilePicture" {onOpen} style="max-width: fit-content" overlay={true}>
     <Dialog.Header class="text-2xl verdana whitespace-nowrap">{ playerName }'s Profile Picture</Dialog.Header>
     <div class="w-full h-full flex items-center justify-center">
-        <img src={`https://avatars.steamstatic.com/${avatarHash}_full.jpg`}
+        <img src="https://avatars.steamstatic.com/{avatarHash}_{showFullRes ? "full" : "medium"}.jpg"
         class="w-[400px] h-[400px]" alt="Avatar" />
     </div>
 </Popup>
