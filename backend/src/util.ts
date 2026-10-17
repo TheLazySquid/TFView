@@ -17,8 +17,9 @@ export async function getCurrentUserId() {
 		let mostRecent = 0;
 	
 		for(const [id, data] of Object.entries<any>(vdf.users)) {
-			if(data.Timestamp > mostRecent) {
-				mostRecent = data.Timestamp;
+			const timestamp = data.Timestamp ?? data.timestamp;
+			if(timestamp > mostRecent) {
+				mostRecent = timestamp;
 				id64 = id;
 			}
 		}
