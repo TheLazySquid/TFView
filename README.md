@@ -109,9 +109,32 @@ This project features two parts, a frontend written in [svelte](https://svelte.d
 ### Setup
 
 1. Make sure you have [git](https://git-scm.com/) and [bun](https://bun.com/) installed.
-2. If you intent to distribute the executable, also install [make](https://www.gnu.org/software/make/) and [gcc](https://www.gnu.org/software/gcc/).
-3. Clone this repo with git and cd into it
-4. Run `bun install`
+   - On Debian/Ubuntu:
+      ```sh
+      sudo apt-get update && sudo apt-get install -y make git
+      curl -fsSL https://bun.sh/install | bash
+      ```
+   - On Arch:
+      ```sh
+      sudo pacman -Sy make git
+      curl -fsSL https://bun.sh/install | bash
+      ```
+   - Windows:
+      Follow the links above for git and bun
+2. On **Linux**, install GTK and appindicator. This is not needed on Windows
+   - On Debian/Ubuntu:
+      ```sh
+      sudo apt-get update && sudo apt-get install -y libgtk-3-dev libappindicator3-dev
+      ```
+   - On Arch:
+      ```sh
+      sudo pacman -Sy gtk3 libappindicator
+      ```
+   - If you already ran `bun install` before installing these packages, run `bun install --force` to rebuild the tray addon.
+
+3. If you intent to distribute the executable, also install [make](https://www.gnu.org/software/make/) and [gcc](https://www.gnu.org/software/gcc/).
+4. Clone this repo with git and cd into it
+5. Run `bun install`
 
 You'll then likely want to open a second terminal to run the frontend and backend simultaneously.
 

@@ -1,12 +1,13 @@
-import Tray from "ctray";
 import { join } from "node:path";
-import { root } from "./consts";
+import { isLinux, root } from "./consts";
 import open from "tiny-open";
 import { networkPort } from "$shared/consts";
 import Close from "./close";
 
-export default function createSystrayIcon() {
-    const iconPath = join(root, "static", "icon.ico");
+export default async function createSystrayIcon() {
+    const { default: Tray } = await import("ctray");
+    // IDK why but I could not get ico working
+    const iconPath = join(root, "static", isLinux ? "icon.png" : "icon.ico");
     const tray = new Tray(iconPath);
 
     tray.tooltip = "TFView";
