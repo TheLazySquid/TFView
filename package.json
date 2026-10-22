@@ -16,5 +16,8 @@
   ],
   "devDependencies": {
     "@biomejs/biome": "2.5.5"
+  },
+  "patchedDependencies": {
+    "ctray@1.0.0": "patches/ctray@1.0.0.patch"
   }
 }

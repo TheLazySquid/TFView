@@ -1,0 +1,62 @@
+diff --git a/src/linux/tray.cc b/src/linux/tray.cc
+index bf3911962f13670b816623872b1cef4b52c69cea..d5df4fc0afbca708e5113c20427167014c948209 100644
+--- a/src/linux/tray.cc
++++ b/src/linux/tray.cc
+@@ -29,10 +29,6 @@ class Tray : public NapiTray<Tray> {
+             NapiTrayItem *item = (NapiTrayItem*) info.Data();
+             Tray *t = (Tray*) g_object_get_data(G_OBJECT(item->itemPointer), "originPointer");
+ 
+-            bool separ = GTK_IS_SEPARATOR_MENU_ITEM(item->itemPointer);
+-            bool check = GTK_IS_CHECK_MENU_ITEM(item->itemPointer);
+-            bool menui = GTK_IS_MENU_ITEM(item->itemPointer);
+-
+             std::string updated = info[0].As<Napi::String>().Utf8Value();
+             if( updated.compare("text") == 0 ){
+                 if( GTK_IS_SEPARATOR_MENU_ITEM(item->itemPointer) ){
+@@ -83,7 +79,7 @@ class Tray : public NapiTray<Tray> {
+                 app_indicator_set_menu(t->indicator, GTK_MENU(PrepareMenu(info, t->menuref.Value(), t)));
+             }
+             else if( updated.compare("icon") == 0 ){
+-                app_indicator_set_icon(t->indicator, t->icon.c_str());
++                t->SetIndicatorIcon();
+             }
+             else if( updated.compare("tooltip") == 0 ){
+                 app_indicator_set_title(t->indicator, t->tooltip.c_str());
+@@ -96,12 +92,26 @@ class Tray : public NapiTray<Tray> {
+ 
+             indicator = app_indicator_new(id,icon.c_str(),APP_INDICATOR_CATEGORY_APPLICATION_STATUS);
+             app_indicator_set_status(indicator, APP_INDICATOR_STATUS_ACTIVE);
+-            app_indicator_set_icon(indicator, icon.c_str());
++            SetIndicatorIcon();
+             app_indicator_set_title(indicator, tooltip.c_str());
+             app_indicator_set_menu(indicator, GTK_MENU(PrepareMenu(info, menuref.Value(), this)));
+         }
+ 
+     private:
++        void SetIndicatorIcon(){
++            std::string iconPath = icon;
++            size_t separator = iconPath.find_last_of('/');
++            if( separator != std::string::npos ){
++                app_indicator_set_icon_theme_path(indicator, iconPath.substr(0, separator).c_str());
++                iconPath = iconPath.substr(separator + 1);
++            }
++            size_t extension = iconPath.find_last_of('.');
++            if( extension != std::string::npos ){
++                iconPath = iconPath.substr(0, extension);
++            }
++            app_indicator_set_icon(indicator, iconPath.c_str());
++        }
++
+         AppIndicator* indicator = nullptr;
+         char id[80] = "tray-indicator-id-nnnn";
+ };
+@@ -148,8 +158,7 @@ void* NapiTrayItem::PrepareItem(const Napi::CallbackInfo& info, void *origin){
+             gtk_menu_item_set_submenu(GTK_MENU_ITEM(item), GTK_WIDGET(PrepareMenu(info, menu, c->origin)));
+         }
+         else{
+-            item = gtk_check_menu_item_new_with_label(text.c_str());
+-            gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item), !!checked);
++            item = gtk_menu_item_new_with_label(text.c_str());
+             g_signal_connect(item, "activate", G_CALLBACK(_tray_menu_cb), c);
+         }
+         gtk_widget_set_sensitive(item, !disabled);
