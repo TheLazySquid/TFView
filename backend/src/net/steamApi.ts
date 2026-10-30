@@ -1,4 +1,4 @@
-import type { ResolvedVanityUrl, SteamFriendsList, SteamPlayerSummaries, SteamPlayerSummary } from "$types/apis";
+import type { ResolvedVanityUrl, SteamFriendsList, SteamPlayerSummaries, SteamPlayerSummary, SteamUGCFile } from "$types/apis";
 import type { PlayerSummary } from "$types/lobby";
 import { id3ToId64, id64ToId3 } from "$shared/steamid";
 import Settings from "$src/settings/settings";
@@ -41,6 +41,12 @@ export default class SteamApi {
 		Server.on(Recieves.GetFriends, async (id3, { reply }) => {
 			const friends = await this.getPlayerFriends(id3);
 			reply(friends);
+		});
+
+		Server.onRelay("resolve-ugc", async ({ id }) => {
+			Log.info("Resolving UGC file", id);
+			return this.query<SteamUGCFile>("ISteamRemoteStorage/GetUGCFileDetails/v1", { appid: 440, ugcid: id })
+				.catch(() => null);
 		});
 
 		Server.onConnect("userfriends", (respond) => {

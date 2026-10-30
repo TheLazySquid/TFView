@@ -33,6 +33,14 @@ export interface SteamFriendsList {
     }
 }
 
+export interface SteamUGCFile {
+    data: {
+        filename: string;
+        url: string;
+        size: number;
+    }
+}
+
 export interface ResolvedVanityUrl {
     response: {
         steamid?: string;

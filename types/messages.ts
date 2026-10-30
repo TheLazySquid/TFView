@@ -1,4 +1,4 @@
-import type { SourceBanInfo } from "./apis";
+import type { SourceBanInfo, SteamUGCFile } from "./apis";
 import type { CasualConfig, CasualProfile, GameDir, GameDirectories, PastPlayer, SettingsType, StoredPastGame } from "./data";
 import type { CurrentServerInfo, KickReason, Player } from "./lobby";
 
@@ -164,3 +164,7 @@ export type RecievesTypes =
     | RecievedMessage<`list-${string}`, { offset: number, params: any }, { total?: number, items: any[] }>
 
 export type ExtractRecieves<C extends RecievesTypes["channel"]> = Extract<RecievesTypes, RecievedMessage<C, any, any>>;
+
+export type RelayedMessage<Path, Data, Reply> = { path: Path, data: Data, replyType: Reply };
+export type RelayedMessageTypes = RelayedMessage<"resolve-ugc", { id: string }, SteamUGCFile | null>
+export type ExtractRelayed<P extends RelayedMessageTypes["path"]> = Extract<RelayedMessageTypes, RelayedMessage<P, any, any>>;

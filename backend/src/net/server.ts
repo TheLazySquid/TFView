@@ -1,5 +1,6 @@
+import type { ExtractMessage, ExtractRecieves, ExtractRelayed, MessageData, MessageTypes, Page, RecievesTypes, RelayedMessageTypes } from "$types/messages";
 import { networkPort } from "$shared/consts";
-import { Message, Recieves, type ExtractMessage, type ExtractRecieves, type MessageData, type MessageTypes, type Page, type RecievesTypes } from "$types/messages";
+import { Message, Recieves } from "$types/messages";
 import EventEmitter from "node:events";
 import { join } from "node:path";
 import Log from "../log";
@@ -27,7 +28,8 @@ const topics: Record<Page, Topic[]> = {
 }
 
 export default class Server {
-    static events = new EventEmitter();
+    static wsEvents = new EventEmitter();
+    static relayHandlers = new Map<string, (data: any) => Promise<any>>();
     static staticPath = join(root, "static");
     static server: Bun.Server<{ page: Page }>;
     static setupMode = false;
@@ -56,6 +58,24 @@ export default class Server {
                     if (server.upgrade(req, { data: { page, reconnecting } })) return;
     
                     return new Response("Upgrade failed", { status: 500 });
+                }
+
+                // Handle relay requests
+                if(parts[0] === "relay") {
+                    const path = parts[1];
+                    if(!path) return new Response("Missing relay path", { status: 400 });
+                    
+                    const handler = this.relayHandlers.get(path);
+                    if(!handler) return new Response("No handler for relay path", { status: 404 });
+
+                    const data = Object.fromEntries(url.searchParams.entries());
+                    const response = await handler(data);
+                    return new Response(JSON.stringify(response), {
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Access-Control-Allow-Origin": "*"
+                        }
+                    });
                 }
 
                 // Serve static files, if possible
@@ -101,7 +121,7 @@ export default class Server {
                         ws.data.page = data.navigate;
                         for(const topic of topics[data.navigate]) {
                             ws.subscribe(topic);
-                            this.events.emit(`${topic}-connect`, callback);
+                            this.wsEvents.emit(`${topic}-connect`, callback);
                         }
 
                         return;
@@ -119,7 +139,7 @@ export default class Server {
                         ws
                     }
 
-                    this.events.emit(data.channel.toString(), data.data, actions);
+                    this.wsEvents.emit(data.channel.toString(), data.data, actions);
                 },
                 open: (ws: WS) => {
                     Log.info("Websocket connection established:", ws.data.page, ws.data.reconnecting ? "(reconnecting)" : "");
@@ -135,7 +155,7 @@ export default class Server {
 
                     for(const topic of topics[ws.data.page]) {
                         ws.subscribe(topic);
-                        this.events.emit(`${topic}-connect`, callback);
+                        this.wsEvents.emit(`${topic}-connect`, callback);
                     }
                 }
             },
@@ -154,7 +174,7 @@ export default class Server {
 
     static onConnect<C extends MessageTypes["channel"]>(topic: Topic, callback: (send: (channel: C, data:
         ExtractMessage<C>["data"]) => void) => void) {
-        this.events.on(`${topic}-connect`, callback);
+        this.wsEvents.on(`${topic}-connect`, callback);
     }
 
     // I sincerely apologize for this type
@@ -162,14 +182,11 @@ export default class Server {
         reply: (response: ExtractRecieves<C>["replyType"]) => void,
         ws: WS
     }) => void) {
-        this.events.on(channel.toString(), callback);
+        this.wsEvents.on(channel.toString(), callback);
     }
 
-    static once<C extends RecievesTypes["channel"]>(channel: C, callback: (data: ExtractRecieves<C>["data"], action: {
-        reply: (response: ExtractRecieves<C>["replyType"]) => void,
-        ws: WS
-    }) => void) {
-        this.events.once(channel.toString(), callback);
+    static onRelay<P extends RelayedMessageTypes["path"]>(channel: P, callback: (data: ExtractRelayed<P>["data"]) => Promise<ExtractRelayed<P>["replyType"]>) {
+        this.relayHandlers.set(channel, callback);
     }
 
     static pendingMessages: Record<string, any[]> = {};
